@@ -63,6 +63,7 @@
 				<version>2.3</version>
 				<configuration>
 				    <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation>
+				    <finalName>agent</finalName>
 				</configuration>
 				<executions>
 					<execution>
