@@ -9,7 +9,8 @@ package com.github.sdarioo.testgen.generator.impl;
 
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.github.sdarioo.testgen.generator.AbstractTestSuiteGenerator;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -29,12 +30,18 @@ public class JUnitParamsGenerator
     @Override
     protected void initTestSuite(Class<?> clazz, TestSuiteBuilder builder) 
     {
-        builder.addImport("junitparams.JUnitParamsRunner"); //$NON-NLS-1$
         builder.addImport("org.junit.Assert"); //$NON-NLS-1$
+        builder.addImport("org.junit.Test"); //$NON-NLS-1$
+        builder.addImport("org.junit.runner.RunWith"); //$NON-NLS-1$
+        builder.addImport("junitparams.Parameters"); //$NON-NLS-1$
+        builder.addImport("junitparams.JUnitParamsRunner"); //$NON-NLS-1$
         
+        
+        String pkg = clazz.getPackage().getName();
         String name = getTestClassName(clazz, builder);
+        
         String signature =  MessageFormat.format(CLASS_SIGNATURE_TEMPLATE, name);
-        builder.setName(name);
+        builder.setCanonicalName((pkg.length() > 0) ? pkg + '.' + name : name);
         builder.setSignature(signature);
     }
     
@@ -181,7 +188,7 @@ public class JUnitParamsGenerator
         "    return new Object[] '{'\n" +
         "{1}\n" +        
         "    '}';\n" +
-        "'}'\n";
+        "'}'";
     
     @SuppressWarnings("nls")
     private static final String ASSERT_EQUALS_TEMPLATE = 

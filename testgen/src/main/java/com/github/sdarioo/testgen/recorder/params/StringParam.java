@@ -29,6 +29,8 @@ public class StringParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
+        // TODO - multiline text as separate resource file?
+        
         return '\"' + StringEscapeUtils.escapeJava(_value) + '\"';
     }
     

@@ -9,11 +9,13 @@ package com.github.sdarioo.testgen.generator.source;
 
 import java.util.*;
 
+import org.apache.commons.lang3.ClassUtils;
+
 import com.github.sdarioo.testgen.util.Formatter;
 
 public class TestClass
 {
-    private final String _name;
+    private final String _qName;
     private final String _signature;
     private final List<String> _imports;
     private final List<TestMethod> _methods;
@@ -24,28 +26,36 @@ public class TestClass
             Collection<TestMethod> methods, 
             Collection<ResourceFile> resources)
     {
-        _name = name;
+        _qName = name;
         _signature = signature;
         _imports = new ArrayList<String>(imports);
         _methods = new ArrayList<TestMethod>(methods);
         _resources = new ArrayList<ResourceFile>(resources);
     }
     
-    public String getName()
+    public String getPackage()
     {
-        return _name;
+        return ClassUtils.getPackageCanonicalName(_qName);
     }
     
     public String getFileName()
     {
-        return getName() + ".java"; //$NON-NLS-1$
+        String name = ClassUtils.getShortCanonicalName(_qName);
+        return name + ".java"; //$NON-NLS-1$
     }
     
+    @SuppressWarnings("nls")
     public String toSourceCode() 
     {
         StringBuilder result = new StringBuilder();
+        
+        String pkg = getPackage();
+        if (pkg != null && pkg.length() > 0) {
+            result.append("package ").append(pkg).append(";\n\n");
+        }
+        
         for (String imprt : _imports) {
-            result.append("import " + imprt).append(';').append('\n'); //$NON-NLS-1$
+            result.append("import " + imprt).append(';').append('\n');
         }
         result.append('\n').append('\n');
         result.append(_signature).append('\n');
@@ -53,8 +63,8 @@ public class TestClass
         
         for (TestMethod method : _methods) {
             String sourceCode = method.toSourceCode();
-            sourceCode = Formatter.indentLines(sourceCode, "    "); //$NON-NLS-1$
-            result.append(sourceCode).append('\n');
+            sourceCode = Formatter.indentLines(sourceCode, "    ");
+            result.append(sourceCode).append('\n').append('\n');
         }
         result.append('}').append('\n');
         return result.toString();

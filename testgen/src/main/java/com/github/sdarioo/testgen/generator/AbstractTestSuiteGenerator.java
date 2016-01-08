@@ -80,7 +80,7 @@ public abstract class AbstractTestSuiteGenerator
     
     protected static String[] getParameterNames(Method method)
     {
-        // Note: JAVA8 has method.getParameters()
+        // TODO: use ASM or in Java8 method.getParameters()
         int size = method.getParameterTypes().length;
         String[] result = new String[size];
         for (int i = 0; i < size; i++) {

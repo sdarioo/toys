@@ -24,7 +24,7 @@ public class TestSuiteBuilder
     private final UniqueNamesGenerator _methodNames = new UniqueNamesGenerator();
     private final UniqueNamesGenerator _fileNames = new UniqueNamesGenerator();
     
-    private String _name;
+    private String _qName;
     private String _signature;
     
     private final Set<String> _imports = new HashSet<String>();
@@ -43,7 +43,7 @@ public class TestSuiteBuilder
         methods.addAll(_testCases);
         methods.addAll(_helperMethods.values());
         
-        return new TestClass(_name, _signature, _imports, methods, _resources);
+        return new TestClass(_qName, _signature, _imports, methods, _resources);
     }
     
     public void addImport(String classOrPkg) 
@@ -51,9 +51,9 @@ public class TestSuiteBuilder
         _imports.add(classOrPkg);
     }
     
-    public void setName(String name)
+    public void setCanonicalName(String qName)
     {
-        _name = name;
+        _qName = qName;
     }
 
     public void setSignature(String signature) 
