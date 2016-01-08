@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.sdarioo.testgen.generator.impl.JUnitParamsGenerator;
@@ -19,30 +18,14 @@ import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.Call.MethodRef;
 import com.github.sdarioo.testgen.recorder.Recorder;
-import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
 import com.github.sdarioo.testgen.util.FileUtil;
 import com.github.sdarioo.testgen.util.TestLocationUtil;
 
 public class Generator
 {
     private static AtomicBoolean _shutdownHookRegistered = new AtomicBoolean(false);
-    
-    
-    @SuppressWarnings("nls")
-    public static void main(String[] args) 
-    {
-        Generator.registerShutdownHook();
-        
-        for (int i = 0; i < 10; i++) {
-            Properties p = new Properties();
-            p.setProperty("key-"+i, "value-"+i);
-            concat(p);
-        }
-    }
-    
-    
+
     public static void registerShutdownHook()
     {
         if (_shutdownHookRegistered.compareAndSet(false, true)) {
@@ -75,7 +58,7 @@ public class Generator
         }
     }
     
-    private static void generateTestsSafe(Recorder recorder)
+    public static void generateTestsSafe(Recorder recorder)
     {
         try {
             generateTests(recorder);
@@ -102,29 +85,5 @@ public class Generator
             FileUtil.write(file, content);
         }
     }
-    
-    
-    public static String concat(Properties props)
-    {
-        Call call = Call.newCall(new MethodRef() {});
-        call.args().add(ParamsFactory.newValue(props));
-        
-        StringBuilder sb = new StringBuilder();
-        
-        for (Object key : props.keySet()) {
-            if (sb.length() > 0) {
-                sb.append(';');
-            }
-            String sKey = (String)key;
-            String sValue = props.getProperty(sKey);
-            sb.append(sKey).append('=').append(sValue);
-        }
-        
-        String ret = sb.toString();
-        
-        call.setResult(ParamsFactory.newValue(ret));
-        Recorder.getDefault().record(call);
-        
-        return ret;
-    }
+  
 }

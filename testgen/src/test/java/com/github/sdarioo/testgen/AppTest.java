@@ -1,8 +1,8 @@
-package com.github.sdarioo.testgen.generator;
+package com.github.sdarioo.testgen;
 
+import com.github.sdarioo.testgen.App;
 import org.junit.Assert;
 import java.util.Properties;
-import com.github.sdarioo.testgen.generator.Generator;
 import junitparams.JUnitParamsRunner;
 import java.lang.String;
 import org.junit.runner.RunWith;
@@ -11,7 +11,7 @@ import junitparams.Parameters;
 
 
 @RunWith(JUnitParamsRunner.class)
-public class GeneratorTest
+public class AppTest
 {
     private Object[] testConcat_Parameters() {
         return new Object[] {
@@ -31,7 +31,29 @@ public class GeneratorTest
     @Test
     @Parameters(method = "testConcat_Parameters")
     public void testConcat(Properties arg0, String expected) throws Exception {
-        String result=Generator.concat(arg0);
+        String result=App.concat(arg0);
+        Assert.assertEquals(expected, result);
+    }
+
+    private Object[] testAdd_Parameters() {
+        return new Object[] {
+            new Object[]{ 4, 6, 10 },
+            new Object[]{ 0, 10, 10 },
+            new Object[]{ 5, 5, 10 },
+            new Object[]{ 9, 1, 10 },
+            new Object[]{ 6, 4, 10 },
+            new Object[]{ 2, 8, 10 },
+            new Object[]{ 1, 9, 10 },
+            new Object[]{ 8, 2, 10 },
+            new Object[]{ 7, 3, 10 },
+            new Object[]{ 3, 7, 10 }
+        };
+    }
+
+    @Test
+    @Parameters(method = "testAdd_Parameters")
+    public void testAdd(int arg0, int arg1, int expected) throws Exception {
+        int result=App.add(arg0,arg1);
         Assert.assertEquals(expected, result);
     }
 
