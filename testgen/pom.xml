@@ -22,6 +22,11 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.ow2.asm</groupId>
+			<artifactId>asm-debug-all</artifactId>
+			<version>5.0.3</version>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -46,6 +51,24 @@
 				<configuration>
 					<source>${jdkVersion}</source>
 					<target>${jdkVersion}</target>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<packageName>TestGen</packageName>
+						</manifest>
+						<manifestEntries>
+							<Premain-Class>com.github.sdarioo.testgen.instrument.InstrumentApp</Premain-Class>
+							<Agent-Class>com.github.sdarioo.testgen.instrument.InstrumentApp</Agent-Class>
+							<Can-Retransform-Classes>True</Can-Retransform-Classes>
+							<Can-Redefine-Classes>False</Can-Redefine-Classes>
+						</manifestEntries>
+					</archive>
 				</configuration>
 			</plugin>
 

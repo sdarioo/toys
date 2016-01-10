@@ -72,8 +72,8 @@ public abstract class AbstractTestSuiteGenerator
             type = getArrayType(type);
         }
         if (!type.isPrimitive()) {
-            String pkg = ClassUtils.getPackageCanonicalName(type);
-            builder.addImport(pkg + '.' + name);
+            builder.addImport(ClassUtils.getPackageCanonicalName(type) + 
+                    '.' + ClassUtils.getShortCanonicalName(type));
         }
         return name;
     }
@@ -119,7 +119,6 @@ public abstract class AbstractTestSuiteGenerator
         }
         return cl;
     }
-    
     
     private static Map<Method, List<Call>> groupByMethod(List<Call> clazzCalls)
     {

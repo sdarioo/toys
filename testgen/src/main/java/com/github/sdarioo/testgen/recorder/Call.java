@@ -27,7 +27,12 @@ public class Call
         return new Call(method);
     }
     
-    public Call(Method method)
+    public static Call newCall(Method method)
+    {
+        return new Call(method);
+    }
+    
+    private Call(Method method)
     {
         _method = method;
         _argList = new ArgList();
