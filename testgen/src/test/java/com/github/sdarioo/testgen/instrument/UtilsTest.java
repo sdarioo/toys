@@ -11,26 +11,26 @@ public class UtilsTest
     @Test
     public void testGetMethod()
     {
-        Method m = Utils.getMethod(UtilsTest.class, "m1", "()V");
+        Method m = InstrumentUtil.getMethod(UtilsTest.class, "m1", "()V");
         assertNotNull(m);
         assertEquals("m1", m.getName());
         
-        m = Utils.getMethod(UtilsTest.class, "m2", "()V");
+        m = InstrumentUtil.getMethod(UtilsTest.class, "m2", "()V");
         assertNotNull(m);
         assertEquals("m2", m.getName());
 
-        m = Utils.getMethod(UtilsTest.class, "m3", "()Ljava/lang/String;");
+        m = InstrumentUtil.getMethod(UtilsTest.class, "m3", "()Ljava/lang/String;");
         assertNotNull(m);
         assertEquals("m3", m.getName());
         
-        m = Utils.getMethod(TestRunnable.class, "run", "()V");
+        m = InstrumentUtil.getMethod(TestRunnable.class, "run", "()V");
         assertNotNull(m);
         assertEquals("run", m.getName());
         
-        m = Utils.getMethod(A.class, "a", "()V");
+        m = InstrumentUtil.getMethod(A.class, "a", "()V");
         assertNotNull(m);
         
-        m = Utils.getMethod(B.class, "a", "()V");
+        m = InstrumentUtil.getMethod(B.class, "a", "()V");
         assertNull(m);
     }
     

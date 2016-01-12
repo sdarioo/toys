@@ -10,6 +10,7 @@ package com.github.sdarioo.testgen;
 public final class Configuration 
 {
     private int _maxCollectionSize = 20;
+    private int _maxArraySize = 20;
     
     private int _maxCalls = 10;
     
@@ -23,6 +24,11 @@ public final class Configuration
     public int getMaxCalls()
     {
         return _maxCalls;
+    }
+    
+    public int getMaxArraySize()
+    {
+        return _maxArraySize;
     }
     
     public int getMaxCollectionSize()

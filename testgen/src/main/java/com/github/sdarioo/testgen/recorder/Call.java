@@ -61,13 +61,12 @@ public class Call
         return (_result != null) || (_exception != null);
     }
     
-    public boolean isValid()
+    public boolean isSupported(Set<String> errors)
     {
-        Set<String> errors = new HashSet<String>();
-        if (!args().isValid(errors)) {
+        if (!args().isSupported(errors)) {
             return false;
         }
-        if ((_result != null) && !_result.isValid(errors)) {
+        if ((_result != null) && !_result.isSupported(errors)) {
             return false;
         }
         return true;

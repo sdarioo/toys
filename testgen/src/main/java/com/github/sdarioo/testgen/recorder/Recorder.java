@@ -10,6 +10,8 @@ package com.github.sdarioo.testgen.recorder;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
@@ -17,16 +19,30 @@ import com.github.sdarioo.testgen.logging.Logger;
 public final class Recorder 
 {
     private static final Recorder DEFAULT = new Recorder();
+    private static final ConcurrentMap<String, Recorder> RECORDERS = new ConcurrentHashMap<String, Recorder>();
     
     private final Map<Method, Set<Call>> _calls = new HashMap<Method, Set<Call>>();
     
-    private final Map<Method, Set<Call>> _invalidCalls = new HashMap<Method, Set<Call>>();
+    private final Map<Method, Set<Call>> _unsupportedCalls = new HashMap<Method, Set<Call>>();
     
     private Recorder() {}
     
     public static Recorder getDefault()
     {
         return DEFAULT;
+    }
+    
+    public static Recorder get(String key)
+    {
+        Recorder recorder = RECORDERS.get(key);
+        if (recorder == null) {
+            Recorder newRecorder = new Recorder();
+            recorder = RECORDERS.putIfAbsent(key, newRecorder);
+            if (recorder == null) {
+                recorder = newRecorder;
+            }
+        }
+        return recorder;
     }
     
     public void record(Call call)
@@ -45,10 +61,10 @@ public final class Recorder
             return;
         }
         
-        if (call.isValid()) {
+        if (call.isSupported(new HashSet<String>())) {
             recordCall(_calls, call);
         } else {
-            recordCall(_invalidCalls, call);
+            recordCall(_unsupportedCalls, call);
         }
     }
 
@@ -56,18 +72,19 @@ public final class Recorder
     {
         Set<Class<?>> result = new HashSet<Class<?>>();
         collectClasses(_calls, result);
-        collectClasses(_invalidCalls, result);
+        collectClasses(_unsupportedCalls, result);
         return result;
     }
     
     public List<Call> getCalls(Class<?> clazz)
     {
         int maxCalls = Configuration.getDefault().getMaxCalls();
-        
+        // First add valid calls. If number of valid calls is less than max number of calls
+        // then return unsupported calls (info about it can be added to generated test suite).
         List<Call> result = new ArrayList<Call>();
         collectCalls(_calls, clazz, result);
         if (result.size() < maxCalls) {
-            collectCalls(_invalidCalls, clazz, result);
+            collectCalls(_unsupportedCalls, clazz, result);
         }
         return result;
     }

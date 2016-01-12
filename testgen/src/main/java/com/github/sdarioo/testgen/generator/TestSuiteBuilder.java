@@ -10,6 +10,7 @@ package com.github.sdarioo.testgen.generator;
 import java.text.MessageFormat;
 import java.util.*;
 
+import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.sdarioo.testgen.generator.source.TestMethod;
@@ -24,6 +25,8 @@ public class TestSuiteBuilder
     private final UniqueNamesGenerator _methodNames = new UniqueNamesGenerator();
     private final UniqueNamesGenerator _fileNames = new UniqueNamesGenerator();
     
+    private final boolean _bFullTypeNames;
+    
     private String _qName;
     private String _signature;
     
@@ -35,6 +38,12 @@ public class TestSuiteBuilder
     
     public TestSuiteBuilder()
     {
+        this(false);
+    }
+    
+    public TestSuiteBuilder(boolean bFullTypeNames)
+    {
+        _bFullTypeNames = bFullTypeNames;
     }
     
     public TestClass buildTestClass()
@@ -85,6 +94,30 @@ public class TestSuiteBuilder
         _resources.add(resource);
         return resource;
     }
+    
+    /**
+     * Returns type name used by code generators. If using short type names than
+     * apropriate import will be added to this builder.
+     * @param type class
+     * @param builder test class builder
+     * @return type name 
+     */
+    public String getTypeName(Class<?> type)
+    {
+        String name = fullTypeName(type);
+        if (_bFullTypeNames) {
+            return name;
+        }
+        name = ClassUtils.getShortCanonicalName(type);
+        
+        if (type.isArray()) {
+            type = getArrayType(type);
+        }
+        if (!type.isPrimitive()) {
+            addImport(ClassUtils.getPackageCanonicalName(type) + '.' + ClassUtils.getShortCanonicalName(type));
+        }
+        return name;
+    }
 
     /**
      * @see com.github.sdarioo.testgen.generator.IUniqueNamesProvider#newUniqueMethodName(java.lang.String)
@@ -108,5 +141,41 @@ public class TestSuiteBuilder
             return uniqueName + '.' + pair.getRight();
         }
         return uniqueName;
+    }
+    
+    /**
+     * Returns full type name for given class. 
+     * This implementation is based on {@link Class#getTypeName()}
+     * @param type class
+     * @return full type name
+     */
+    private static String fullTypeName(Class<?> type) 
+    {
+        if (type.isArray()) {
+            try {
+                Class<?> cl = type;
+                int dimensions = 0;
+                while (cl.isArray()) {
+                    dimensions++;
+                    cl = cl.getComponentType();
+                }
+                StringBuffer sb = new StringBuffer();
+                sb.append(cl.getName());
+                for (int i = 0; i < dimensions; i++) {
+                    sb.append("[]"); //$NON-NLS-1$
+                }
+                return sb.toString();
+            } catch (Throwable e) { /*FALLTHRU*/ }
+        }
+        return type.getName();
+    }
+
+    private static Class<?> getArrayType(Class<?> type)
+    {
+        Class<?> cl = type;
+        while (cl.isArray()) {
+            cl = cl.getComponentType();
+        }
+        return cl;
     }
 }

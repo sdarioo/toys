@@ -43,7 +43,7 @@ public class TestGenMethodAdapter
         mv.visitLdcInsn(_owner);
         mv.visitLdcInsn(_method.getName());
         mv.visitLdcInsn(_method.getDescriptor());
-        mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/instrument/Utils", "getMethod", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/reflect/Method;", false);
+        mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/instrument/InstrumentUtil", "getMethod", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/reflect/Method;", false);
         mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/recorder/Call", "newCall", "(Ljava/lang/reflect/Method;)Lcom/github/sdarioo/testgen/recorder/Call;", false);
         mv.visitVarInsn(ASTORE, _call);
         

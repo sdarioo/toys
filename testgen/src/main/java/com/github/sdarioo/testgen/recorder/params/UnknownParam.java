@@ -23,7 +23,7 @@ public class UnknownParam
     }
     
     @Override
-    public boolean isValid(Collection<String> errors) 
+    public boolean isSupported(Collection<String> errors) 
     {
         errors.add("Unsupported type: " + _clazz.getName()); //$NON-NLS-1$
         return false;

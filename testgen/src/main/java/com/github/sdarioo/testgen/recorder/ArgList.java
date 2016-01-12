@@ -37,11 +37,11 @@ public final class ArgList
         return Collections.unmodifiableList(_args);
     }
     
-    public boolean isValid(Collection<String> errors)
+    public boolean isSupported(Collection<String> errors)
     {
         boolean bValid = true;
         for (IParameter param : _args) {
-            if (!param.isValid(errors)) {
+            if (!param.isSupported(errors)) {
                 bValid = false;
             }
         }

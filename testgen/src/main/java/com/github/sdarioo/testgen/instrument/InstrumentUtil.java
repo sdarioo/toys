@@ -2,9 +2,9 @@ package com.github.sdarioo.testgen.instrument;
 
 import java.lang.reflect.Method;
 
-public final class Utils 
+public final class InstrumentUtil 
 {
-    private Utils() {}
+    private InstrumentUtil() {}
     
     public static java.lang.reflect.Method getMethod(Class<?> owner, String name, String descriptor)
     {

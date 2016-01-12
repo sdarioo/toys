@@ -32,7 +32,7 @@ public class PropertiesParam
     }
     
     @Override
-    public boolean isValid(Collection<String> errors) 
+    public boolean isSupported(Collection<String> errors) 
     {
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if (_value.size() > maxSize) {

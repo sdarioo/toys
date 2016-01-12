@@ -56,8 +56,13 @@ public final class ParamsFactory
         if (value == null) {
             return IParameter.NULL;
         }
+        Class<?> clazz = value.getClass();
+        
         if (value instanceof String) {
             return new StringParam((String)value);
+        }
+        if (clazz.isArray()) {
+            return new ArrayParam(value);
         }
         if (ClassUtils.isPrimitiveWrapper(value.getClass())) {
             return toPrimitiveValue(value);
@@ -67,8 +72,7 @@ public final class ParamsFactory
         }
         return new UnknownParam(value.getClass());
     }
-    
-    
+        
     private static IParameter toPrimitiveValue(Object value)
     {
         if (value instanceof Boolean) {

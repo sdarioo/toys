@@ -21,10 +21,6 @@ public class JUnitParamsGenerator
     extends AbstractTestSuiteGenerator
 {
     
-    public JUnitParamsGenerator()
-    {
-        super(false);
-    }
     
     @Override
     protected void initTestSuite(Class<?> clazz, TestSuiteBuilder builder) 
@@ -96,10 +92,11 @@ public class JUnitParamsGenerator
             String testCaseName, TestSuiteBuilder builder)
     {
         String name = getParamsProviderMethodName(testCaseName);
-        StringBuilder sb = new StringBuilder();
         Set<String> errors = new HashSet<String>();
+        
+        StringBuilder sb = new StringBuilder();
         for (Call call : calls) {
-            if (!call.args().isValid(errors)) {
+            if (!call.isSupported(errors)) {
                 continue;
             }
             if (sb.length() > 0) {
@@ -107,16 +104,16 @@ public class JUnitParamsGenerator
             }
             List<IParameter> values = new ArrayList<IParameter>();
             values.addAll(call.args().getValues());
+
             if (hasReturn(method)) {
                 values.add(call.getResult());
             }
             String code = toSourceCode(values, builder);
             sb.append(code);
         }
-        String source = MessageFormat.format(PARAMS_PROVIDER_METHOD_TEMPLATE, name, sb.toString());
-        if (!errors.isEmpty()) {
-            source = getProblemsComment(errors) + source;
-        }
+        String source = MessageFormat.format(PARAMS_PROVIDER_METHOD_TEMPLATE, 
+                getProblemsComment(errors), name, sb.toString());
+        
         return new TestMethod(name, source);
     }
 
@@ -141,13 +138,13 @@ public class JUnitParamsGenerator
     
     private String getDecl(Class<?> type, String name, TestSuiteBuilder builder)
     {
-        return getShortName(type, builder) + ' ' + name;
+        return builder.getTypeName(type) + ' ' + name;
     }
     
     private String getStaticCall(Method method, String[] args, TestSuiteBuilder builder)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(getShortName(method.getDeclaringClass(), builder));
+        sb.append(builder.getTypeName(method.getDeclaringClass()));
         sb.append('.');
         sb.append(method.getName());
         sb.append('(');
@@ -177,9 +174,12 @@ public class JUnitParamsGenerator
     private static String getProblemsComment(Set<String> errors)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("// Problems:\n"); //$NON-NLS-1$
-        for (String line : errors) {
-            sb.append("// " + line + '\n'); //$NON-NLS-1$
+        if (!errors.isEmpty()) {
+            int idx = 1;
+            sb.append("// Problems while recording parameters:"); //$NON-NLS-1$
+            for (String line : errors) {
+                sb.append(MessageFormat.format("\n// {0}. {1}", idx++, line)); //$NON-NLS-1$
+            }
         }
         return sb.toString();
     }
@@ -200,9 +200,10 @@ public class JUnitParamsGenerator
     
     @SuppressWarnings("nls")
     private static final String PARAMS_PROVIDER_METHOD_TEMPLATE = 
-        "private Object[] {0}() '{'\n" +
+        "{0}\n"+
+        "private Object[] {1}() '{'\n" +
         "    return new Object[] '{'\n" +
-        "{1}\n" +        
+        "{2}\n" +        
         "    '}';\n" +
         "'}'";
     

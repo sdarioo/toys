@@ -53,8 +53,9 @@ public class Generator
             ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
             List<Call> calls = recorder.getCalls(clazz);
             TestClass testSuite = generator.generate(clazz, calls);
-            write(testSuite, destDir);
-            Logger.info("Generated TestSuite " + destDir.getAbsolutePath() + "/" + testSuite.getFileName());
+            if (write(testSuite, destDir)) {
+                Logger.info("Generated TestSuite " + destDir.getAbsolutePath() + "/" + testSuite.getFileName());
+            }
         }
     }
     
@@ -72,12 +73,12 @@ public class Generator
         return new JUnitParamsGenerator();
     }
     
-    private static void write(TestClass testSuite, File destDir)
+    private static boolean write(TestClass testSuite, File destDir)
         throws IOException
     {
-        if (!destDir.mkdirs()) {
+        if (!destDir.isDirectory() && !destDir.mkdirs()) {
             Logger.error("Cannot create test destination director: " + destDir.getAbsolutePath()); //$NON-NLS-1$
-            return;
+            return false;
         }
         
         String content = testSuite.toSourceCode();
@@ -89,6 +90,7 @@ public class Generator
             file = new File(destDir, res.getFileName());
             FileUtil.write(file, content);
         }
+        return true;
     }
   
 }

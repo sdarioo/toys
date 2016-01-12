@@ -18,11 +18,9 @@ import com.github.sdarioo.testgen.recorder.Call;
 public abstract class AbstractTestSuiteGenerator 
     implements ITestSuiteGenerator
 {
-    private final boolean _fullTypeNames;
 
-    protected AbstractTestSuiteGenerator(boolean fullTypeNames)
+    protected AbstractTestSuiteGenerator()
     {
-        _fullTypeNames = fullTypeNames;
     }
     
     protected abstract void initTestSuite(Class<?> clazz, TestSuiteBuilder builder);
@@ -59,24 +57,6 @@ public abstract class AbstractTestSuiteGenerator
         String defaultName = name + "Test"; //$NON-NLS-1$
         return namesProvider.newUniqueFileName(defaultName);
     }
-
-    protected String getShortName(Class<?> type, TestSuiteBuilder builder)
-    {
-        String name = fullTypeName(type);
-        if (_fullTypeNames) {
-            return name;
-        }
-        name = ClassUtils.getShortCanonicalName(type);
-        
-        if (type.isArray()) {
-            type = getArrayType(type);
-        }
-        if (!type.isPrimitive()) {
-            builder.addImport(ClassUtils.getPackageCanonicalName(type) + 
-                    '.' + ClassUtils.getShortCanonicalName(type));
-        }
-        return name;
-    }
     
     protected static String[] getParameterNames(Method method)
     {
@@ -87,37 +67,6 @@ public abstract class AbstractTestSuiteGenerator
             result[i] = "arg" + i; //$NON-NLS-1$
         }
         return result;
-    }
-    
-    // Returns full type name for given class. See package private Field.getTypeName
-    private static String fullTypeName(Class<?> type) 
-    {
-        if (type.isArray()) {
-            try {
-                Class<?> cl = type;
-                int dimensions = 0;
-                while (cl.isArray()) {
-                    dimensions++;
-                    cl = cl.getComponentType();
-                }
-                StringBuffer sb = new StringBuffer();
-                sb.append(cl.getName());
-                for (int i = 0; i < dimensions; i++) {
-                    sb.append("[]"); //$NON-NLS-1$
-                }
-                return sb.toString();
-            } catch (Throwable e) { /*FALLTHRU*/ }
-        }
-        return type.getName();
-    }
-
-    private static Class<?> getArrayType(Class<?> type)
-    {
-        Class<?> cl = type;
-        while (cl.isArray()) {
-            cl = cl.getComponentType();
-        }
-        return cl;
     }
     
     private static Map<Method, List<Call>> groupByMethod(List<Call> clazzCalls)

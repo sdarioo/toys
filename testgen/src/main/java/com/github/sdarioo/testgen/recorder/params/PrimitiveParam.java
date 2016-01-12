@@ -22,7 +22,7 @@ public class PrimitiveParam implements IParameter
     }
     
     @Override
-    public boolean isValid(Collection<String> errors) 
+    public boolean isSupported(Collection<String> errors) 
     {
         return true;
     }

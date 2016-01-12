@@ -29,7 +29,7 @@ public class StringParam
     }
     
     @Override
-    public boolean isValid(Collection<String> errors) 
+    public boolean isSupported(Collection<String> errors) 
     {
         return true;
     }
