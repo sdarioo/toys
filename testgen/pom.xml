@@ -22,6 +22,18 @@
 			<artifactId>commons-lang3</artifactId>
 			<version>3.4</version>
 		</dependency>
+		
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>2.7.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>2.7.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.ow2.asm</groupId>
 			<artifactId>asm-debug-all</artifactId>
@@ -63,8 +75,8 @@
 							<packageName>TestGen</packageName>
 						</manifest>
 						<manifestEntries>
-							<Premain-Class>com.github.sdarioo.testgen.instrument.InstrumentApp</Premain-Class>
-							<Agent-Class>com.github.sdarioo.testgen.instrument.InstrumentApp</Agent-Class>
+							<Premain-Class>com.github.sdarioo.testgen.instrument.Agent</Premain-Class>
+							<Agent-Class>com.github.sdarioo.testgen.instrument.Agent</Agent-Class>
 							<Can-Retransform-Classes>True</Can-Retransform-Classes>
 							<Can-Redefine-Classes>False</Can-Redefine-Classes>
 						</manifestEntries>

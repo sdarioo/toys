@@ -18,13 +18,13 @@ public class App
             p.setProperty("key-"+i, "value-"+i);
             
             concat(p);
-            add(i, 10 - i);
+            add((short)i, (byte)i, Boolean.FALSE);
         }
     }
     
-    public static int add(int x, int y)
+    public static Double add(Short x, Byte y, Boolean b)
     {
-        int result = x + y;
+        double result = x + y;
         return result;
     }
     

@@ -9,23 +9,16 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.util.Collection;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
 
-public class StringParam
-    implements IParameter
+public class PrimitiveParam implements IParameter
 {
-    private final String _value;
+    private final String _sourceCode;
     
-    /**
-     * @param value string value, never null
-     * @pre value != null
-     */
-    public StringParam(String value)
+    PrimitiveParam(String sourceCode)
     {
-        _value = value;
+        _sourceCode = sourceCode;
     }
     
     @Override
@@ -37,30 +30,22 @@ public class StringParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        // TODO - multiline text as separate resource file?
-        
-        return '\"' + StringEscapeUtils.escapeJava(_value) + '\"';
-    }
-    
-    @Override
-    public String toString() 
-    {
-        return _value;
+        return _sourceCode;
     }
     
     @Override
     public boolean equals(Object obj) 
     {
-        if (!(obj instanceof StringParam)) {
+        if (!(obj instanceof PrimitiveParam)) {
             return false;
         }
-        StringParam other = (StringParam)obj;
-        return (_value != null) ? _value.equals(other._value) : (other._value == null);
+        PrimitiveParam other = (PrimitiveParam)obj;
+        return _sourceCode.equals(other._sourceCode);
     }
     
     @Override
     public int hashCode() 
     {
-        return (_value != null) ? _value.hashCode() : 0;
+        return _sourceCode.hashCode();
     }
 }

@@ -9,8 +9,7 @@ package com.github.sdarioo.testgen.generator.impl;
 
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.github.sdarioo.testgen.generator.AbstractTestSuiteGenerator;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -98,7 +97,11 @@ public class JUnitParamsGenerator
     {
         String name = getParamsProviderMethodName(testCaseName);
         StringBuilder sb = new StringBuilder();
+        Set<String> errors = new HashSet<String>();
         for (Call call : calls) {
+            if (!call.args().isValid(errors)) {
+                continue;
+            }
             if (sb.length() > 0) {
                 sb.append(",\n"); //$NON-NLS-1$
             }
@@ -111,6 +114,9 @@ public class JUnitParamsGenerator
             sb.append(code);
         }
         String source = MessageFormat.format(PARAMS_PROVIDER_METHOD_TEMPLATE, name, sb.toString());
+        if (!errors.isEmpty()) {
+            source = getProblemsComment(errors) + source;
+        }
         return new TestMethod(name, source);
     }
 
@@ -166,6 +172,16 @@ public class JUnitParamsGenerator
         if (sb.length() > 0) {
             sb.append(", "); //$NON-NLS-1$
         }
+    }
+    
+    private static String getProblemsComment(Set<String> errors)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("// Problems:\n"); //$NON-NLS-1$
+        for (String line : errors) {
+            sb.append("// " + line + '\n'); //$NON-NLS-1$
+        }
+        return sb.toString();
     }
     
     @SuppressWarnings("nls")

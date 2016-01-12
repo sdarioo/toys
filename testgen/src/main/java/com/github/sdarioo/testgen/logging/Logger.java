@@ -12,16 +12,16 @@ public class Logger
 
     public static void info(String msg)
     {
-        System.err.println("[INFO]" + msg); //$NON-NLS-1$
+        System.err.println("[INFO] " + msg); //$NON-NLS-1$
     }
     
     public static void warn(String msg)
     {
-        System.err.println("[WARN]" + msg); //$NON-NLS-1$
+        System.err.println("[WARN] " + msg); //$NON-NLS-1$
     }
     
     public static void error(String msg)
     {
-        System.err.println("[ERROR]" + msg); //$NON-NLS-1$
+        System.err.println("[ERROR] " + msg); //$NON-NLS-1$
     }
 }

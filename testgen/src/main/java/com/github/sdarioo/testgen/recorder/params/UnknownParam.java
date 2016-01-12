@@ -9,58 +9,46 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.util.Collection;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
 
-public class StringParam
+public class UnknownParam
     implements IParameter
 {
-    private final String _value;
+    private final Class<?> _clazz;
     
-    /**
-     * @param value string value, never null
-     * @pre value != null
-     */
-    public StringParam(String value)
+    public UnknownParam(Class<?> clazz)
     {
-        _value = value;
+        _clazz = clazz;
     }
     
     @Override
     public boolean isValid(Collection<String> errors) 
     {
-        return true;
+        errors.add("Unsupported type: " + _clazz.getName()); //$NON-NLS-1$
+        return false;
     }
-    
+
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        // TODO - multiline text as separate resource file?
-        
-        return '\"' + StringEscapeUtils.escapeJava(_value) + '\"';
+        return IParameter.NULL.toSouceCode(builder);
     }
-    
+
     @Override
-    public String toString() 
+    public boolean equals(Object obj)
     {
-        return _value;
-    }
-    
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (!(obj instanceof StringParam)) {
+        if (!(obj instanceof UnknownParam)) {
             return false;
         }
-        StringParam other = (StringParam)obj;
-        return (_value != null) ? _value.equals(other._value) : (other._value == null);
+        UnknownParam other = (UnknownParam)obj;
+        return _clazz.equals(other._clazz);
     }
     
     @Override
     public int hashCode() 
     {
-        return (_value != null) ? _value.hashCode() : 0;
+        return _clazz.hashCode();
     }
+    
 }

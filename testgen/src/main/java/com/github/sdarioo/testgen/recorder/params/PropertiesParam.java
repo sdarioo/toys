@@ -7,8 +7,11 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.text.MessageFormat;
+import java.util.Collection;
 import java.util.Properties;
 
+import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.IParameter;
@@ -26,6 +29,18 @@ public class PropertiesParam
             String sValue = value.getProperty(sKey);
             _value.setProperty(sKey, sValue);
         }
+    }
+    
+    @Override
+    public boolean isValid(Collection<String> errors) 
+    {
+        int maxSize = Configuration.getDefault().getMaxCollectionSize();
+        if (_value.size() > maxSize) {
+            errors.add(MessageFormat.format("Properties size exceeds maximum permitted size. Max={0}, size={1}.", //$NON-NLS-1$
+                   maxSize, _value.size())); 
+            return false;    
+        }
+        return true;
     }
     
     @SuppressWarnings("nls")

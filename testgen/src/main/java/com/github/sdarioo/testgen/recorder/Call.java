@@ -8,6 +8,8 @@
 package com.github.sdarioo.testgen.recorder;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Call 
 {
@@ -55,7 +57,20 @@ public class Call
     
     public boolean isFinished()
     {
+        // Void methods must have IParameter.VOID set as result
         return (_result != null) || (_exception != null);
+    }
+    
+    public boolean isValid()
+    {
+        Set<String> errors = new HashSet<String>();
+        if (!args().isValid(errors)) {
+            return false;
+        }
+        if ((_result != null) && !_result.isValid(errors)) {
+            return false;
+        }
+        return true;
     }
     
     public ArgList args()

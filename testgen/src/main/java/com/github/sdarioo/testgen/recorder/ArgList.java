@@ -37,6 +37,17 @@ public final class ArgList
         return Collections.unmodifiableList(_args);
     }
     
+    public boolean isValid(Collection<String> errors)
+    {
+        boolean bValid = true;
+        for (IParameter param : _args) {
+            if (!param.isValid(errors)) {
+                bValid = false;
+            }
+        }
+        return bValid;
+    }
+    
     @Override
     public boolean equals(Object obj) 
     {

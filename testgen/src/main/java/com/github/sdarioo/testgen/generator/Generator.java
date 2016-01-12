@@ -75,6 +75,11 @@ public class Generator
     private static void write(TestClass testSuite, File destDir)
         throws IOException
     {
+        if (!destDir.mkdirs()) {
+            Logger.error("Cannot create test destination director: " + destDir.getAbsolutePath()); //$NON-NLS-1$
+            return;
+        }
+        
         String content = testSuite.toSourceCode();
         File file = new File(destDir, testSuite.getFileName());
         FileUtil.write(file, content);

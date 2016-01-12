@@ -8,13 +8,19 @@
 package com.github.sdarioo.testgen.recorder;
 
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.*;
+
+import com.github.sdarioo.testgen.Configuration;
+import com.github.sdarioo.testgen.logging.Logger;
 
 public final class Recorder 
 {
     private static final Recorder DEFAULT = new Recorder();
     
     private final Map<Method, Set<Call>> _calls = new HashMap<Method, Set<Call>>();
+    
+    private final Map<Method, Set<Call>> _invalidCalls = new HashMap<Method, Set<Call>>();
     
     private Recorder() {}
     
@@ -26,53 +32,83 @@ public final class Recorder
     public void record(Call call)
     {
         if (!call.isFinished()) {
+            Logger.error("Cannot record call without return value or thrown exception: " + call.getMethod().toString()); //$NON-NLS-1$
             return;
         }
-        Method method = call.getMethod();
-        int maxCalls = maxCalls(method);
+        if (call.getMethod() == null) {
+            Logger.error("Cannot record call without java.lang.reflect.Method object."); //$NON-NLS-1$
+            return;
+        }
+        if (call.args().size() != call.getMethod().getParameterTypes().length) {
+            Logger.warn(MessageFormat.format("Recorded call args count {0} is different that method parameters count {1}",  //$NON-NLS-1$
+                    call.args().size(), call.getMethod().getParameterTypes().length));
+            return;
+        }
         
-        synchronized (_calls) {
-            Set<Call> calls = _calls.get(method);
-            if (calls == null) {
-                calls = new HashSet<Call>();
-                _calls.put(method, calls);
-            }
-            if (calls.size() >= maxCalls) {
-                return;
-            }
-            calls.add(call);
+        if (call.isValid()) {
+            recordCall(_calls, call);
+        } else {
+            recordCall(_invalidCalls, call);
         }
     }
-    
+
     public Collection<Class<?>> getRecordedClasses()
     {
         Set<Class<?>> result = new HashSet<Class<?>>();
-        for (Method method : _calls.keySet()) {
-            result.add(method.getDeclaringClass());
-        }
+        collectClasses(_calls, result);
+        collectClasses(_invalidCalls, result);
         return result;
     }
     
     public List<Call> getCalls(Class<?> clazz)
     {
+        int maxCalls = Configuration.getDefault().getMaxCalls();
+        
         List<Call> result = new ArrayList<Call>();
-        for (Map.Entry<Method, Set<Call>> entry : _calls.entrySet()) {
-            Method method = entry.getKey();
-            if (clazz.equals(method.getDeclaringClass())) {
-                result.addAll(entry.getValue());
-            }
+        collectCalls(_calls, clazz, result);
+        if (result.size() < maxCalls) {
+            collectCalls(_invalidCalls, clazz, result);
         }
         return result;
     }
     
-    private static int maxCalls(Method method)
+    private static void recordCall(Map<Method, Set<Call>> calls, Call call)
     {
-        RuntimeTestGeneration annot = method.getAnnotation(RuntimeTestGeneration.class);
-        if (annot != null) {
-            return annot.maxCalls();
+        Method method = call.getMethod();
+        int maxCalls = Configuration.getDefault().getMaxCalls();
+        
+        synchronized (calls) {
+            Set<Call> methodCalls = calls.get(method);
+            if (methodCalls == null) {
+                methodCalls = new HashSet<Call>();
+                calls.put(method, methodCalls);
+            }
+            if (methodCalls.size() < maxCalls) {
+                methodCalls.add(call);
+            }
         }
-        return DEFAULT_MAX_CALLS;
     }
     
-    public static final int DEFAULT_MAX_CALLS = 10;
+    private static void collectClasses(Map<Method, Set<Call>> calls, Set<Class<?>> result)
+    {
+        synchronized (calls) {
+            for (Method method : calls.keySet()) {
+                // TODO - method from parent class??
+                result.add(method.getDeclaringClass());
+            }
+        }
+    }
+    
+    private static void collectCalls(Map<Method, Set<Call>> calls, Class<?> clazz, List<Call> result)
+    {
+        synchronized (calls) {
+            for (Map.Entry<Method, Set<Call>> entry : calls.entrySet()) {
+                Method method = entry.getKey();
+                if (clazz.equals(method.getDeclaringClass())) {
+                    result.addAll(entry.getValue());
+                }
+            }
+        }
+    }
+   
 }
