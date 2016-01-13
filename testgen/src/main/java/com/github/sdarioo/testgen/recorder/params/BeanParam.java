@@ -12,4 +12,10 @@ public class BeanParam {
     // - constructor with single String argument
     // - factory method fromString or valueOf
     // - all fields in recognizable format + getter/setter
+    
+    
+    public BeanParam(Object bean)
+    {
+        
+    }
 }
