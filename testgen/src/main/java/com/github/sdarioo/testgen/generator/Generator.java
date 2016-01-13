@@ -50,8 +50,8 @@ public class Generator
                 Logger.error("Null test location for class: " + clazz.getName());
                 continue;
             }
-            ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
             List<Call> calls = recorder.getCalls(clazz);
+            ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
             TestClass testSuite = generator.generate(clazz, calls);
             if (write(testSuite, destDir)) {
                 Logger.info("Generated TestSuite " + destDir.getAbsolutePath() + "/" + testSuite.getFileName());
@@ -88,6 +88,7 @@ public class Generator
         for (ResourceFile res : testSuite.getResources()) {
             content = res.getContent();
             file = new File(destDir, res.getFileName());
+            file.getParentFile().mkdirs();
             FileUtil.write(file, content);
         }
         return true;

@@ -87,10 +87,17 @@ public class TestSuiteBuilder
         return method;
     }
     
-    public ResourceFile addResource(String content, String fileName)
+    public ResourceFile addResource(String content, String nameSuffix)
     {
+        // Lookup existing resource with the same content
+        for (ResourceFile res : _resources) {
+            if (res.getContent().equals(content)) {
+                return res;
+            }
+        }
+        String fileName = toResourceName(nameSuffix);
         String uniqueName = newUniqueFileName(fileName);
-        ResourceFile resource = new ResourceFile(uniqueName, content);
+        ResourceFile resource = new ResourceFile("res/" + uniqueName, content);
         _resources.add(resource);
         return resource;
     }
@@ -170,6 +177,17 @@ public class TestSuiteBuilder
         return type.getName();
     }
 
+    private String toResourceName(String suffix)
+    {
+        if (_qName == null) {
+            return suffix;
+        }
+        int index = _qName.lastIndexOf('.');
+        return (index > 0) ? 
+                _qName.substring(index + 1) + '_' + suffix : 
+                _qName + '_' + suffix;
+    }
+    
     private static Class<?> getArrayType(Class<?> type)
     {
         Class<?> cl = type;
@@ -178,4 +196,6 @@ public class TestSuiteBuilder
         }
         return cl;
     }
+    
+    
 }

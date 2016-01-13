@@ -7,11 +7,13 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.TestClass;
 
 public class StringParamTest 
 {
@@ -27,7 +29,39 @@ public class StringParamTest
     @Test
     public void shouldEscapeText()
     {
-        StringParam v = new StringParam("c:\\win\\path");
-        assertEquals("\"c:\\\\win\\\\path\"", v.toSouceCode(new TestSuiteBuilder()));
+        StringParam p = new StringParam("c:\\win\\path");
+        assertEquals("\"c:\\\\win\\\\path\"", p.toSouceCode(new TestSuiteBuilder()));
+        
+        p = new StringParam("line1\n\rline2");
+        assertEquals("\"line1\\n\\rline2\"", p.toSouceCode(new TestSuiteBuilder()));
+    }
+    
+    @Test
+    public void testCountLines()
+    {
+        assertEquals(1, StringParam.getLinesCount(""));
+        assertEquals(1, StringParam.getLinesCount("text"));
+        assertEquals(2, StringParam.getLinesCount("\n"));
+        assertEquals(3, StringParam.getLinesCount("\n\n"));
+        assertEquals(3, StringParam.getLinesCount("1\n2\n3"));
+    }
+    
+    @Test
+    public void testCreateResource()
+    {
+        StringBuilder sb = new StringBuilder();
+        int maxStringLength = Configuration.getDefault().getMaxStringLength();
+        for (int i = 0; i< maxStringLength; i++) {
+            sb.append("XX");
+        }
+        StringParam p = new StringParam(sb.toString());
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        String code = p.toSouceCode(builder);
+        assertTrue(code.length() < maxStringLength);
+        
+        TestClass test = builder.buildTestClass();
+        assertEquals(1, test.getResources().size());
+        assertEquals(sb.toString(), test.getResources().get(0).getContent());
     }
 }
+

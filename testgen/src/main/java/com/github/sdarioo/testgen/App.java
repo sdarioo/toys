@@ -20,6 +20,14 @@ public class App
             concat(p);
             add((short)i, (byte)i, Boolean.FALSE);
         }
+
+        trim("\nline\n");
+        
+    }
+    
+    public static String trim(String text)
+    {
+        return text.trim();
     }
     
     public static Double add(Short x, Byte y, Boolean b)

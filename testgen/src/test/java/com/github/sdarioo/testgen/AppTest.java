@@ -76,6 +76,20 @@ public class AppTest
         Assert.assertEquals(expected, result);
     }
 
+
+    private Object[] testTrim_Parameters() {
+        return new Object[] {
+            new Object[]{ "\nline\n", "line" }
+        };
+    }
+
+    @Test
+    @Parameters(method = "testTrim_Parameters")
+    public void testTrim(String arg0, String expected) throws Exception {
+        String result=App.trim(arg0);
+        Assert.assertEquals(expected, result);
+    }
+
     private static String[] pair(String key, String value) {
         return new String[] { key, value};
     }
