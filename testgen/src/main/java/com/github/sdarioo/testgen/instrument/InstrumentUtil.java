@@ -24,4 +24,14 @@ public final class InstrumentUtil
     {
         return org.objectweb.asm.commons.Method.getMethod(method).getDescriptor();
     }
+    
+    public static boolean isFlagSet(int access, int... flags)
+    {
+        for (int flag : flags) {
+            if ((access & flag) == flag) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

@@ -19,6 +19,10 @@ public class App
             
             concat(p);
             add((short)i, (byte)i, Boolean.FALSE);
+            
+            Person person = new Person();
+            person.setAge(10 + i);
+            isAdult(person);
         }
 
         trim("\nline\n");
@@ -50,5 +54,21 @@ public class App
         String ret = sb.toString();
         return ret;
     }
-
+    
+    public static boolean isAdult(Person p)
+    {
+        return p.age >= 18;
+    }
+    
+    public static class Person
+    {
+        int age;
+        String name;
+        public void setAge(int age) {
+            this.age = age;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
 }

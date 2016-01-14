@@ -8,7 +8,12 @@ import java.util.Properties;
 import org.apache.commons.lang3.ClassUtils;
 
 import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.recorder.params.beans.Bean;
+import com.github.sdarioo.testgen.recorder.params.beans.BeanFactory;
 
+// TODO
+// - constructor with single String argument
+// - factory method fromString or valueOf
 public final class ParamsFactory 
 {
     private ParamsFactory() {}
@@ -70,6 +75,11 @@ public final class ParamsFactory
         if (value instanceof Properties) {
             return new PropertiesParam((Properties)value);
         }
+        Bean bean = BeanFactory.getInstance().getBean(clazz);
+        if (bean != null) {
+            return new BeanParam(value, bean);
+        }
+        
         return new UnknownParam(value.getClass());
     }
         

@@ -97,7 +97,7 @@ public class TestSuiteBuilder
         }
         String fileName = toResourceName(nameSuffix);
         String uniqueName = newUniqueFileName(fileName);
-        ResourceFile resource = new ResourceFile("res/" + uniqueName, content);
+        ResourceFile resource = new ResourceFile("res/" + uniqueName, content); //$NON-NLS-1$
         _resources.add(resource);
         return resource;
     }
@@ -125,7 +125,7 @@ public class TestSuiteBuilder
         }
         return name;
     }
-
+    
     /**
      * @see com.github.sdarioo.testgen.generator.IUniqueNamesProvider#newUniqueMethodName(java.lang.String)
      */

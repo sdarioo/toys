@@ -44,6 +44,7 @@ public class ArrayParam
         return bValid;
     }
 
+    @SuppressWarnings("nls")
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {

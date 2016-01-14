@@ -1,4 +1,5 @@
 1. Support for JavaBeans
+2. Support for params with factory method (valueOf, fromString) and String based constructor
 2. Support for collections
 3. Support for generic methods/generic types
 4. Support for non-static methods + method from super class (method.getDeclaringClass)
@@ -6,3 +7,4 @@
 6. Real param names + better res names
 7. Problem with EXPAND_FRAMES (why needed)
 8. Setting proper Max Stack
+9. Test methods sorting

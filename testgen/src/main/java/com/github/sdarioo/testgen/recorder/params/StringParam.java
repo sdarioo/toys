@@ -37,6 +37,7 @@ public class StringParam
         return true;
     }
     
+    @SuppressWarnings("nls")
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
@@ -87,6 +88,7 @@ public class StringParam
         return count;
     }
     
+    @SuppressWarnings("nls")
     private static final String RES_TEMPLATE =
             "private String {0}(String res) '{'\n" +
             "    StringBuilder sb = new StringBuilder();\n" +

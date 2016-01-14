@@ -67,7 +67,7 @@ public class TestGenClassAdapter
                 Opcodes.ACC_ANNOTATION,
                 Opcodes.ACC_ENUM
             };
-        if (isFlagSet(access, excludeFlags)) {
+        if (InstrumentUtil.isFlagSet(access, excludeFlags)) {
             return false;
         }
         return true;
@@ -82,7 +82,7 @@ public class TestGenClassAdapter
             Opcodes.ACC_ABSTRACT,
             Opcodes.ACC_SYNTHETIC
         };
-        if (isFlagSet(access, excludeFlags)) {
+        if (InstrumentUtil.isFlagSet(access, excludeFlags)) {
             return false;
         }
         if (ALL_METHODS.equals(_methodName)) {
@@ -91,15 +91,7 @@ public class TestGenClassAdapter
         return methodName.equals(_methodName);
     }
     
-    private static boolean isFlagSet(int access, int[] flags)
-    {
-        for (int flag : flags) {
-            if ((access & flag) == flag) {
-                return true;
-            }
-        }
-        return false;
-    }
+
     
     static final String ALL_METHODS = "*"; //$NON-NLS-1$
 }
