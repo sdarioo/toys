@@ -8,21 +8,18 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.objectweb.asm.*;
 import org.objectweb.asm.commons.Method;
 
+import com.github.sdarioo.testgen.instrument.AccessibleClassVisitor;
 import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 
 public class BeanIntrospector
-    extends ClassVisitor
+    extends AccessibleClassVisitor
 {
     private final BeanBuilder _builder = new BeanBuilder();
     
-    public BeanIntrospector() 
-    {
-        super(Opcodes.ASM5);
-    }
     
     public Bean getBean()
     {
-        return _builder.newBean();
+        return _isClassAccessible ? _builder.build() : Bean.UNSUPPORTED;
     }
     
     @Override
@@ -38,17 +35,12 @@ public class BeanIntrospector
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) 
     {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-        Method method = new Method(name, desc);
         
-        if (InstrumentUtil.isFlagSet(access, Opcodes.ACC_PRIVATE,
-            Opcodes.ACC_BRIDGE,
-            Opcodes.ACC_NATIVE,
-            Opcodes.ACC_ABSTRACT,
-            Opcodes.ACC_SYNTHETIC))
-        {
+        if (!isMethodAccessible(name, access)) {
             return mv;
         }
         
+        Method method = new Method(name, desc);
         if (isConstructor(method) || isGetter(method) || isSetter(method)) {
             mv = new BeanMethodVisitor(_builder, method);
         }
@@ -65,7 +57,7 @@ public class BeanIntrospector
         if (!method.getName().startsWith("get")) { //$NON-NLS-1$
             return false;
         }
-        if (method.getArgumentTypes().length > 0) {
+        if (method.getArgumentTypes().length != 0) {
             return false;
         }
         if (Type.VOID_TYPE.equals(method.getReturnType())) {
@@ -97,7 +89,6 @@ public class BeanIntrospector
         }
         return false;
     }
-    
     
     private static class BeanMethodVisitor 
         extends MethodVisitor

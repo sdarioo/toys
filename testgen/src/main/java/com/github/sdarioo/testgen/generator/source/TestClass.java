@@ -31,6 +31,9 @@ public class TestClass
         _imports = new ArrayList<String>(imports);
         _methods = new ArrayList<TestMethod>(methods);
         _resources = new ArrayList<ResourceFile>(resources);
+        
+        Collections.sort(_imports);
+        Collections.sort(_methods);
     }
     
     public String getPackage()

@@ -14,11 +14,13 @@ import org.apache.commons.lang3.ClassUtils;
 
 import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.IArgNamesProvider;
 
 public abstract class AbstractTestSuiteGenerator 
     implements ITestSuiteGenerator
 {
-
+    private IArgNamesProvider _argNamesProvider;
+    
     protected AbstractTestSuiteGenerator()
     {
     }
@@ -28,6 +30,18 @@ public abstract class AbstractTestSuiteGenerator
     protected abstract void addTestCases(Method method, List<Call> calls, TestSuiteBuilder builder);
     
     
+    /**
+     * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#setArgNamesProvider(com.github.sdarioo.testgen.recorder.IArgNamesProvider)
+     */
+    @Override
+    public void setArgNamesProvider(IArgNamesProvider argNamesProvider) 
+    {
+        _argNamesProvider = argNamesProvider;
+    }
+    
+    /**
+     * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#generate(java.lang.Class, java.util.List)
+     */
     @Override
     public TestClass generate(Class<?> testedClass, List<Call> recordedCalls)
     {
@@ -58,15 +72,20 @@ public abstract class AbstractTestSuiteGenerator
         return namesProvider.newUniqueFileName(defaultName);
     }
     
-    protected static String[] getParameterNames(Method method)
+    protected String[] getParameterNames(Method method)
     {
-        // TODO: use ASM or in Java8 method.getParameters()
-        int size = method.getParameterTypes().length;
-        String[] result = new String[size];
-        for (int i = 0; i < size; i++) {
-            result[i] = "arg" + i; //$NON-NLS-1$
+        String[] names = null;
+        if (_argNamesProvider != null) {
+            names = _argNamesProvider.getArgumentNames(method);
         }
-        return result;
+        if (names == null) {
+            int size = method.getParameterTypes().length;
+            names = new String[size];
+            for (int i = 0; i < size; i++) {
+                names[i] = "arg" + i; //$NON-NLS-1$
+            }
+        }
+        return names;
     }
     
     private static Map<Method, List<Call>> groupByMethod(List<Call> clazzCalls)

@@ -20,7 +20,8 @@ import com.github.sdarioo.testgen.recorder.IParameter;
 public class JUnitParamsGenerator
     extends AbstractTestSuiteGenerator
 {
-    
+    private int _testMethodOrder = 0;
+    private int _paramMethodOrder = 1000;
     
     @Override
     protected void initTestSuite(Class<?> clazz, TestSuiteBuilder builder) 
@@ -84,7 +85,7 @@ public class JUnitParamsGenerator
         String paramProviderName = getParamsProviderMethodName(testCaseName);
 
         String source = MessageFormat.format(TEST_METHOD_TEMPLATE, paramProviderName, testCaseName, args, body);
-        return new TestMethod(testCaseName, source);
+        return new TestMethod(testCaseName, source, _testMethodOrder++);
     }
     
     // Protected for junit tests
@@ -114,7 +115,7 @@ public class JUnitParamsGenerator
         String source = MessageFormat.format(PARAMS_PROVIDER_METHOD_TEMPLATE, 
                 getProblemsComment(errors), name, sb.toString());
         
-        return new TestMethod(name, source);
+        return new TestMethod(name, source, _paramMethodOrder++);
     }
 
     // Protected for junit tests

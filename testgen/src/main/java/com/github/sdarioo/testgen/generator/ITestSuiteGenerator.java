@@ -11,8 +11,11 @@ import java.util.List;
 
 import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.IArgNamesProvider;
 
 public interface ITestSuiteGenerator 
 {
     TestClass generate(Class<?> testedClass, List<Call> recordedCalls);
+    
+    void setArgNamesProvider(IArgNamesProvider argNamesProvider);
 }

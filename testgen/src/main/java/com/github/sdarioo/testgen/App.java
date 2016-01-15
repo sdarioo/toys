@@ -22,7 +22,7 @@ public class App
             
             Person person = new Person();
             person.setAge(10 + i);
-            isAdult(person);
+            isAdult(new Person[]{person});
         }
 
         trim("\nline\n");
@@ -55,9 +55,9 @@ public class App
         return ret;
     }
     
-    public static boolean isAdult(Person p)
+    public static boolean isAdult(Person[] p)
     {
-        return p.age >= 18;
+        return true;
     }
     
     public static class Person

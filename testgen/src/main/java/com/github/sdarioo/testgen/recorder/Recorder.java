@@ -16,10 +16,13 @@ import java.util.concurrent.ConcurrentMap;
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 
-public final class Recorder 
+public final class Recorder
+    implements IArgNamesProvider
 {
     private static final Recorder DEFAULT = new Recorder();
     private static final ConcurrentMap<String, Recorder> RECORDERS = new ConcurrentHashMap<String, Recorder>();
+    
+    private static final Map<String, String[]> ARG_NAMES = new HashMap<String, String[]>();
     
     private final Map<Method, Set<Call>> _calls = new HashMap<Method, Set<Call>>();
     
@@ -87,6 +90,31 @@ public final class Recorder
             collectCalls(_unsupportedCalls, clazz, result);
         }
         return result;
+    }
+    
+    /**
+     * @see com.github.sdarioo.testgen.recorder.IArgNamesProvider#getArgumentNames(java.lang.reflect.Method)
+     */
+    @Override
+    public String[] getArgumentNames(Method method) 
+    {
+        String typeDesc = org.objectweb.asm.Type.getDescriptor(method.getDeclaringClass());
+        String methodDesc = org.objectweb.asm.Type.getMethodDescriptor(method);
+        String key = typeDesc + '-' + methodDesc;
+        return ARG_NAMES.get(key);
+    }
+    
+    public void setArgumentNames(org.objectweb.asm.Type type, org.objectweb.asm.commons.Method method, String[] names)
+    {
+        if (names != null) {
+            for (String name : names) {
+                if (name == null) {
+                    return;
+                }
+            }
+            String key = type.getDescriptor() + '-' + method.getDescriptor();
+            ARG_NAMES.put(key, names);
+        }
     }
     
     private static void recordCall(Map<Method, Set<Call>> calls, Call call)

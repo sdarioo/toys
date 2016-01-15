@@ -116,8 +116,7 @@ public class BeanParam
                 args.append(", ");
             }
             org.objectweb.asm.Type type = org.objectweb.asm.Type.getType(field.getDesc());
-            // TODO - convert to simple type
-            String className = type.getClassName();
+            String className = builder.getTypeName(type.getClassName());
             args.append(className).append(' ').append(field.getName());
         }
         

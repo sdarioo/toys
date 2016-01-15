@@ -7,19 +7,20 @@
 
 package com.github.sdarioo.testgen.instrument;
 
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.Method;
 
 import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.Recorder;
 
 public class TestGenMethodAdapter 
     extends AdviceAdapter
 {
     private final Type _owner;
     private final Method _method;
+    private final boolean _isStatic;
+    private final String[] _paramNames; 
     
     private int _call;
     
@@ -27,8 +28,22 @@ public class TestGenMethodAdapter
     {
         super(Opcodes.ASM5, mv, access, name, desc);
         
+        _isStatic = isStatic(access);
         _owner = owner;
         _method = new Method(name, desc);
+        _paramNames = new String[_method.getArgumentTypes().length];
+    }
+    
+    @Override
+    public void visitLocalVariable(String name, String desc, String signature,
+            Label start, Label end, int index) 
+    {
+        super.visitLocalVariable(name, desc, signature, start, end, index);
+
+        int paramIndex = _isStatic ? index : index - 1;
+        if ((paramIndex >= 0) && (paramIndex < _paramNames.length)) {
+            _paramNames[paramIndex] = name;
+        }
     }
     
     
@@ -112,6 +127,13 @@ public class TestGenMethodAdapter
         super.onMethodExit(opcode);
     }
     
+    @Override
+    public void visitEnd() 
+    {
+        super.visitEnd();
+        Recorder.getDefault().setArgumentNames(_owner, _method, _paramNames);
+    }
+    
     
     @Override
     public void visitMaxs(int maxStack, int maxLocals) 
@@ -130,6 +152,10 @@ public class TestGenMethodAdapter
         mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/recorder/params/ParamsFactory", "newValue", desc, false);
     }
     
+    private static boolean isStatic(int access)
+    {
+        return (access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC; 
+    }
     
     private static boolean isPrimitive(Type t)
     {

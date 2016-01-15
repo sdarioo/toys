@@ -35,6 +35,7 @@ public class TestSuiteBuilder
     private final Map<String, TestMethod> _helperMethods = new HashMap<String, TestMethod>();
     private final List<ResourceFile> _resources = new ArrayList<ResourceFile>();
     
+    private int _helperMethodOrder = 1000000;
     
     public TestSuiteBuilder()
     {
@@ -81,7 +82,7 @@ public class TestSuiteBuilder
         if (method == null) {
             String uniqueName = newUniqueMethodName(methodName);
             String sourceCode = MessageFormat.format(template, uniqueName);
-            method = new TestMethod(uniqueName, sourceCode);
+            method = new TestMethod(uniqueName, sourceCode, _helperMethodOrder++);
             _helperMethods.put(template, method);    
         }
         return method;
@@ -111,19 +112,28 @@ public class TestSuiteBuilder
      */
     public String getTypeName(Class<?> type)
     {
-        String name = fullTypeName(type);
+        return getTypeName(type.getCanonicalName());
+    }
+    
+    public String getTypeName(String canonicalName)
+    {
         if (_bFullTypeNames) {
-            return name;
+            return canonicalName;
         }
-        name = ClassUtils.getShortCanonicalName(type);
-        
-        if (type.isArray()) {
-            type = getArrayType(type);
+        // Add required import
+        String componentType = canonicalName;
+        int index = canonicalName.lastIndexOf('[');
+        if (index >= 0) {
+            componentType =  canonicalName.substring(0, index).trim();
         }
-        if (!type.isPrimitive()) {
-            addImport(ClassUtils.getPackageCanonicalName(type) + '.' + ClassUtils.getShortCanonicalName(type));
+        if (componentType.lastIndexOf('.') > 0) {
+            addImport(
+                    ClassUtils.getPackageCanonicalName(componentType) + '.' + 
+                    ClassUtils.getShortCanonicalName(componentType));
         }
-        return name;
+        // Create short name
+        String shortName = ClassUtils.getShortCanonicalName(canonicalName);
+        return shortName;
     }
     
     /**
@@ -149,33 +159,13 @@ public class TestSuiteBuilder
         }
         return uniqueName;
     }
-    
-    /**
-     * Returns full type name for given class. 
-     * This implementation is based on {@link Class#getTypeName()}
-     * @param type class
-     * @return full type name
-     */
-    private static String fullTypeName(Class<?> type) 
+
+    // Method exposed for junit tests
+    Set<String> getImports()
     {
-        if (type.isArray()) {
-            try {
-                Class<?> cl = type;
-                int dimensions = 0;
-                while (cl.isArray()) {
-                    dimensions++;
-                    cl = cl.getComponentType();
-                }
-                StringBuffer sb = new StringBuffer();
-                sb.append(cl.getName());
-                for (int i = 0; i < dimensions; i++) {
-                    sb.append("[]"); //$NON-NLS-1$
-                }
-                return sb.toString();
-            } catch (Throwable e) { /*FALLTHRU*/ }
-        }
-        return type.getName();
+        return Collections.unmodifiableSet(_imports);
     }
+    
 
     private String toResourceName(String suffix)
     {
@@ -187,15 +177,5 @@ public class TestSuiteBuilder
                 _qName.substring(index + 1) + '_' + suffix : 
                 _qName + '_' + suffix;
     }
-    
-    private static Class<?> getArrayType(Class<?> type)
-    {
-        Class<?> cl = type;
-        while (cl.isArray()) {
-            cl = cl.getComponentType();
-        }
-        return cl;
-    }
-    
-    
+
 }

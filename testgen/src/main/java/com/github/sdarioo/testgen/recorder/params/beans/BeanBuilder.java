@@ -66,7 +66,7 @@ public class BeanBuilder
         return null;
     }
     
-    public Bean newBean()
+    public Bean build()
     {
         if (_constructors.isEmpty()) {
             _constructors.add(Constructor.DEFAULT);

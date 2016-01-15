@@ -52,6 +52,8 @@ public class Generator
             }
             List<Call> calls = recorder.getCalls(clazz);
             ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
+            generator.setArgNamesProvider(recorder);
+            
             TestClass testSuite = generator.generate(clazz, calls);
             if (write(testSuite, destDir)) {
                 Logger.info("Generated TestSuite " + destDir.getAbsolutePath() + "/" + testSuite.getFileName());
