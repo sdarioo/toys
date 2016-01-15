@@ -7,6 +7,8 @@
 
 package com.github.sdarioo.testgen;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
 public class App 
@@ -22,7 +24,9 @@ public class App
             
             Person person = new Person();
             person.setAge(10 + i);
+            
             isAdult(new Person[]{person});
+            isAdult(Arrays.asList(person));
         }
 
         trim("\nline\n");
@@ -56,6 +60,11 @@ public class App
     }
     
     public static boolean isAdult(Person[] p)
+    {
+        return true;
+    }
+    
+    public static boolean isAdult(List<Person> p)
     {
         return true;
     }

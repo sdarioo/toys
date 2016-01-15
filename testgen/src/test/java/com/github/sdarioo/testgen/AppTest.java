@@ -7,6 +7,8 @@ import java.lang.Byte;
 import java.lang.Double;
 import java.lang.Short;
 import java.lang.String;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
@@ -21,6 +23,13 @@ public class AppTest
     @Test
     @Parameters(method = "testIsAdult_Parameters")
     public void testIsAdult(Person[] p, boolean expected) throws Exception {
+        boolean result=App.isAdult(p);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    @Parameters(method = "testIsAdult1_Parameters")
+    public void testIsAdult1(List p, boolean expected) throws Exception {
         boolean result=App.isAdult(p);
         Assert.assertEquals(expected, result);
     }
@@ -55,16 +64,32 @@ public class AppTest
 
     private Object[] testIsAdult_Parameters() {
         return new Object[] {
-            new Object[]{ new Person[]{newPerson(16, null)}, true },
-            new Object[]{ new Person[]{newPerson(17, null)}, true },
-            new Object[]{ new Person[]{newPerson(13, null)}, true },
-            new Object[]{ new Person[]{newPerson(18, null)}, true },
-            new Object[]{ new Person[]{newPerson(11, null)}, true },
-            new Object[]{ new Person[]{newPerson(10, null)}, true },
-            new Object[]{ new Person[]{newPerson(19, null)}, true },
-            new Object[]{ new Person[]{newPerson(12, null)}, true },
             new Object[]{ new Person[]{newPerson(14, null)}, true },
-            new Object[]{ new Person[]{newPerson(15, null)}, true }
+            new Object[]{ new Person[]{newPerson(12, null)}, true },
+            new Object[]{ new Person[]{newPerson(19, null)}, true },
+            new Object[]{ new Person[]{newPerson(13, null)}, true },
+            new Object[]{ new Person[]{newPerson(16, null)}, true },
+            new Object[]{ new Person[]{newPerson(18, null)}, true },
+            new Object[]{ new Person[]{newPerson(17, null)}, true },
+            new Object[]{ new Person[]{newPerson(15, null)}, true },
+            new Object[]{ new Person[]{newPerson(11, null)}, true },
+            new Object[]{ new Person[]{newPerson(10, null)}, true }
+        };
+    }
+
+
+    private Object[] testIsAdult1_Parameters() {
+        return new Object[] {
+            new Object[]{ Arrays.asList(newPerson(15, null)), true },
+            new Object[]{ Arrays.asList(newPerson(14, null)), true },
+            new Object[]{ Arrays.asList(newPerson(18, null)), true },
+            new Object[]{ Arrays.asList(newPerson(12, null)), true },
+            new Object[]{ Arrays.asList(newPerson(10, null)), true },
+            new Object[]{ Arrays.asList(newPerson(17, null)), true },
+            new Object[]{ Arrays.asList(newPerson(13, null)), true },
+            new Object[]{ Arrays.asList(newPerson(19, null)), true },
+            new Object[]{ Arrays.asList(newPerson(16, null)), true },
+            new Object[]{ Arrays.asList(newPerson(11, null)), true }
         };
     }
 
