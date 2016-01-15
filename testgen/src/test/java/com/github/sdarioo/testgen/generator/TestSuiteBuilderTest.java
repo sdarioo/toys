@@ -21,7 +21,7 @@ public class TestSuiteBuilderTest
         assertEquals("TestSuiteBuilderTest", b.getTypeName(TestSuiteBuilderTest.class));
         assertEquals("String[]", b.getTypeName(new String[0].getClass()));
         assertEquals("int[]", b.getTypeName(new int[0].getClass()));
-        assertEquals("Inner", b.getTypeName(Inner.class));
+        assertEquals("TestSuiteBuilderTest.Inner", b.getTypeName(Inner.class));
         
         assertEquals(3, b.getImports().size());
         assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest"));
@@ -30,10 +30,10 @@ public class TestSuiteBuilderTest
         
         
         b = new TestSuiteBuilder();
-        assertEquals("TestSuiteBuilderTest", b.getTypeName(TestSuiteBuilderTest.class.getCanonicalName()));
-        assertEquals("String[]", b.getTypeName(new String[0].getClass().getCanonicalName()));
-        assertEquals("int[]", b.getTypeName(new int[0].getClass().getCanonicalName()));
-        assertEquals("Inner", b.getTypeName(Inner.class.getCanonicalName()));
+        assertEquals("TestSuiteBuilderTest", b.getTypeName(TestSuiteBuilderTest.class.getName()));
+        assertEquals("String[]", b.getTypeName(new String[0].getClass().getName()));
+        assertEquals("int[]", b.getTypeName(new int[0].getClass().getName()));
+        assertEquals("TestSuiteBuilderTest.Inner", b.getTypeName(Inner.class.getName()));
         
         assertEquals(3, b.getImports().size());
         assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest"));

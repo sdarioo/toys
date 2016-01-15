@@ -69,6 +69,9 @@ public final class ParamsFactory
         if (clazz.isArray()) {
             return new ArrayParam(value);
         }
+        if (clazz.isEnum()) {
+            return new EnumParam((Enum<?>)value);
+        }
         if (ClassUtils.isPrimitiveWrapper(value.getClass())) {
             return toPrimitiveValue(value);
         }

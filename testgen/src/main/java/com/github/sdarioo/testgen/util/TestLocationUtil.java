@@ -18,14 +18,19 @@ public class TestLocationUtil
     @SuppressWarnings("nls")
     public static File getTestLocation(Class<?> testedClass)
     {
-        String pkgPath = testedClass.getPackage().getName().replace('.', '/');
-        
         CodeSource codeSource = testedClass.getProtectionDomain().getCodeSource();
         if (codeSource != null) {
             URL url = codeSource.getLocation();
             File loc = toFile(url);
             String path = loc.getAbsolutePath().replace('\\', '/');
             if (loc.isDirectory()) {
+                
+                String pkgPath = "";
+                Package pkg = testedClass.getPackage();
+                if (pkg != null) {
+                    pkgPath = pkg.getName().replace('.', '/');
+                }
+                
                 // Maven
                 if (path.endsWith("/target/classes")) {
                     File testSrcDir = new File(loc.getParentFile().getParentFile(), "src/test/java");

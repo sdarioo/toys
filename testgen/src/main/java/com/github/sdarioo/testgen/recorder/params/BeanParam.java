@@ -16,6 +16,7 @@ import org.objectweb.asm.commons.Method;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
+import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.beans.Bean;
@@ -116,7 +117,10 @@ public class BeanParam
                 args.append(", ");
             }
             org.objectweb.asm.Type type = org.objectweb.asm.Type.getType(field.getDesc());
-            String className = builder.getTypeName(type.getClassName());
+            String className = InstrumentUtil.isPrimitive(type) ? 
+                    type.getClassName() : 
+                    type.getInternalName().replace('/', '.');
+            className = builder.getTypeName(className);
             args.append(className).append(' ').append(field.getName());
         }
         

@@ -145,7 +145,7 @@ public class TestGenMethodAdapter
     @SuppressWarnings("nls")
     private void invokeParamsFactoryNewValue(Type type)
     {
-        String desc = isPrimitive(type) ? 
+        String desc = InstrumentUtil.isPrimitive(type) ? 
                 "(" + type.getDescriptor() + ")Lcom/github/sdarioo/testgen/recorder/IParameter;": 
                 "(Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/IParameter;";
         
@@ -157,8 +157,5 @@ public class TestGenMethodAdapter
         return (access & Opcodes.ACC_STATIC) == Opcodes.ACC_STATIC; 
     }
     
-    private static boolean isPrimitive(Type t)
-    {
-        return t.getSort() <= 8;
-    }
+
 }

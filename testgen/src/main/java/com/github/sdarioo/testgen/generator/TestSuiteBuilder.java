@@ -12,8 +12,10 @@ import java.util.*;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.objectweb.asm.Type;
 
 import com.github.sdarioo.testgen.generator.source.TestMethod;
+import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.impl.UniqueNamesGenerator;
 import com.github.sdarioo.testgen.generator.source.TestClass;
@@ -112,27 +114,28 @@ public class TestSuiteBuilder
      */
     public String getTypeName(Class<?> type)
     {
-        return getTypeName(type.getCanonicalName());
+        return getTypeName(type.getName());
     }
     
-    public String getTypeName(String canonicalName)
+    public String getTypeName(String className)
     {
         if (_bFullTypeNames) {
-            return canonicalName;
+            return className;
         }
         // Add required import
-        String componentType = canonicalName;
-        int index = canonicalName.lastIndexOf('[');
+        String componentType = className;
+        int index = className.lastIndexOf('[');
         if (index >= 0) {
-            componentType =  canonicalName.substring(0, index).trim();
+            componentType =  getElementType(className);
         }
         if (componentType.lastIndexOf('.') > 0) {
-            addImport(
-                    ClassUtils.getPackageCanonicalName(componentType) + '.' + 
-                    ClassUtils.getShortCanonicalName(componentType));
+            String pkg = ClassUtils.getPackageCanonicalName(componentType);
+            if (pkg.length() > 0) {
+                addImport(pkg + '.' + ClassUtils.getShortCanonicalName(componentType));
+            }
         }
         // Create short name
-        String shortName = ClassUtils.getShortCanonicalName(canonicalName);
+        String shortName = ClassUtils.getShortCanonicalName(className);
         return shortName;
     }
     
@@ -176,6 +179,15 @@ public class TestSuiteBuilder
         return (index > 0) ? 
                 _qName.substring(index + 1) + '_' + suffix : 
                 _qName + '_' + suffix;
+    }
+    
+    private static String getElementType(String arrayType)
+    {
+        Type type = Type.getType(arrayType);
+        while (type.getSort() == Type.ARRAY) {
+            type = type.getElementType();
+        }
+        return InstrumentUtil.isPrimitive(type) ? type.getClassName() : type.getInternalName().replace('/', '.');
     }
 
 }

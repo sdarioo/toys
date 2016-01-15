@@ -33,7 +33,7 @@ public class JUnitParamsGenerator
         builder.addImport("junitparams.JUnitParamsRunner"); //$NON-NLS-1$
         
         
-        String pkg = clazz.getPackage().getName();
+        String pkg = (clazz.getPackage() != null) ? clazz.getPackage().getName() : "";
         String name = getTestClassName(clazz, builder);
         
         String signature =  MessageFormat.format(CLASS_SIGNATURE_TEMPLATE, name);
