@@ -36,11 +36,11 @@ public class TestGenTransformer
     static byte[] transform(byte[] classfileBuffer, String className, String methodName)
     {
         ClassReader reader = new ClassReader(classfileBuffer);
-        ClassWriter writer = new ClassWriter(0);
+        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         TestGenClassAdapter adapter = new TestGenClassAdapter(writer, methodName);
         
         try {
-            // TODO - why need EXPAND_FRAMES
+            // ClassReader.accept() calls that receive any subclass of LocalVariableSorter need EXPAND_FRAMES flag
             reader.accept(adapter, ClassReader.EXPAND_FRAMES);
             return writer.toByteArray();
         } catch (Throwable thr) {

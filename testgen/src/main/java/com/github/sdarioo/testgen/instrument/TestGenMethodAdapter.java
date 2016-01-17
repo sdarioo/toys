@@ -138,8 +138,10 @@ public class TestGenMethodAdapter
     @Override
     public void visitMaxs(int maxStack, int maxLocals) 
     {
-        // TODO
-        super.visitMaxs(maxStack + 4, maxLocals);
+        // Set pessimistic max stack value - instrumentation adds additional 3values to the stack.
+        // If ClassWriter uses COMPUTE_MAXS flags than this method will be ignored and max stack values
+        // will be computed based on method signature and bytecode instructions.
+        super.visitMaxs(maxStack + 3, maxLocals);
     }
     
     @SuppressWarnings("nls")
