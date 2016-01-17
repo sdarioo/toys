@@ -29,6 +29,7 @@ public class TestGenTransformer
         if (!className.endsWith(_className)) {
             return classfileBuffer;
         }
+        Logger.info("Transforming class: " + className);
         return transform(classfileBuffer, className, _methodName);
     }
 

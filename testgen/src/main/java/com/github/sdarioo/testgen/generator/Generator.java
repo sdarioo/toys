@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.github.sdarioo.testgen.generator.impl.JUnitParamsGenerator;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
@@ -24,20 +23,13 @@ import com.github.sdarioo.testgen.util.TestLocationUtil;
 
 public class Generator
 {
-    private static AtomicBoolean _shutdownHookRegistered = new AtomicBoolean(false);
-
-    public static void registerShutdownHook()
+    
+    public static void generateTests()
     {
-        if (_shutdownHookRegistered.compareAndSet(false, true)) {
-           Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Recorder recorder = Recorder.getDefault();
-                    generateTestsSafe(recorder);
-                }
-            }));
-        }
+        Recorder recorder = Recorder.getDefault();
+        generateTestsSafe(recorder);
     }
+    
     
     @SuppressWarnings("nls")
     public static void generateTests(Recorder recorder)
@@ -56,7 +48,7 @@ public class Generator
             
             TestClass testSuite = generator.generate(clazz, calls);
             if (write(testSuite, destDir)) {
-                Logger.info("Generated TestSuite " + destDir.getAbsolutePath() + "/" + testSuite.getFileName());
+                Logger.info("Generated Test: " + destDir.getAbsolutePath() + File.separator + testSuite.getFileName());
             }
         }
     }
@@ -66,7 +58,7 @@ public class Generator
         try {
             generateTests(recorder);
         } catch (IOException e) {
-            Logger.error(e.toString());
+            Logger.error("Error while generating tests.", e);
         }
     }
     

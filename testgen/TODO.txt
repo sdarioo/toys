@@ -4,7 +4,7 @@
 4. Support for collections
 5. Support for generic methods/generic types
 6. Support for non-static methods + method from super class (method.getDeclaringClass)
-7. Logging / console output
+
 9. Problem with EXPAND_FRAMES (why needed)
 10. Setting proper Max Stack
 11. Configure agent using properties file

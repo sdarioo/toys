@@ -80,7 +80,6 @@ public class JUnitParamsGeneratorTest
         
         String text = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
         assertNotNull(text);
-        //System.out.println(text);
     }
     
     @SuppressWarnings("nls")

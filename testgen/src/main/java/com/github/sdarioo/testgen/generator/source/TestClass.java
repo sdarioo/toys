@@ -36,6 +36,11 @@ public class TestClass
         Collections.sort(_methods);
     }
     
+    public String getName()
+    {
+        return _qName;
+    }
+    
     public String getPackage()
     {
         return ClassUtils.getPackageCanonicalName(_qName);
