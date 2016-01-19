@@ -47,14 +47,27 @@ public class TestLocationUtil
                     }
                 }
                 // Eclipse
-                if (path.endsWith("/bin") && isEclipseProject(loc.getParentFile())) {
-                    File testsDir = getEclipseTestProject(loc.getParentFile());
+                File eclipseProject = null;
+                if (isEclipseProject(loc)) {
+                    eclipseProject = loc;
+                } else if (path.endsWith("/bin") && isEclipseProject(loc.getParentFile())) {
+                    eclipseProject = loc.getParentFile();
+                }
+                if (eclipseProject != null) {
+                    File testsDir = getEclipseTestProject(eclipseProject);
                     File testSrcDir = new File(testsDir, "src");
                     if (testSrcDir.isDirectory()) {
                         return new File(testSrcDir, pkgPath);
                     }
                 }
+                
+                Logger.warn("Unrecognized project structure for path: " + path);
+                
+            } else {
+                Logger.warn("CodeSource loction not exists: " + url.toString());
             }
+        } else {
+            Logger.warn("Null ProtectionDomein.CodeSource for: " + testedClass.getName());
         }
         
         return null;

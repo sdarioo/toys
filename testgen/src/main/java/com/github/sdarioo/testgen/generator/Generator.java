@@ -45,7 +45,6 @@ public class Generator
             List<Call> calls = recorder.getCalls(clazz);
             ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
             generator.setArgNamesProvider(recorder);
-            
             TestClass testSuite = generator.generate(clazz, calls);
             if (write(testSuite, destDir)) {
                 Logger.info("Generated test: " + destDir.getAbsolutePath() + File.separator + testSuite.getFileName());
@@ -57,7 +56,7 @@ public class Generator
     {
         try {
             generateTests(recorder);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             Logger.error("Error while generating tests.", e); //$NON-NLS-1$
         }
     }

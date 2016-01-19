@@ -18,18 +18,20 @@ public class Logger
 {
     
     private static final java.util.logging.Logger LOGGER;
+    private static final String NAME = "TestGen"; //$NON-NLS-1$
     
     static
     {
         //Must be called first before logger is used
-        System.setProperty("java.util.logging.manager", CustomLogManager.class.getName());
+        System.setProperty("java.util.logging.manager", CustomLogManager.class.getName()); //$NON-NLS-1$
         
-        LOGGER = java.util.logging.Logger.getLogger("testgen");
+        LOGGER = java.util.logging.Logger.getLogger(NAME);
         configureLogger();
     }
     
     public static void shutdown()
     {
+        info("Shutdown logger."); //$NON-NLS-1$
         CustomLogManager.resetFinally();
     }
     
@@ -69,15 +71,15 @@ public class Logger
     private static void configureLogger()
     {
         try {
-            InputStream is = Logger.class.getResourceAsStream("/logging.properties");
+            InputStream is = Logger.class.getResourceAsStream("/logging.properties"); //$NON-NLS-1$
             if (is != null) {
                 LogManager.getLogManager().readConfiguration(is);
                 is.close();
             } else {
-                LOGGER.warning("Cannot read logging.properties file.");   
+                LOGGER.warning("Cannot read logging.properties file.");    //$NON-NLS-1$
             }
         } catch (Throwable thr) {
-            LOGGER.log(Level.SEVERE, "Error while configuring logger.", thr);
+            LOGGER.log(Level.SEVERE, "Error while configuring logger.", thr); //$NON-NLS-1$
         }
     }
     
