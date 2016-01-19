@@ -22,6 +22,7 @@ public class TestGenMethodAdapter
     private final boolean _isStatic;
     private final String[] _paramNames; 
     
+    private int _args;
     private int _call;
     
     public TestGenMethodAdapter(Type owner, MethodVisitor mv, int access, String name, String desc) 
@@ -53,27 +54,19 @@ public class TestGenMethodAdapter
     {
         super.onMethodEnter();
         
-        // Call call = Call.newCall(Utils.getMethod(clazz, name, desc));
+        _args = newLocal(Type.getType(Object.class));
         _call = newLocal(Type.getType(Call.class));
+        
+        generateArgumentsArray();
         mv.visitLdcInsn(_owner);
         mv.visitLdcInsn(_method.getName());
         mv.visitLdcInsn(_method.getDescriptor());
         mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/instrument/InstrumentUtil", "getMethod", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/reflect/Method;", false);
-        mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/recorder/Call", "newCall", "(Ljava/lang/reflect/Method;)Lcom/github/sdarioo/testgen/recorder/Call;", false);
+        
+        mv.visitVarInsn(ALOAD, _args);
+        mv.visitMethodInsn(INVOKESTATIC, Call.TYPE_NAME, Call.NEW_CALL_METHOD_NAME, Call.NEW_CALL_METHOD_DESC, false);
+        
         mv.visitVarInsn(ASTORE, _call);
-        
-        // foreach (x : args) {
-        //     call.args().add(ParamsFactory.newValue(x));
-        // }
-        Type[] args = _method.getArgumentTypes();
-        
-        for (int i = 0; i < args.length; i++) {
-            mv.visitVarInsn(ALOAD, _call);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "com/github/sdarioo/testgen/recorder/Call", "args", "()Lcom/github/sdarioo/testgen/recorder/ArgList;", false);
-            loadArg(i);
-            invokeParamsFactoryNewValue(args[i]);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "com/github/sdarioo/testgen/recorder/ArgList", "add", "(Lcom/github/sdarioo/testgen/recorder/IParameter;)V", false);
-        }
     }
     
     @SuppressWarnings("nls")
@@ -82,10 +75,9 @@ public class TestGenMethodAdapter
     {
         switch (opcode) {
         case RETURN:
-            // call.setResult(IParameter.VOID)
+            // call.end()
             mv.visitVarInsn(ALOAD, _call);
-            mv.visitFieldInsn(GETSTATIC, "com/github/sdarioo/testgen/recorder/IParameter", "VOID", "Lcom/github/sdarioo/testgen/recorder/IParameter;");
-            mv.visitMethodInsn(INVOKEVIRTUAL, "com/github/sdarioo/testgen/recorder/Call", "setResult", "(Lcom/github/sdarioo/testgen/recorder/IParameter;)V", false);
+            mv.visitMethodInsn(INVOKEVIRTUAL, Call.TYPE_NAME, "end", "()V", false);
             break;
         case IRETURN:
         case FRETURN:
@@ -93,36 +85,38 @@ public class TestGenMethodAdapter
         case LRETURN:
         case DRETURN:
             // Object ret = return object;
-            // call.setResult(ret);
-            Type returnType = _method.getReturnType();
-            int ret = newLocal(returnType);
-            mv.visitInsn(DUP);
+            // call.endWithResult(ret);
+            if (opcode == LRETURN || opcode == DRETURN) {
+                mv.visitInsn(DUP2);
+            } else {
+                mv.visitInsn(DUP);
+            }
+            boxIfNeeded(_method.getReturnType());
+            int ret = newLocal(Type.getType(Object.class));
             storeLocal(ret);
-            
             mv.visitVarInsn(ALOAD, _call);
             loadLocal(ret);
-            invokeParamsFactoryNewValue(returnType);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "com/github/sdarioo/testgen/recorder/Call", "setResult", "(Lcom/github/sdarioo/testgen/recorder/IParameter;)V", false);
+            mv.visitMethodInsn(INVOKEVIRTUAL, Call.TYPE_NAME, "endWithResult", "(Ljava/lang/Object;)V", false);
             
             break;
         case ATHROW:
             // Throwable exc = thrown exception;
-            // call.setException(exc);
+            // call.endWithException(exc);
             int exc = newLocal(Type.getType(Throwable.class));
             mv.visitInsn(DUP);
             mv.visitVarInsn(ASTORE, exc);
             
             mv.visitVarInsn(ALOAD, _call);
             mv.visitVarInsn(ALOAD, exc);
-            mv.visitMethodInsn(INVOKEVIRTUAL, "com/github/sdarioo/testgen/recorder/Call", "setException", "(Ljava/lang/Throwable;)V", false);
+            mv.visitMethodInsn(INVOKEVIRTUAL, Call.TYPE_NAME, "endWithException", "(Ljava/lang/Throwable;)V", false);
             
             break;
         }
     
         // Recorder.getDefault().record(call);
-        mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/recorder/Recorder", "getDefault", "()Lcom/github/sdarioo/testgen/recorder/Recorder;", false);
+        mv.visitMethodInsn(INVOKESTATIC, Recorder.TYPE_NAME, Recorder.GET_DEFAULT_METHOD_NAME, Recorder.GET_DEFAULT_METHOD_DESC, false);
         mv.visitVarInsn(ALOAD, _call);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "com/github/sdarioo/testgen/recorder/Recorder", "record", "(Lcom/github/sdarioo/testgen/recorder/Call;)V", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, Recorder.TYPE_NAME, Recorder.RECORD_METHOD_NAME, Recorder.RECORD_METHOD_DESC, false);
         
         super.onMethodExit(opcode);
     }
@@ -145,14 +139,109 @@ public class TestGenMethodAdapter
     }
     
     @SuppressWarnings("nls")
-    private void invokeParamsFactoryNewValue(Type type)
+    private void generateArgumentsArray()
     {
-        String desc = InstrumentUtil.isPrimitive(type) ? 
-                "(" + type.getDescriptor() + ")Lcom/github/sdarioo/testgen/recorder/IParameter;": 
-                "(Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/IParameter;";
-        
-        mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/recorder/params/ParamsFactory", "newValue", desc, false);
+        Type[] argumentTypes = Type.getArgumentTypes(methodDesc);
+
+        mv.visitIntInsn(BIPUSH, argumentTypes.length);
+        mv.visitTypeInsn(ANEWARRAY, "java/lang/Object");
+
+        int argIndex = _isStatic ? 0 : 1;
+        for (int i = 0; i < argumentTypes.length; i++) {
+            Type argumentType = argumentTypes[i];
+
+            mv.visitInsn(DUP);
+            mv.visitIntInsn(BIPUSH, i);
+            mv.visitVarInsn(argumentType.getOpcode(ILOAD), argIndex);
+
+            boxIfNeeded(argumentType);
+
+            mv.visitInsn(AASTORE);
+            argIndex += argumentType.getSize();
+        }
+
+        mv.visitVarInsn(ASTORE, _args);
     }
+    
+    @SuppressWarnings("nls")
+    private void boxIfNeeded(Type type)
+    {
+        switch (type.getSort()) {
+            case Type.BYTE:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Byte",
+                        "valueOf",
+                        "(B)Ljava/lang/Byte;",
+                        false
+                );
+                break;
+            case Type.BOOLEAN:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Boolean",
+                        "valueOf",
+                        "(Z)Ljava/lang/Boolean;",
+                        false
+                );
+                break;
+            case Type.SHORT:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Short",
+                        "valueOf",
+                        "(S)Ljava/lang/Short;",
+                        false
+                );
+                break;
+            case Type.CHAR:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Character",
+                        "valueOf",
+                        "(C)Ljava/lang/Character;",
+                        false
+                );
+                break;
+            case Type.INT:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Integer",
+                        "valueOf",
+                        "(I)Ljava/lang/Integer;",
+                        false
+                );
+                break;
+            case Type.FLOAT:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Float",
+                        "valueOf",
+                        "(F)Ljava/lang/Float;",
+                        false
+                );
+                break;
+            case Type.LONG:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Long",
+                        "valueOf",
+                        "(J)Ljava/lang/Long;",
+                        false
+                );
+                break;
+            case Type.DOUBLE:
+                mv.visitMethodInsn(
+                        INVOKESTATIC,
+                        "java/lang/Double",
+                        "valueOf",
+                        "(D)Ljava/lang/Double;",
+                        false
+                );
+                break;
+        }
+    }
+    
     
     private static boolean isStatic(int access)
     {

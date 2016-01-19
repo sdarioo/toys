@@ -11,6 +11,9 @@ import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.CodeSource;
+import java.security.ProtectionDomain;
+
+import com.github.sdarioo.testgen.logging.Logger;
 
 public class TestLocationUtil 
 {
@@ -18,7 +21,12 @@ public class TestLocationUtil
     @SuppressWarnings("nls")
     public static File getTestLocation(Class<?> testedClass)
     {
-        CodeSource codeSource = testedClass.getProtectionDomain().getCodeSource();
+        ProtectionDomain protectionDomain = testedClass.getProtectionDomain();
+        if (protectionDomain == null) {
+            Logger.error("Null ProtectionDomain for class: " + testedClass.getName());
+            return null;
+        }
+        CodeSource codeSource = protectionDomain.getCodeSource();
         if (codeSource != null) {
             URL url = codeSource.getLocation();
             File loc = toFile(url);

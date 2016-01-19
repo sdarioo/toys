@@ -31,6 +31,21 @@ public class App
 
         trim("\nline\n");
         
+        isMax(Long.MIN_VALUE);
+        isMax(Long.MAX_VALUE);
+        
+        getMax(Long.MIN_VALUE);
+        getMax(Long.MAX_VALUE);
+    }
+    
+    public static boolean isMax(long m)
+    {
+        return m == Long.MAX_VALUE;
+    }
+    
+    public static long getMax(long m)
+    {
+        return Long.MAX_VALUE;
     }
     
     public static String trim(String text)

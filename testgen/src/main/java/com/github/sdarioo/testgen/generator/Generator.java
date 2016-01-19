@@ -48,7 +48,7 @@ public class Generator
             
             TestClass testSuite = generator.generate(clazz, calls);
             if (write(testSuite, destDir)) {
-                Logger.info("Generated Test: " + destDir.getAbsolutePath() + File.separator + testSuite.getFileName());
+                Logger.info("Generated test: " + destDir.getAbsolutePath() + File.separator + testSuite.getFileName());
             }
         }
     }
@@ -58,7 +58,7 @@ public class Generator
         try {
             generateTests(recorder);
         } catch (IOException e) {
-            Logger.error("Error while generating tests.", e);
+            Logger.error("Error while generating tests.", e); //$NON-NLS-1$
         }
     }
     

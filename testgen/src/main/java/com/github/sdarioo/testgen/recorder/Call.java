@@ -10,6 +10,10 @@ package com.github.sdarioo.testgen.recorder;
 import java.lang.reflect.Method;
 import java.util.Set;
 
+import org.objectweb.asm.Type;
+
+import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
+
 public class Call 
 {
     private final Method _method;
@@ -18,35 +22,43 @@ public class Call
     private ExceptionInfo _exception;
     private final ArgList _argList;
     
+    public static Call newCall(Method method, Object... args)
+    {
+        IParameter[] params = new IParameter[args.length];
+        for (int i = 0; i < args.length; i++) {
+            params[i] = ParamsFactory.newValue(args[i]);
+        }
+        return new Call(method, params);
+    }
     
-    public static Call newCall(MethodRef ref)
+    public static Call newCall(MethodRef ref, Object... args)
     {
         Method method = ref.getClass().getEnclosingMethod();
         if (method == null) {
             throw new IllegalArgumentException("MethodRef must be anonymous class within a tested method"); //$NON-NLS-1$
         }
-        return new Call(method);
+        return newCall(method, args);
     }
     
-    public static Call newCall(Method method)
-    {
-        return new Call(method);
-    }
-    
-    private Call(Method method)
+    private Call(Method method, IParameter[] args)
     {
         _method = method;
-        _argList = new ArgList();
+        _argList = new ArgList(args);
     }
     
-    public Call(Method method, IParameter result, IParameter... args)
+    public void end()
     {
-        _method = method;
-        _argList = new ArgList();
-        setResult(result);
-        for (IParameter value : args) {
-            args().add(value);
-        }
+        _result = IParameter.VOID;
+    }
+    
+    public void endWithResult(Object result)
+    {
+        _result = ParamsFactory.newValue(result);
+    }
+    
+    public void endWithException(Throwable thr)
+    {
+        _exception = new ExceptionInfo(thr);
     }
     
     public Method getMethod()
@@ -56,7 +68,6 @@ public class Call
     
     public boolean isFinished()
     {
-        // Void methods must have IParameter.VOID set as result
         return (_result != null) || (_exception != null);
     }
     
@@ -81,19 +92,9 @@ public class Call
         return _result;
     }
     
-    public void setResult(IParameter result)
-    {
-        _result = result;
-    }
-    
     public ExceptionInfo getExceptionInfo()
     {
         return _exception;
-    }
-    
-    public void setException(Throwable exception)
-    {
-        _exception = new ExceptionInfo(exception);
     }
     
     @Override
@@ -137,6 +138,18 @@ public class Call
         return true;
     }
 
+    @Override
+    public String toString() 
+    {
+        return _method.toString();
+    }
     
     public static abstract class MethodRef {}
+    
+    
+    public static final String TYPE_NAME = Type.getType(Call.class).getInternalName();
+    public static final String NEW_CALL_METHOD_NAME = "newCall"; //$NON-NLS-1$
+    public static final String NEW_CALL_METHOD_DESC = "(Ljava/lang/reflect/Method;[Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/Call;"; //$NON-NLS-1$
+    
+    
 }

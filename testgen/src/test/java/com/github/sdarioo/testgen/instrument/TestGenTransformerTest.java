@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.*;
+import java.util.Properties;
 
 import org.junit.Test;
 import org.objectweb.asm.ClassReader;
@@ -53,15 +54,9 @@ public class TestGenTransformerTest
         assertNotEquals(b1.length, b2.length);
         
         verify(b2);
-        
-        String[] inst = {
-          "INVOKESTATIC com/github/sdarioo/testgen/recorder/params/ParamsFactory.newValue (I)Lcom/github/sdarioo/testgen/recorder/IParameter;",
-          "INVOKESTATIC com/github/sdarioo/testgen/recorder/params/ParamsFactory.newValue (I)Lcom/github/sdarioo/testgen/recorder/IParameter;"
-        };
-        trace(b2, inst);
     }
     
-    @Test
+   @Test
     public void testTransform2() throws IOException
     {
         byte[] b1 = getBytes(Target.class);
@@ -69,13 +64,28 @@ public class TestGenTransformerTest
         assertNotEquals(b1.length, b2.length);
         
         verify(b2);
-        
-        String[] inst = {
-          "INVOKESTATIC com/github/sdarioo/testgen/recorder/params/ParamsFactory.newValue (Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/IParameter;",
-          "INVOKESTATIC com/github/sdarioo/testgen/recorder/params/ParamsFactory.newValue (I)Lcom/github/sdarioo/testgen/recorder/IParameter;"
-        };
-        trace(b2, inst);
     }
+    
+    @Test
+    public void testConcat() throws IOException
+    {
+        byte[] b1 = getBytes(Target.class);
+        byte[] b2 = TestGenTransformer.transform(b1, "Target", "concat");
+        
+        assertNotEquals(b1.length, b2.length);
+        verify(b2);
+    }
+    
+    @Test
+    public void testLong() throws IOException
+    {
+        byte[] b1 = getBytes(Target.class);
+        byte[] b2 = TestGenTransformer.transform(b1, "Target", "l");
+        
+        assertNotEquals(b1.length, b2.length);
+        verify(b2);
+    }
+    
 
     private static byte[] getBytes(Class<?> clazz)
         throws IOException
@@ -138,6 +148,22 @@ public class TestGenTransformerTest
     public static class Target {
         public int m1(int a) { return 0;}
         public int m2(Object a) { return 0;}
+        public long l(long v) { return v; }
+        
+        public static String concat(Properties props)
+        {
+            StringBuilder sb = new StringBuilder();
+            for (Object key : props.keySet()) {
+                if (sb.length() > 0) {
+                    sb.append(';');
+                }
+                String sKey = (String)key;
+                String sValue = props.getProperty(sKey);
+                sb.append(sKey).append('=').append(sValue);
+            }
+            String ret = sb.toString();
+            return ret;
+        }
     }
 }
 

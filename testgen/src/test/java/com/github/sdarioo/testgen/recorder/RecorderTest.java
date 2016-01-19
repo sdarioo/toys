@@ -7,10 +7,14 @@
 
 package com.github.sdarioo.testgen.recorder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
@@ -18,8 +22,6 @@ import org.junit.Test;
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 import com.github.sdarioo.testgen.recorder.Call.MethodRef;
-import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
-import com.github.sdarioo.testgen.recorder.params.UnknownParam;
 
 public class RecorderTest 
 {
@@ -53,15 +55,13 @@ public class RecorderTest
         int max = Configuration.getDefault().getMaxCalls();
         Recorder r = Recorder.get("testGetCallsWithUnsupported");
         for (int i = 0; i < max; i++) {
-            Call c = Call.newCall(m);
-            c.args().add(ParamsFactory.newValue("param"+i));
-            c.setResult(IParameter.VOID);
+            Call c = Call.newCall(m, "param"+i);
+            c.end();
             r.record(c);
         }
         // This call will not be returned by getCalls because there is already max valid calls
-        Call c = Call.newCall(m);
-        c.args().add(new UnknownParam(Collections.class));
-        c.setResult(IParameter.VOID);
+        Call c = Call.newCall(m, new Object());
+        c.end();
         r.record(c);
         
         List<Call> calls = r.getCalls(m.getDeclaringClass());
@@ -77,15 +77,13 @@ public class RecorderTest
         
         Recorder r = Recorder.get("testGetCallsWithUnsupported");
         
-        Call c = Call.newCall(m);
-        c.args().add(ParamsFactory.newValue("param"));
-        c.setResult(IParameter.VOID);
+        Call c = Call.newCall(m, "param");
+        c.end();
         r.record(c);
         
         // This call will be returned because size of supported calls is less than max
-        c = Call.newCall(m);
-        c.args().add(new UnknownParam(Collections.class));
-        c.setResult(IParameter.VOID);
+        c = Call.newCall(m, new Object());
+        c.end();
         r.record(c);
         
         List<Call> calls = r.getCalls(m.getDeclaringClass());

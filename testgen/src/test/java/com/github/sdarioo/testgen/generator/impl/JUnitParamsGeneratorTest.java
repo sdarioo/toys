@@ -19,10 +19,8 @@ import org.apache.commons.lang3.text.StrTokenizer;
 import org.junit.Test;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
-import com.github.sdarioo.testgen.generator.impl.JUnitParamsGenerator;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
 
 public class JUnitParamsGeneratorTest
 {
@@ -47,19 +45,20 @@ public class JUnitParamsGeneratorTest
         assertNotNull(method);
         
         List<Call> calls = new ArrayList<Call>();
-        calls.add(new Call(method, ParamsFactory.newValue("ret1"), ParamsFactory.newValue("name1"), ParamsFactory.newValue(1)));
-        calls.add(new Call(method, ParamsFactory.newValue(null), ParamsFactory.newValue(null), ParamsFactory.newValue(2)));
+        calls.add(Call.newCall(method, "name1", 1));
+        calls.add(Call.newCall(method, null, 2));
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
 
         String text = gen.generateParamsProvider(method, calls, "testSayHello", new TestSuiteBuilder()).toSourceCode();
         assertNotNull(text);
+        System.out.println(text);
 
         String[] lines = new StrTokenizer(text, '\n').getTokenArray();
         assertEquals(6, lines.length);
         assertEquals("private Object[] testSayHello_Parameters() {", lines[0].trim());
         assertEquals("return new Object[] {", lines[1].trim());
-        assertEquals("new Object[]{ \"name1\", 1, \"ret1\" },", lines[2].trim());
+        assertEquals("new Object[]{ \"name1\", 1, null },", lines[2].trim());
         assertEquals("new Object[]{ null, 2, null }", lines[3].trim());
         assertEquals("};", lines[4].trim());
         assertEquals("}", lines[5].trim());
@@ -73,8 +72,8 @@ public class JUnitParamsGeneratorTest
         assertNotNull(method);
         
         List<Call> calls = new ArrayList<Call>();
-        calls.add(new Call(method, ParamsFactory.newValue("ret1"), ParamsFactory.newValue("name1"), ParamsFactory.newValue(1)));
-        calls.add(new Call(method, ParamsFactory.newValue(null), ParamsFactory.newValue(null), ParamsFactory.newValue(1)));
+        calls.add(Call.newCall(method, "ret1", "name1", 1));
+        calls.add(Call.newCall(method, null, null, 1));
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         
@@ -95,8 +94,8 @@ public class JUnitParamsGeneratorTest
         p2.setProperty("key2", "value2");
         
         List<Call> calls = new ArrayList<Call>();
-        calls.add(new Call(method, ParamsFactory.newValue(0), ParamsFactory.newValue(p1)));
-        calls.add(new Call(method, ParamsFactory.newValue(0), ParamsFactory.newValue(p2)));
+        calls.add(Call.newCall(method, 0, p1));
+        calls.add(Call.newCall(method, 0, p2));
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         

@@ -13,7 +13,7 @@ public class ArrayParam
 {
     private final int _length;
     private final Class<?> _clazz;
-    private final IParameter[] _array;
+    private final IParameter[] _values;
     
     ArrayParam(Object array)
     {
@@ -21,14 +21,14 @@ public class ArrayParam
         _clazz = array.getClass();
         
         if (_length > Configuration.getDefault().getMaxArraySize()) {
-            _array = new IParameter[0];
+            _values = new IParameter[0];
             return;
         }
         
-        _array = new IParameter[_length];
+        _values = new IParameter[_length];
         for (int i = 0; i < _length; i++) {
             Object element = Array.get(array, i);
-            _array[i] = ParamsFactory.newValue(element);
+            _values[i] = ParamsFactory.newValue(element);
         }
     }
 
@@ -41,11 +41,7 @@ public class ArrayParam
                     maxSize, _length));
             return false;
         }
-        boolean bValid = true;
-        for (IParameter param : _array) {
-            bValid &= param.isSupported(errors);
-        }
-        return bValid;
+        return ParamsUtil.isSupported(_values, errors);
     }
 
     @SuppressWarnings("nls")
@@ -53,7 +49,7 @@ public class ArrayParam
     public String toSouceCode(TestSuiteBuilder builder) 
     {
         StringBuilder sb = new StringBuilder();
-        for (IParameter param : _array) {
+        for (IParameter param : _values) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
@@ -65,11 +61,7 @@ public class ArrayParam
     @Override
     public int hashCode() 
     {
-        int hash = 1;
-        for (IParameter param : _array) {
-            hash = 31*hash + param.hashCode();
-        }
-        return hash;
+        return ParamsUtil.hashCode(_values);
     }
     
     @Override
@@ -82,15 +74,7 @@ public class ArrayParam
             return false;
         }
         ArrayParam other = (ArrayParam)obj;
-        if (_length != other._length) {
-            return false;
-        }
-        for (int i = 0; i < _length; i++) {
-            if (!_array[i].equals(other._array[i])) {
-                return false;
-            }
-        }
-        return true;
+        return ParamsUtil.equals(_values, other._values);
     }
 
 }

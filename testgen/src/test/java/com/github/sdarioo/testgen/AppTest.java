@@ -21,8 +21,22 @@ import org.junit.runner.RunWith;
 public class AppTest
 {
     @Test
+    @Parameters(method = "testIsMax_Parameters")
+    public void testIsMax(long m, boolean expected) throws Exception {
+        boolean result=App.isMax(m);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    @Parameters(method = "testGetMax_Parameters")
+    public void testGetMax(long m, long expected) throws Exception {
+        long result=App.getMax(m);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
     @Parameters(method = "testIsAdult_Parameters")
-    public void testIsAdult(Person[] p, boolean expected) throws Exception {
+    public void testIsAdult(App.Person[] p, boolean expected) throws Exception {
         boolean result=App.isAdult(p);
         Assert.assertEquals(expected, result);
     }
@@ -62,34 +76,50 @@ public class AppTest
     }
 
 
+    private Object[] testIsMax_Parameters() {
+        return new Object[] {
+            new Object[]{ -9223372036854775808L, false },
+            new Object[]{ 9223372036854775807L, true }
+        };
+    }
+
+
+    private Object[] testGetMax_Parameters() {
+        return new Object[] {
+            new Object[]{ 9223372036854775807L, 9223372036854775807L },
+            new Object[]{ -9223372036854775808L, 9223372036854775807L }
+        };
+    }
+
+
     private Object[] testIsAdult_Parameters() {
         return new Object[] {
-            new Object[]{ new Person[]{newPerson(14, null)}, true },
-            new Object[]{ new Person[]{newPerson(12, null)}, true },
-            new Object[]{ new Person[]{newPerson(19, null)}, true },
-            new Object[]{ new Person[]{newPerson(13, null)}, true },
-            new Object[]{ new Person[]{newPerson(16, null)}, true },
-            new Object[]{ new Person[]{newPerson(18, null)}, true },
-            new Object[]{ new Person[]{newPerson(17, null)}, true },
-            new Object[]{ new Person[]{newPerson(15, null)}, true },
-            new Object[]{ new Person[]{newPerson(11, null)}, true },
-            new Object[]{ new Person[]{newPerson(10, null)}, true }
+            new Object[]{ new App.Person[]{newPerson(12, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(18, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(10, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(14, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(17, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(19, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(16, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(13, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(15, null)}, true },
+            new Object[]{ new App.Person[]{newPerson(11, null)}, true }
         };
     }
 
 
     private Object[] testIsAdult1_Parameters() {
         return new Object[] {
-            new Object[]{ Arrays.asList(newPerson(15, null)), true },
-            new Object[]{ Arrays.asList(newPerson(14, null)), true },
+            new Object[]{ Arrays.asList(newPerson(19, null)), true },
+            new Object[]{ Arrays.asList(newPerson(17, null)), true },
             new Object[]{ Arrays.asList(newPerson(18, null)), true },
+            new Object[]{ Arrays.asList(newPerson(15, null)), true },
+            new Object[]{ Arrays.asList(newPerson(13, null)), true },
+            new Object[]{ Arrays.asList(newPerson(11, null)), true },
             new Object[]{ Arrays.asList(newPerson(12, null)), true },
             new Object[]{ Arrays.asList(newPerson(10, null)), true },
-            new Object[]{ Arrays.asList(newPerson(17, null)), true },
-            new Object[]{ Arrays.asList(newPerson(13, null)), true },
-            new Object[]{ Arrays.asList(newPerson(19, null)), true },
             new Object[]{ Arrays.asList(newPerson(16, null)), true },
-            new Object[]{ Arrays.asList(newPerson(11, null)), true }
+            new Object[]{ Arrays.asList(newPerson(14, null)), true }
         };
     }
 
@@ -139,8 +169,8 @@ public class AppTest
         };
     }
 
-    private static Person newPerson(int age, String name) {
-        Person result = new Person();
+    private static App.Person newPerson(int age, String name) {
+        App.Person result = new App.Person();
         result.setAge(age);
         result.setName(name);
         return result;

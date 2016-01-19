@@ -13,6 +13,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.objectweb.asm.Type;
+
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 
@@ -25,8 +27,14 @@ public final class Recorder
     private static final Map<String, String[]> ARG_NAMES = new HashMap<String, String[]>();
     
     private final Map<Method, Set<Call>> _calls = new HashMap<Method, Set<Call>>();
-    
     private final Map<Method, Set<Call>> _unsupportedCalls = new HashMap<Method, Set<Call>>();
+    
+    
+    public static final String TYPE_NAME = Type.getType(Recorder.class).getInternalName();
+    public static final String GET_DEFAULT_METHOD_NAME = "getDefault"; //$NON-NLS-1$
+    public static final String GET_DEFAULT_METHOD_DESC = "()Lcom/github/sdarioo/testgen/recorder/Recorder;"; //$NON-NLS-1$
+    public static final String RECORD_METHOD_NAME = "record"; //$NON-NLS-1$
+    public static final String RECORD_METHOD_DESC = "(Lcom/github/sdarioo/testgen/recorder/Call;)V"; //$NON-NLS-1$
     
     private Recorder() {}
     
@@ -59,7 +67,7 @@ public final class Recorder
             return;
         }
         if (call.args().size() != call.getMethod().getParameterTypes().length) {
-            Logger.warn(MessageFormat.format("Recorded call args count {0} is different that method parameters count {1}",  //$NON-NLS-1$
+            Logger.error(MessageFormat.format("Recorded call args count {0} is different that method parameters count {1}",  //$NON-NLS-1$
                     call.args().size(), call.getMethod().getParameterTypes().length));
             return;
         }
@@ -129,7 +137,10 @@ public final class Recorder
                 calls.put(method, methodCalls);
             }
             if (methodCalls.size() < maxCalls) {
-                methodCalls.add(call);
+                if (methodCalls.add(call)) {
+                    Logger.info(MessageFormat.format("Recording {0} call: {1}",  //$NON-NLS-1$
+                            call.isSupported(new HashSet<String>()) ? "supported" : "unsupported", call)); //$NON-NLS-1$ //$NON-NLS-2$
+                }
             }
         }
     }

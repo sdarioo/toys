@@ -9,43 +9,35 @@ package com.github.sdarioo.testgen.recorder;
 
 import java.util.*;
 
+import com.github.sdarioo.testgen.recorder.params.ParamsUtil;
+
 public final class ArgList
 {
-    private final List<IParameter> _args = new ArrayList<IParameter>();
+    private final IParameter[] _args;
     
-    ArgList()
+    ArgList(IParameter[] args)
     {
+        _args = args;
     }
     
     public int size()
     {
-        return _args.size();
+        return _args.length;
     }
     
     public IParameter get(int index)
     {
-        return _args.get(index);
+        return _args[index];
     }
-    
-    public void add(IParameter value)
-    {
-        _args.add(value);
-    }
-    
+
     public List<IParameter> getValues() 
     {
-        return Collections.unmodifiableList(_args);
+        return Arrays.asList(_args);
     }
     
     public boolean isSupported(Collection<String> errors)
     {
-        boolean bValid = true;
-        for (IParameter param : _args) {
-            if (!param.isSupported(errors)) {
-                bValid = false;
-            }
-        }
-        return bValid;
+        return ParamsUtil.isSupported(_args, errors);
     }
     
     @Override
@@ -55,13 +47,13 @@ public final class ArgList
             return false;
         }
         ArgList other = (ArgList)obj;
-        return _args.equals(other._args);
+        return ParamsUtil.equals(_args, other._args);
     }
     
     @Override
     public int hashCode() 
     {
-        return _args.hashCode();
+        return ParamsUtil.hashCode(_args);
     }
 
 }

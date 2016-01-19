@@ -46,11 +46,7 @@ public class ListParam
                     maxSize, _originalSize));
             return false;
         }
-        boolean bValid = true;
-        for (IParameter param : _values) {
-            bValid &= param.isSupported(errors);
-        }
-        return bValid;
+        return ParamsUtil.isSupported(_values, errors);
     }
 
     @SuppressWarnings("nls")
@@ -71,11 +67,7 @@ public class ListParam
     @Override
     public int hashCode() 
     {
-        int hash = 1;
-        for (IParameter param : _values) {
-            hash = 31*hash + param.hashCode();
-        }
-        return hash;
+        return ParamsUtil.hashCode(_values);
     }
     
     @Override
@@ -84,19 +76,10 @@ public class ListParam
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof ArrayParam)) {
+        if (!(obj instanceof ListParam)) {
             return false;
         }
-        
         ListParam other = (ListParam)obj;
-        if (_values.length != other._values.length) {
-            return false;
-        }
-        for (int i = 0; i < _values.length; i++) {
-            if (!_values[i].equals(other._values[i])) {
-                return false;
-            }
-        }
-        return true;
+        return ParamsUtil.equals(_values, other._values);
     }
 }

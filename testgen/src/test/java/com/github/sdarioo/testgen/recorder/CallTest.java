@@ -48,50 +48,50 @@ public class CallTest
         assertEquals(call1.hashCode(), call2.hashCode());
         
         // With args
-        call1.args().add(ParamsFactory.newValue(1));
+        call1 = Call.newCall(new MethodRef() {}, 1);
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2.args().add(ParamsFactory.newValue(1));
+        call2 = Call.newCall(new MethodRef() {}, 1);
         assertEquals(call1, call2);
         assertEquals(call1.hashCode(), call2.hashCode());
         
-        call1.args().add(ParamsFactory.newValue("test"));
+        call1 = Call.newCall(new MethodRef() {}, 1, "test");
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2.args().add(ParamsFactory.newValue("test"));
+        call2 = Call.newCall(new MethodRef() {}, 1, "test");
         assertEquals(call1, call2);
         assertEquals(call1.hashCode(), call2.hashCode());
         
         // With Result
-        call1.setResult(ParamsFactory.newValue(1));
+        call1.endWithResult(1);
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2.setResult(ParamsFactory.newValue(2));
+        call2.endWithResult(2);
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2.setResult(ParamsFactory.newValue(1));
+        call2.endWithResult(1);
         assertEquals(call1, call2);
         assertEquals(call1.hashCode(), call2.hashCode());
         
         
         // With Exception
-        call1.setException(new NullPointerException("null"));
+        call1.endWithException(new NullPointerException("null"));
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2.setException(new NullPointerException("other null"));
+        call2.endWithException(new NullPointerException("other null"));
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2.setException(new IllegalArgumentException("null"));
+        call2.endWithException(new IllegalArgumentException("null"));
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2.setException(new NullPointerException("null"));
+        call2.endWithException(new NullPointerException("null"));
         assertEquals(call1, call2);
         assertEquals(call1.hashCode(), call2.hashCode());
     }

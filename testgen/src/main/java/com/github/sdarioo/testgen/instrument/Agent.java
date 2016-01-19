@@ -9,7 +9,7 @@ public class Agent
 {
     public static void premain(String args, Instrumentation inst) 
     {
-        Logger.info("Agent started.");
+        Logger.info("Agent started."); //$NON-NLS-1$
         
         AgentArgs parsedArgs = parseArgs(args);
         if (parsedArgs == null) {
@@ -21,7 +21,7 @@ public class Agent
         
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
-                Logger.info("Agent ShutdownHook begin.");
+                Logger.info("Agent ShutdownHook started."); //$NON-NLS-1$
                 Generator.generateTests();
                 Logger.shutdown();
             }
@@ -42,7 +42,7 @@ public class Agent
     
     private static void logUsage()
     {
-        Logger.warn("Missing agent parameters. Usage: -javaagent:<agent_jar>=<class>.<method>");
+        Logger.warn("Missing agent parameters. Usage: -javaagent:<agent-jar>=<class>.<method>"); //$NON-NLS-1$
     }
     
     private static class AgentArgs

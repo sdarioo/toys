@@ -29,14 +29,15 @@ public class TestGenTransformer
         if (!className.endsWith(_className)) {
             return classfileBuffer;
         }
-        Logger.info("Transforming class: " + className);
+        Logger.info("Transforming class: " + className); //$NON-NLS-1$
         return transform(classfileBuffer, className, _methodName);
     }
 
     static byte[] transform(byte[] classfileBuffer, String className, String methodName)
     {
         ClassReader reader = new ClassReader(classfileBuffer);
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        //ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
+        ClassWriter writer = new ClassWriter(reader, 0);
         TestGenClassAdapter adapter = new TestGenClassAdapter(writer, methodName);
         
         try {
