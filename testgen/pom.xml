@@ -68,6 +68,7 @@
 							<Agent-Class>com.github.sdarioo.testgen.instrument.Agent</Agent-Class>
 							<Can-Retransform-Classes>True</Can-Retransform-Classes>
 							<Can-Redefine-Classes>False</Can-Redefine-Classes>
+							<Boot-Class-Path>${artifactId}.jar</Boot-Class-Path>
 						</manifestEntries>
 					</archive>
 				</configuration>
