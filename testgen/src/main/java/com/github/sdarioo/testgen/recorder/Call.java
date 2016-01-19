@@ -9,18 +9,24 @@ package com.github.sdarioo.testgen.recorder;
 
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.objectweb.asm.Type;
 
 import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
 
-public class Call 
+public class Call implements Comparable<Call> 
 {
     private final Method _method;
     
+    private final long _callId;
+    private final ArgList _args;
+    
     private IParameter _result;
     private ExceptionInfo _exception;
-    private final ArgList _argList;
+    
+    private static final AtomicLong _callIdGenerator = new AtomicLong(0);
     
     public static Call newCall(Method method, Object... args)
     {
@@ -43,7 +49,8 @@ public class Call
     private Call(Method method, IParameter[] args)
     {
         _method = method;
-        _argList = new ArgList(args);
+        _args = new ArgList(args);
+        _callId = _callIdGenerator.incrementAndGet();
     }
     
     public void end()
@@ -84,7 +91,7 @@ public class Call
     
     public ArgList args()
     {
-        return _argList;
+        return _args;
     }
 
     public IParameter getResult()
@@ -98,15 +105,21 @@ public class Call
     }
     
     @Override
+    public int compareTo(Call other) 
+    {
+        return NumberUtils.compare(_callId, other._callId);
+    }
+    
+    @Override
     public int hashCode() 
     {
         final int prime = 31;
         int result = 1;
-        result = prime * result
-                + ((_argList == null) ? 0 : _argList.hashCode());
+        result = prime * result + _args.hashCode();
         result = prime * result
                 + ((_exception == null) ? 0 : _exception.hashCode());
-        result = prime * result + ((_result == null) ? 0 : _result.hashCode());
+        result = prime * result 
+                + ((_result == null) ? 0 : _result.hashCode());
         return result;
     }
 
@@ -120,10 +133,7 @@ public class Call
         if (getClass() != obj.getClass())
             return false;
         Call other = (Call) obj;
-        if (_argList == null) {
-            if (other._argList != null)
-                return false;
-        } else if (!_argList.equals(other._argList))
+        if (!_args.equals(other._args))
             return false;
         if (_exception == null) {
             if (other._exception != null)
@@ -150,6 +160,5 @@ public class Call
     public static final String TYPE_NAME = Type.getType(Call.class).getInternalName();
     public static final String NEW_CALL_METHOD_NAME = "newCall"; //$NON-NLS-1$
     public static final String NEW_CALL_METHOD_DESC = "(Ljava/lang/reflect/Method;[Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/Call;"; //$NON-NLS-1$
-    
     
 }

@@ -97,6 +97,8 @@ public final class Recorder
         if (result.size() < maxCalls) {
             collectCalls(_unsupportedCalls, clazz, result);
         }
+        
+        Collections.sort(result);
         return result;
     }
     
