@@ -12,12 +12,14 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.objectweb.asm.Type;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 
+// ThreadSafe
 public final class Recorder
     implements IArgNamesProvider
 {
@@ -29,6 +31,7 @@ public final class Recorder
     private final Map<Method, Set<Call>> _calls = new HashMap<Method, Set<Call>>();
     private final Map<Method, Set<Call>> _unsupportedCalls = new HashMap<Method, Set<Call>>();
     
+    private AtomicLong _timestamp = new AtomicLong(0L);
     
     public static final String TYPE_NAME = Type.getType(Recorder.class).getInternalName();
     public static final String GET_DEFAULT_METHOD_NAME = "getDefault"; //$NON-NLS-1$
@@ -103,6 +106,14 @@ public final class Recorder
     }
     
     /**
+     * @return last record timestamp, 0L if nothing has been recorded yet.
+     */
+    public long getTimestamp()
+    {
+        return _timestamp.get();
+    }
+    
+    /**
      * @see com.github.sdarioo.testgen.recorder.IArgNamesProvider#getArgumentNames(java.lang.reflect.Method)
      */
     @Override
@@ -127,7 +138,7 @@ public final class Recorder
         }
     }
     
-    private static void recordCall(Map<Method, Set<Call>> calls, Call call)
+    private void recordCall(Map<Method, Set<Call>> calls, Call call)
     {
         Method method = call.getMethod();
         int maxCalls = Configuration.getDefault().getMaxCalls();
@@ -140,6 +151,8 @@ public final class Recorder
             }
             if (methodCalls.size() < maxCalls) {
                 if (methodCalls.add(call)) {
+                    _timestamp.set(System.currentTimeMillis());
+                    
                     Logger.info(MessageFormat.format("Recording {0} call: {1}",  //$NON-NLS-1$
                             call.isSupported(new HashSet<String>()) ? "supported" : "unsupported", call)); //$NON-NLS-1$ //$NON-NLS-2$
                 }

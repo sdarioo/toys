@@ -8,6 +8,7 @@
 package com.github.sdarioo.testgen.logging;
 
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
@@ -35,6 +36,12 @@ public class Logger
         CustomLogManager.resetFinally();
     }
     
+    public static void info(String fmt, Object... args)
+    {
+        String msg = MessageFormat.format(fmt, args);
+        info(msg);
+    }
+    
     public static void info(String msg)
     {
         String[] caller = inferCaller();
@@ -45,6 +52,12 @@ public class Logger
     {
         String[] caller = inferCaller();
         LOGGER.logp(Level.WARNING, caller[0], caller[1], msg);
+    }
+    
+    public static void warn(String msg, Throwable t)
+    {
+        String[] caller = inferCaller();
+        LOGGER.logp(Level.WARNING, caller[0], caller[1], msg, t);
     }
     
     public static void error(String msg)

@@ -43,5 +43,5 @@ public class TestGenClassAdapter
         return methodName.equals(_methodName);
     }
 
-    static final String ALL_METHODS = "*"; //$NON-NLS-1$
+    public static final String ALL_METHODS = "*"; //$NON-NLS-1$
 }

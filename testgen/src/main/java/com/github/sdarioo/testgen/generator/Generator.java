@@ -9,8 +9,7 @@ package com.github.sdarioo.testgen.generator;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import com.github.sdarioo.testgen.generator.impl.JUnitParamsGenerator;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
@@ -21,43 +20,56 @@ import com.github.sdarioo.testgen.recorder.Recorder;
 import com.github.sdarioo.testgen.util.FileUtil;
 import com.github.sdarioo.testgen.util.TestLocationUtil;
 
-public class Generator
+// ThreadSafe
+public final class Generator
 {
+    private final Recorder _recorder;
+    private volatile long _timestamp = 0L;
     
-    public static void generateTests()
+    private static final Generator DEFAULT = new Generator(Recorder.getDefault());
+
+    private Generator(Recorder recorder) 
     {
-        Recorder recorder = Recorder.getDefault();
-        generateTestsSafe(recorder);
+        _recorder = recorder;
     }
     
+    public static synchronized Generator getDefault()
+    {
+        return DEFAULT;
+    }
+
+    public void generateTests()
+    {
+        try {
+            internalGenerateTests();
+        } catch (Throwable e) {
+            Logger.error("Error while generating tests.", e); //$NON-NLS-1$
+        }
+    }
     
     @SuppressWarnings("nls")
-    public static void generateTests(Recorder recorder)
+    private void internalGenerateTests()
         throws IOException
     {
-        Collection<Class<?>> classes = recorder.getRecordedClasses();
+        if (_timestamp == _recorder.getTimestamp()) {
+            return;
+        }
+        _timestamp = _recorder.getTimestamp();
+        
+        Collection<Class<?>> classes = _recorder.getRecordedClasses();
         for (Class<?> clazz : classes) {
             File destDir = TestLocationUtil.getTestLocation(clazz);
             if (destDir == null) {
                 Logger.error("Null test location for class: " + clazz.getName());
                 continue;
             }
-            List<Call> calls = recorder.getCalls(clazz);
+            List<Call> calls = _recorder.getCalls(clazz);
             ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
-            generator.setArgNamesProvider(recorder);
+            generator.setArgNamesProvider(_recorder);
             TestClass testSuite = generator.generate(clazz, calls);
             if (write(testSuite, destDir)) {
                 Logger.info("Generated test: " + destDir.getAbsolutePath() + File.separator + testSuite.getFileName());
             }
-        }
-    }
-    
-    public static void generateTestsSafe(Recorder recorder)
-    {
-        try {
-            generateTests(recorder);
-        } catch (Throwable e) {
-            Logger.error("Error while generating tests.", e); //$NON-NLS-1$
         }
     }
     
@@ -66,7 +78,7 @@ public class Generator
         return new JUnitParamsGenerator();
     }
     
-    private static boolean write(TestClass testSuite, File destDir)
+    private synchronized static boolean write(TestClass testSuite, File destDir)
         throws IOException
     {
         if (!destDir.isDirectory() && !destDir.mkdirs()) {

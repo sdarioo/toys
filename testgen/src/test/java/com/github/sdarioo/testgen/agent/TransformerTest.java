@@ -5,7 +5,7 @@
  * actual or intended publication of such source code.
  */
 
-package com.github.sdarioo.testgen.instrument;
+package com.github.sdarioo.testgen.agent;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -19,14 +19,16 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
+import com.github.sdarioo.testgen.agent.Transformer;
+
 @SuppressWarnings("nls")
-public class TestGenTransformerTest
+public class TransformerTest
 {
     @Test
     public void shouldSkipPrivateInnerClass() throws IOException
     {
         byte[] b1 = getBytes(PrivateClass.class);
-        byte[] b2 = TestGenTransformer.transform(b1, "PrivateClass", "publicMethod");
+        byte[] b2 = Transformer.transform(b1, "PrivateClass", "publicMethod");
         assertEquals(b1.length, b2.length);
     }
     
@@ -34,7 +36,7 @@ public class TestGenTransformerTest
     public void shouldSkipInterface() throws IOException
     {
         byte[] b1 = getBytes(Interface.class);
-        byte[] b2 = TestGenTransformer.transform(b1, "Interface", "publicMethod");
+        byte[] b2 = Transformer.transform(b1, "Interface", "publicMethod");
         assertEquals(b1.length, b2.length);
     }
 
@@ -42,7 +44,7 @@ public class TestGenTransformerTest
     public void shouldSkipPrivateMethod() throws IOException
     {
         byte[] b1 = getBytes(PublicClass.class);
-        byte[] b2 = TestGenTransformer.transform(b1, "PublicClass", "privateMethod");
+        byte[] b2 = Transformer.transform(b1, "PublicClass", "privateMethod");
         assertEquals(b1.length, b2.length);
     }
     
@@ -50,7 +52,7 @@ public class TestGenTransformerTest
     public void testTransform1() throws IOException
     {
         byte[] b1 = getBytes(Target.class);
-        byte[] b2 = TestGenTransformer.transform(b1, "Target", "m1");
+        byte[] b2 = Transformer.transform(b1, "Target", "m1");
         assertNotEquals(b1.length, b2.length);
         
         verify(b2);
@@ -60,7 +62,7 @@ public class TestGenTransformerTest
     public void testTransform2() throws IOException
     {
         byte[] b1 = getBytes(Target.class);
-        byte[] b2 = TestGenTransformer.transform(b1, "Target", "m2");
+        byte[] b2 = Transformer.transform(b1, "Target", "m2");
         assertNotEquals(b1.length, b2.length);
         
         verify(b2);
@@ -70,7 +72,7 @@ public class TestGenTransformerTest
     public void testConcat() throws IOException
     {
         byte[] b1 = getBytes(Target.class);
-        byte[] b2 = TestGenTransformer.transform(b1, "Target", "concat");
+        byte[] b2 = Transformer.transform(b1, "Target", "concat");
         
         assertNotEquals(b1.length, b2.length);
         verify(b2);
@@ -80,7 +82,7 @@ public class TestGenTransformerTest
     public void testLong() throws IOException
     {
         byte[] b1 = getBytes(Target.class);
-        byte[] b2 = TestGenTransformer.transform(b1, "Target", "l");
+        byte[] b2 = Transformer.transform(b1, "Target", "l");
         
         assertNotEquals(b1.length, b2.length);
         verify(b2);

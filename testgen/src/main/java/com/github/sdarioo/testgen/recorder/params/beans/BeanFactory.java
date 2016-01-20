@@ -8,6 +8,7 @@
 package com.github.sdarioo.testgen.recorder.params.beans;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,18 +33,23 @@ public final class BeanFactory
     {
         Bean bean = _cache.get(clazz);
         if (bean == null) {
-            
-            String name = clazz.getName();
-            if (name != null) {
-                try {
-                    ClassReader reader = new ClassReader(name);
+            InputStream is = null;
+            try {
+                is = readClass(clazz);
+                if (is != null) {
+                    ClassReader reader = new ClassReader(is);
                     BeanIntrospector introspector = new BeanIntrospector();
                     reader.accept(introspector, 0);
                     bean = introspector.getBean();
-                } catch (IOException e) {
-                    Logger.warn(e.toString());
+                } else {
+                    Logger.warn("Cannot load class bytes: " + clazz); //$NON-NLS-1$
                 }
+            } catch (IOException e) {
+                Logger.warn(e.toString(), e);
+            } finally {
+                if (is != null) { try { is.close(); } catch (IOException e) {} }
             }
+            
             if (bean == null) {
                  bean = Bean.UNSUPPORTED;
             }
@@ -51,6 +57,21 @@ public final class BeanFactory
         }
         
         return bean.isValid() ? bean : null; 
+    }
+    
+    private static InputStream readClass(Class<?> clazz)
+    {
+        String name = clazz.getName();
+        if (name == null) {
+            Logger.warn("Skipping annonymous class: " + clazz); //$NON-NLS-1$
+            return null;
+        }
+        ClassLoader classLoader = clazz.getClassLoader();
+        String resource = name.replace('.', '/') + ".class"; //$NON-NLS-1$
+        if (classLoader != null) {
+            return classLoader.getResourceAsStream(resource);
+        }
+        return ClassLoader.getSystemResourceAsStream(resource);
     }
 
 }

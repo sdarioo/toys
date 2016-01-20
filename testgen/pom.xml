@@ -64,8 +64,8 @@
 							<packageName>TestGen</packageName>
 						</manifest>
 						<manifestEntries>
-							<Premain-Class>com.github.sdarioo.testgen.instrument.Agent</Premain-Class>
-							<Agent-Class>com.github.sdarioo.testgen.instrument.Agent</Agent-Class>
+							<Premain-Class>com.github.sdarioo.testgen.agent.Agent</Premain-Class>
+							<Agent-Class>com.github.sdarioo.testgen.agent.Agent</Agent-Class>
 							<Can-Retransform-Classes>True</Can-Retransform-Classes>
 							<Can-Redefine-Classes>False</Can-Redefine-Classes>
 							<Boot-Class-Path>${artifactId}.jar</Boot-Class-Path>

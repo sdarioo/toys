@@ -1,4 +1,4 @@
-package com.github.sdarioo.testgen.instrument;
+package com.github.sdarioo.testgen.agent;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -7,15 +7,16 @@ import java.security.ProtectionDomain;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
+import com.github.sdarioo.testgen.instrument.TestGenClassAdapter;
 import com.github.sdarioo.testgen.logging.Logger;
 
-public class TestGenTransformer
+public class Transformer
     implements ClassFileTransformer
 {
     private final String _className;
     private final String _methodName;
     
-    public TestGenTransformer(String className, String methodName)
+    public Transformer(String className, String methodName)
     {
         _className = className;
         _methodName = methodName;
@@ -36,7 +37,6 @@ public class TestGenTransformer
     static byte[] transform(byte[] classfileBuffer, String className, String methodName)
     {
         ClassReader reader = new ClassReader(classfileBuffer);
-        //ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
         ClassWriter writer = new ClassWriter(reader, 0);
         TestGenClassAdapter adapter = new TestGenClassAdapter(writer, methodName);
         

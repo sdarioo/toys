@@ -1,8 +1,12 @@
-package com.github.sdarioo.testgen.instrument;
+package com.github.sdarioo.testgen.agent;
 
 import java.lang.instrument.Instrumentation;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.Generator;
+import com.github.sdarioo.testgen.instrument.TestGenClassAdapter;
 import com.github.sdarioo.testgen.logging.Logger;
 
 public class Agent 
@@ -16,16 +20,33 @@ public class Agent
             logUsage();
             return;
         }
-        TestGenTransformer transformer = new TestGenTransformer(parsedArgs.clazz, parsedArgs.method);
+        Transformer transformer = new Transformer(parsedArgs.clazz, parsedArgs.method);
         inst.addTransformer(transformer);
+     
+        if (Configuration.getDefault().isBackgroundGenerationEnabled()) {
+            startBackgroundGeneration(5000L, 5000L);
+        }
         
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 Logger.info("Agent ShutdownHook started."); //$NON-NLS-1$
-                Generator.generateTests();
+                Generator.getDefault().generateTests();
                 Logger.shutdown();
             }
         }));
+    }
+    
+    private static void startBackgroundGeneration(long delay, long period)
+    {
+        Logger.info("Starting Generator background thread. Delay={0}, period={1}", delay, period); //$NON-NLS-1$
+        
+        Timer timer = new Timer(true);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Generator.getDefault().generateTests();
+            }
+        }, delay, period);
     }
     
     private static AgentArgs parseArgs(String args)
