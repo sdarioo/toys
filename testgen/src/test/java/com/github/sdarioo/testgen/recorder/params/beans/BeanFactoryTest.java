@@ -70,6 +70,13 @@ public class BeanFactoryTest
         assertEquals(2, bean.getGetters().size());
     }
     
+    @Test
+    public void testBeanHierarchy()
+    {
+        assertTrue(BeanFactory.isBeanHierarchyAllowed(BeanSInterface.class));
+        assertFalse(BeanFactory.isBeanHierarchyAllowed(BeanSClass.class));
+    }
+    
     public static class Empty
     {
     }
@@ -124,5 +131,17 @@ public class BeanFactoryTest
         public void setName(String name) {
             this.name = name;
         }
+    }
+    
+    public static class BeanSInterface implements AutoCloseable
+    {
+        @Override
+        public void close() throws Exception {
+        }
+    }
+    
+    public static class BeanSClass extends Empty
+    {
+        
     }
 }

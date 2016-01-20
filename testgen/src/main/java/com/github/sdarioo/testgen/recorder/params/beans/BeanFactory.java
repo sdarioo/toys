@@ -33,30 +33,37 @@ public final class BeanFactory
     {
         Bean bean = _cache.get(clazz);
         if (bean == null) {
-            InputStream is = null;
-            try {
-                is = readClass(clazz);
-                if (is != null) {
-                    ClassReader reader = new ClassReader(is);
-                    BeanIntrospector introspector = new BeanIntrospector();
-                    reader.accept(introspector, 0);
-                    bean = introspector.getBean();
-                } else {
-                    Logger.warn("Cannot load class bytes: " + clazz); //$NON-NLS-1$
-                }
-            } catch (IOException e) {
-                Logger.warn(e.toString(), e);
-            } finally {
-                if (is != null) { try { is.close(); } catch (IOException e) {} }
+            if (isBeanHierarchyAllowed(clazz)) {
+                bean = introspect(clazz);
             }
-            
             if (bean == null) {
-                 bean = Bean.UNSUPPORTED;
+                bean = Bean.UNSUPPORTED;
             }
             _cache.put(clazz, bean);
         }
-        
         return bean.isValid() ? bean : null; 
+    }
+    
+    private static Bean introspect(Class<?> clazz)
+    {
+        Bean bean = null;
+        InputStream is = null;
+        try {
+            is = readClass(clazz);
+            if (is != null) {
+                ClassReader reader = new ClassReader(is);
+                BeanIntrospector introspector = new BeanIntrospector();
+                reader.accept(introspector, 0);
+                bean = introspector.getBean();
+            } else {
+                Logger.warn("Cannot load class bytes: " + clazz); //$NON-NLS-1$
+            }
+        } catch (IOException e) {
+            Logger.warn(e.toString(), e);
+        } finally {
+            if (is != null) { try { is.close(); } catch (IOException e) {} }
+        }
+        return bean;
     }
     
     private static InputStream readClass(Class<?> clazz)
@@ -72,6 +79,20 @@ public final class BeanFactory
             return classLoader.getResourceAsStream(resource);
         }
         return ClassLoader.getSystemResourceAsStream(resource);
+    }
+    
+    // Default access for junit tests
+    static boolean isBeanHierarchyAllowed(Class<?> clazz)
+    {
+        Class<?> cl = clazz.getSuperclass();
+        // java.lang.Object, interface, privitive, void
+        if (cl == null) {
+            return false;
+        }
+        if (cl.isInterface()) {
+            return true;
+        }
+        return Object.class.equals(cl);
     }
 
 }

@@ -1,4 +1,4 @@
-1. Support for JavaBeans
+
 2. Support for params with factory method (valueOf, fromString) and String based constructor
 
 4. Support for collections

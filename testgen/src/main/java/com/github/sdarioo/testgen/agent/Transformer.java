@@ -27,7 +27,7 @@ public class Transformer
             ProtectionDomain protectionDomain, byte[] classfileBuffer)
                     throws IllegalClassFormatException
     {
-        if (!className.endsWith(_className)) {
+        if (!shouldTransform(className)) {
             return classfileBuffer;
         }
         Logger.info("Transforming class: " + className); //$NON-NLS-1$
@@ -50,4 +50,15 @@ public class Transformer
         return classfileBuffer;
     }
     
+    private boolean shouldTransform(String className)
+    {
+        if (className.equals(_className)) {
+            return true;
+        }
+
+        if (className.endsWith('/' + _className)) {
+            return true;
+        }
+        return false;
+    }
 }
