@@ -7,13 +7,10 @@
 
 package com.github.sdarioo.testgen.generator.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import org.apache.commons.lang3.text.StrTokenizer;
 import org.junit.Test;
@@ -52,7 +49,6 @@ public class JUnitParamsGeneratorTest
 
         String text = gen.generateParamsProvider(method, calls, "testSayHello", new TestSuiteBuilder()).toSourceCode();
         assertNotNull(text);
-        System.out.println(text);
 
         String[] lines = new StrTokenizer(text, '\n').getTokenArray();
         assertEquals(6, lines.length);
@@ -97,11 +93,33 @@ public class JUnitParamsGeneratorTest
         calls.add(Call.newCall(method, 0, p1));
         calls.add(Call.newCall(method, 0, p2));
         
+        calls.get(0).endWithResult(null);
+        calls.get(1).endWithResult(null);
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         
-        String text = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
+        String src = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
         
-        System.out.println(text);
+        Set<String> set = toLines(src);
+        
+        assertTrue(set.contains("@Parameters(method = \"testMethodWithProperties_Parameters\")"));
+        assertTrue(set.contains("private Object[] testMethodWithProperties_Parameters() {"));
+    }
+    
+    @SuppressWarnings("nls")
+    @Test
+    public void testGenerateTestCaseForException()
+    {
+        Method method = getMethod("methodWithProperties");
+        Call call = Call.newCall(method, (Object)null);
+        call.endWithException(new IllegalArgumentException());
+        JUnitParamsGenerator gen = new JUnitParamsGenerator();
+        
+        String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
+        Set<String> set = toLines(src);
+        
+        assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
+        assertTrue(set.contains("JUnitParamsGeneratorTest.methodWithProperties(null);"));
     }
     
     public String sayHello(String name, int index)
@@ -125,4 +143,13 @@ public class JUnitParamsGeneratorTest
         return null;
     }
 
+    private static Set<String> toLines(String src)
+    {
+        String[] lines = src.split("\\n");
+        Set<String> set = new HashSet<String>();
+        for (String line : lines) {
+            set.add(line.trim());
+        }
+        return set;
+    }
 }

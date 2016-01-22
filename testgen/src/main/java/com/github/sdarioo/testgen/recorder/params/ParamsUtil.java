@@ -7,7 +7,9 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import com.github.sdarioo.testgen.recorder.IParameter;
 
@@ -15,7 +17,7 @@ public final class ParamsUtil
 {
     private ParamsUtil() {}
     
-    public static boolean isSupported(IParameter[] params, Collection<String> errors)
+    public static boolean isSupported(List<IParameter> params, Collection<String> errors)
     {
         boolean bValid = true;
         for (IParameter param : params) {
@@ -24,6 +26,11 @@ public final class ParamsUtil
             }
         }
         return bValid;
+    }
+    
+    public static boolean isSupported(IParameter[] params, Collection<String> errors)
+    {
+        return isSupported(Arrays.asList(params), errors);
     }
     
     public static int hashCode(IParameter[] params)

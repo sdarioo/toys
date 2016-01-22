@@ -8,20 +8,21 @@
 package com.github.sdarioo.testgen.recorder;
 
 import java.lang.reflect.Method;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.math.NumberUtils;
 import org.objectweb.asm.Type;
 
 import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
+import com.github.sdarioo.testgen.recorder.params.ParamsUtil;
 
 public class Call implements Comparable<Call> 
 {
     private final Method _method;
     
     private final long _callId;
-    private final ArgList _args;
+    private final List<IParameter> _args;
     
     private IParameter _result;
     private ExceptionInfo _exception;
@@ -30,9 +31,9 @@ public class Call implements Comparable<Call>
     
     public static Call newCall(Method method, Object... args)
     {
-        IParameter[] params = new IParameter[args.length];
-        for (int i = 0; i < args.length; i++) {
-            params[i] = ParamsFactory.newValue(args[i]);
+        List<IParameter> params = new ArrayList<IParameter>(args.length);
+        for (Object arg : args) {
+            params.add(ParamsFactory.newValue(arg));
         }
         return new Call(method, params);
     }
@@ -46,10 +47,10 @@ public class Call implements Comparable<Call>
         return newCall(method, args);
     }
     
-    private Call(Method method, IParameter[] args)
+    private Call(Method method, List<IParameter> args)
     {
         _method = method;
-        _args = new ArgList(args);
+        _args = args;
         _callId = _callIdGenerator.incrementAndGet();
     }
     
@@ -80,7 +81,7 @@ public class Call implements Comparable<Call>
     
     public boolean isSupported(Set<String> errors)
     {
-        if (!args().isSupported(errors)) {
+        if (!ParamsUtil.isSupported(_args, errors)) {
             return false;
         }
         if ((_result != null) && !_result.isSupported(errors)) {
@@ -89,9 +90,9 @@ public class Call implements Comparable<Call>
         return true;
     }
     
-    public ArgList args()
+    public List<IParameter> args()
     {
-        return _args;
+        return Collections.unmodifiableList(_args);
     }
 
     public IParameter getResult()

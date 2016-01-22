@@ -1,10 +1,8 @@
+1. Support for generic methods/generic types
 
-2. Support for params with factory method (valueOf, fromString) and String based constructor
+2. Support for non-static methods + method from super class (method.getDeclaringClass)
 
-4. Support for collections
-5. Support for generic methods/generic types
-6. Support for non-static methods + method from super class (method.getDeclaringClass)
+3. Param types support:
 
-11. Support for exceptions
-12. Support for serializable classes
-
+ - params with factory method (valueOf, fromString) and String based constructor
+ - serializable classes

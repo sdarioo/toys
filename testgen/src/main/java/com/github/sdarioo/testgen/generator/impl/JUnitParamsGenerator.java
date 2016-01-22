@@ -42,13 +42,38 @@ public class JUnitParamsGenerator
     }
     
     @Override
-    protected void addTestCases(Method method, List<Call> calls, TestSuiteBuilder builder) 
+    protected void addTestCases(Method method, List<Call> callsWithResult, 
+            TestSuiteBuilder builder) 
     {
         TestMethod testCase = generateTestCase(method, builder);
-        TestMethod paramProvider = generateParamsProvider(method, calls, testCase.getName(), builder);
+        TestMethod paramProvider = generateParamsProvider(method, callsWithResult, testCase.getName(), builder);
         
         builder.addTestCase(paramProvider);
         builder.addTestCase(testCase);
+    }
+    
+    @Override
+    protected void addTestCasesForExceptions(Method method, List<Call> callsWithException,
+            TestSuiteBuilder builder) 
+    {
+        for (Call call : callsWithException) {
+            if (!call.isSupported(new HashSet<String>())) {
+                continue;
+            }
+            List<String> args = new ArrayList<String>();
+            for (IParameter param : call.args()) {
+                args.add(param.toSouceCode(builder));
+            }
+            String testCaseName = getTestCaseName(method, builder);
+            String methodInvocation = getStaticCall(method, args.toArray(new String[0]), builder);
+            String exceptionName = builder.getTypeName(call.getExceptionInfo().getClassName());
+            
+            String source = MessageFormat.format(TEST_CASE_WITH_EXCEPTION_TEMPLATE, 
+                    exceptionName, testCaseName, methodInvocation);
+            
+            TestMethod testCase = new TestMethod(testCaseName, source, _testMethodOrder++);
+            builder.addTestCase(testCase);
+        }
     }
     
     protected TestMethod generateTestCase(Method method, TestSuiteBuilder builder)
@@ -84,7 +109,7 @@ public class JUnitParamsGenerator
         String testCaseName = getTestCaseName(method, builder);
         String paramProviderName = getParamsProviderMethodName(testCaseName);
 
-        String source = MessageFormat.format(TEST_METHOD_TEMPLATE, paramProviderName, testCaseName, args, body);
+        String source = MessageFormat.format(TEST_CASE_TEMPLATE, paramProviderName, testCaseName, args, body);
         return new TestMethod(testCaseName, source, _testMethodOrder++);
     }
     
@@ -103,13 +128,13 @@ public class JUnitParamsGenerator
             if (sb.length() > 0) {
                 sb.append(",\n"); //$NON-NLS-1$
             }
-            List<IParameter> values = new ArrayList<IParameter>();
-            values.addAll(call.args().getValues());
+            List<IParameter> params = new ArrayList<IParameter>();
+            params.addAll(call.args());
 
             if (hasReturn(method)) {
-                values.add(call.getResult());
+                params.add(call.getResult());
             }
-            String code = toSourceCode(values, builder);
+            String code = toSourceCode(params, builder);
             sb.append(code);
         }
         String source = MessageFormat.format(PARAMS_PROVIDER_METHOD_TEMPLATE, 
@@ -119,15 +144,16 @@ public class JUnitParamsGenerator
     }
 
     // Protected for junit tests
-    protected static String toSourceCode(List<IParameter> values, TestSuiteBuilder builder)
+    protected static String toSourceCode(List<IParameter> params, TestSuiteBuilder builder)
     {
         StringBuilder sb = new StringBuilder();
-        for (IParameter value : values) {
+        for (IParameter param : params) {
             appendComma(sb);
-            String code = (value != null) ? 
-                    value.toSouceCode(builder) : 
-                    IParameter.NULL.toSouceCode(builder);
-            sb.append(code);
+            if (param != null) {
+                sb.append(param.toSouceCode(builder));
+            } else {
+                sb.append("null"); //$NON-NLS-1$
+            }
         }
         return MessageFormat.format(PARAMS_LIST_TEMPLATE, sb.toString());
     }
@@ -192,11 +218,19 @@ public class JUnitParamsGenerator
 
     
     @SuppressWarnings("nls")
-    private static final String TEST_METHOD_TEMPLATE = 
+    private static final String TEST_CASE_TEMPLATE = 
         "@Test\n" + 
         "@Parameters(method = \"{0}\")\n" + 
         "public void {1}({2}) throws Exception '{'\n" + 
         "    {3}\n" + 
+        "'}'";
+    
+    @SuppressWarnings("nls")
+    private static final String TEST_CASE_WITH_EXCEPTION_TEMPLATE = 
+        "@Test(expected={0}.class)\n" + 
+        "public void {1}() throws Exception '{'\n" + 
+        "    {2};\n" + 
+        "    Assert.assertTrue(false);\n" +
         "'}'";
     
     @SuppressWarnings("nls")

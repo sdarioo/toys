@@ -27,7 +27,9 @@ public abstract class AbstractTestSuiteGenerator
     
     protected abstract void initTestSuite(Class<?> clazz, TestSuiteBuilder builder);
     
-    protected abstract void addTestCases(Method method, List<Call> calls, TestSuiteBuilder builder);
+    protected abstract void addTestCases(Method method, List<Call> callsWithResult, TestSuiteBuilder builder);
+    
+    protected abstract void addTestCasesForExceptions(Method method, List<Call> callsWithException, TestSuiteBuilder builder);
     
     
     /**
@@ -52,7 +54,15 @@ public abstract class AbstractTestSuiteGenerator
         for (Map.Entry<Method, List<Call>> entry : callMap.entrySet()) {
             Method method = entry.getKey();
             List<Call> methodCalls = entry.getValue();
-            addTestCases(method, methodCalls, builder);
+            
+            List<Call> callsWithResult = getCallsWithResult(methodCalls);
+            if (!callsWithResult.isEmpty()) {
+                addTestCases(method, callsWithResult, builder);
+            }
+            List<Call> callsWithExc = getCallsWithException(methodCalls);
+            if (!callsWithExc.isEmpty()) {
+                addTestCasesForExceptions(method, callsWithExc, builder);
+            }
         }
         
         return builder.buildTestClass();
@@ -99,6 +109,28 @@ public abstract class AbstractTestSuiteGenerator
                 result.put(method, methodCalls);
             }
             methodCalls.add(call);
+        }
+        return result;
+    }
+    
+    private static List<Call> getCallsWithException(List<Call> calls)
+    {
+        List<Call> result = new ArrayList<Call>();
+        for (Call call : calls) {
+            if (call.getExceptionInfo() != null) {
+                result.add(call);
+            }
+        }
+        return result;
+    }
+    
+    private static List<Call> getCallsWithResult(List<Call> calls)
+    {
+        List<Call> result = new ArrayList<Call>();
+        for (Call call : calls) {
+            if (call.getResult() != null) {
+                result.add(call);
+            }
         }
         return result;
     }
