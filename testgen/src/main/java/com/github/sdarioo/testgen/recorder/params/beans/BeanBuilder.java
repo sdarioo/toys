@@ -66,6 +66,9 @@ public class BeanBuilder
         return null;
     }
     
+    /**
+     * @return non null if all fields can be set using constructor + setter + accessible field
+     */
     public Bean build()
     {
         if (_constructors.isEmpty()) {
@@ -74,33 +77,44 @@ public class BeanBuilder
         
         Bean result = null;
         for (Constructor constructor : _constructors) {
-            Set<Field> fields = new HashSet<Field>(_fields);
-            fields.removeAll(constructor.setters);
             
-            Map<Field, Method> setters = new HashMap<Field, Method>();
-            for (Field field : fields) {
+            Set<Field> fieldsToSet = new HashSet<Field>(_fields);
+            // Constructor
+            fieldsToSet.removeAll(constructor.setters);
+            
+            // Setters + accessible fields
+            List<Field> fieldsWithSetter = new ArrayList<Field>();
+            for (Field field : fieldsToSet) {
                 Method setter = _setters.get(field);
                 if (setter != null) {
-                    setters.put(field, setter);
+                    fieldsWithSetter.add(field);
+                } else if (!field.isPrivate()) {
+                    fieldsWithSetter.add(field);
                 }
             }
-            if (fields.size() == setters.size()) {
-                result = new Bean(_fields, constructor, _getters, setters);
+            fieldsToSet.removeAll(fieldsWithSetter);
+            
+            if (fieldsToSet.isEmpty()) {
+                result = new Bean(_fields, constructor, _getters, _setters);
                 break;
             }
-        }
-        if (result == null) {
-            result = Bean.UNSUPPORTED;
         }
         return result;
     }
     
     private static Method chooseMethod(String fieldName, Method... getters)
     {
-        // TODO - better matching strategy
-        for (Method method : getters) {
-            if (method.getName().toLowerCase().endsWith(fieldName.toLowerCase())) {
-                return method;
+        // Choose best matching method for given field name
+        for (int i = 0; i < fieldName.length(); i++) {
+            String suffix = fieldName.substring(i).toLowerCase();
+            if (suffix.isEmpty()) {
+                break;
+            }
+            for (Method method : getters) {
+                String methodName = method.getName().toLowerCase();
+                if (methodName.endsWith(suffix)) {
+                    return method;
+                }
             }
         }
         return getters[0];

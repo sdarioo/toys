@@ -7,23 +7,28 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.text.MessageFormat;
+
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 
-public class ListParam
+public class SetParam
     extends CollectionParam
 {
     
-    public ListParam(java.util.List<?> list)
+    protected SetParam(java.util.Set<?> set) 
     {
-        super(list);
+        super(set);
     }
-
+    
     @SuppressWarnings("nls")
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
+        String setImpl = builder.getTypeName("java.util.HashSet");
         String arrays = builder.getTypeName("java.util.Arrays");
-        return arrays + ".asList(" + getValuesSourceCode(builder) + ')';
+        
+        String template = "new {0}({1}.asList({2}))";
+        return MessageFormat.format(template, setImpl, arrays, getValuesSourceCode(builder));
     }
 
 }

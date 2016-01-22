@@ -19,7 +19,7 @@ public class BeanIntrospector
     
     public Bean getBean()
     {
-        return _isClassAccessible ? _builder.build() : Bean.UNSUPPORTED;
+        return _isClassAccessible ? _builder.build() : null;
     }
     
     @Override
@@ -46,6 +46,7 @@ public class BeanIntrospector
         }
         return mv;
     }
+    
     
     private static boolean isConstructor(Method method)
     {
@@ -111,6 +112,13 @@ public class BeanIntrospector
             
             _getInsts = new ArrayList<GetField>();
             _setInsts = new ArrayList<SetField>();
+        }
+        
+        @Override
+        public void visitLocalVariable(String name, String desc, String signature,
+                Label start, Label end, int index) 
+        {
+            super.visitLocalVariable(name, desc, signature, start, end, index);
         }
         
         @Override

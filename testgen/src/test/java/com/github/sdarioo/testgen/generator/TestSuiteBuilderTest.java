@@ -15,6 +15,16 @@ public class TestSuiteBuilderTest
 {
     @SuppressWarnings("nls")
     @Test
+    public void shouldAddJavaUtil()
+    {
+        TestSuiteBuilder b = new TestSuiteBuilder();
+        assertEquals("TreeMap", b.getTypeName("java.util.TreeMap"));
+        assertEquals(1, b.getImports().size());
+        assertTrue(b.getImports().contains("java.util.TreeMap"));
+    }
+    
+    @SuppressWarnings("nls")
+    @Test
     public void testGetSimpleName()
     {
         TestSuiteBuilder b = new TestSuiteBuilder();
@@ -23,10 +33,9 @@ public class TestSuiteBuilderTest
         assertEquals("int[]", b.getTypeName(new int[0].getClass()));
         assertEquals("TestSuiteBuilderTest.Inner", b.getTypeName(Inner.class));
         
-        assertEquals(3, b.getImports().size());
+        assertEquals(2, b.getImports().size());
         assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest"));
         assertTrue(b.getImports().contains("java.lang.String"));
-        assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest.Inner"));
         
         
         b = new TestSuiteBuilder();
@@ -35,10 +44,22 @@ public class TestSuiteBuilderTest
         assertEquals("int[]", b.getTypeName(new int[0].getClass().getName()));
         assertEquals("TestSuiteBuilderTest.Inner", b.getTypeName(Inner.class.getName()));
         
-        assertEquals(3, b.getImports().size());
+        assertEquals(2, b.getImports().size());
         assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest"));
         assertTrue(b.getImports().contains("java.lang.String"));
-        assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest.Inner"));
+    }
+    
+    @SuppressWarnings("nls")
+    @Test
+    public void testInternalBeanName()
+    {
+        String name = "com.parasoft.dtp.shared.UuidCalculator$ViolationInfo";
+        TestSuiteBuilder b = new TestSuiteBuilder();
+        assertEquals("UuidCalculator.ViolationInfo", b.getTypeName(name));
+        
+        assertEquals(1, b.getImports().size());
+        assertTrue(b.getImports().contains("com.parasoft.dtp.shared.UuidCalculator"));
+        
     }
     
     public static class Inner {}

@@ -77,6 +77,17 @@ public class BeanFactoryTest
         assertFalse(BeanFactory.isBeanHierarchyAllowed(BeanSClass.class));
     }
     
+    @Test
+    public void testNoSetterBean()
+    {
+        BeanFactory f = BeanFactory.getInstance();
+        Bean bean = f.getBean(NoSetter.class);
+        assertNotNull(bean);
+        assertEquals(0, bean.getConstructor().setters.size());
+        assertEquals(0, bean.getSetters().size());
+        assertEquals(0, bean.getGetters().size());
+    }
+    
     public static class Empty
     {
     }
@@ -133,15 +144,20 @@ public class BeanFactoryTest
         }
     }
     
-    public static class BeanSInterface implements AutoCloseable
+    public static class NoSetter
+    {
+        int x;
+        int y;
+    }
+    
+    public static class BeanSInterface 
+        implements Comparable<BeanSInterface>
     {
         @Override
-        public void close() throws Exception {
+        public int compareTo(BeanSInterface o) {
+            return 0;
         }
     }
     
-    public static class BeanSClass extends Empty
-    {
-        
-    }
+    public static class BeanSClass extends Empty {}
 }

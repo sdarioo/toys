@@ -81,6 +81,10 @@ public final class ParamsFactory
         if (value instanceof Properties) {
             return new PropertiesParam((Properties)value);
         }
+        if (value instanceof java.util.Map<?,?>) {
+            return new MapParam((java.util.Map<?,?>)value);
+        }
+        
         Bean bean = BeanFactory.getInstance().getBean(clazz);
         if (bean != null) {
             return new BeanParam(value, bean);

@@ -7,7 +7,6 @@
 
 package com.github.sdarioo.testgen.recorder.params.beans;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,11 +30,6 @@ public class Bean
         _setters = setters;
     }
     
-    public boolean isValid()
-    {
-        return this != UNSUPPORTED;
-    }
-    
     public List<Field> getFields()
     {
         return _fields;
@@ -55,9 +49,5 @@ public class Bean
     {
         return _setters;
     }
-    
-    public static final Bean UNSUPPORTED = new Bean(Collections.<Field>emptyList(),
-            Constructor.DEFAULT,
-            Collections.<Field, Method>emptyMap(),
-            Collections.<Field, Method>emptyMap());
+
 }

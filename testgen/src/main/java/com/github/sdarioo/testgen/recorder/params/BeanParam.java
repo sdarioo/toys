@@ -8,9 +8,7 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.objectweb.asm.commons.Method;
 
@@ -30,9 +28,6 @@ public class BeanParam
     
     private final Field[] _fields;
     private final IParameter[] _params;
-    
-    private static Map<Class<?>, String> _factoryTemplateMethodsCache =
-            new HashMap<Class<?>, String>();
     
     public BeanParam(Object obj, Bean bean)
     {
@@ -75,7 +70,7 @@ public class BeanParam
         }
         
         String factoryMethodName = getFactoryMethodName(type);
-        String factoryMethodTemplate = createFactoryMethodTemplate(builder);
+        String factoryMethodTemplate = getFactoryMethodTemplate(builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
         return MessageFormat.format("{0}({1})", factoryMethod.getName(), sb.toString());
@@ -103,9 +98,9 @@ public class BeanParam
     }
     
     @SuppressWarnings("nls")
-    private String createFactoryMethodTemplate(TestSuiteBuilder builder)
+    private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
-        String template = _factoryTemplateMethodsCache.get(_clazz);
+        String template = builder.getTemplatesCache().get(_clazz);
         if (template != null) {
             return template;
         }
@@ -120,9 +115,12 @@ public class BeanParam
             String className = InstrumentUtil.isPrimitive(type) ? 
                     type.getClassName() : 
                     type.getInternalName().replace('/', '.');
+                    
             className = builder.getTypeName(className);
-            args.append(className).append(' ').append(field.getName());
+            args.append(className).append(' ').append(paramName(field));
         }
+        
+        Set<Field> fieldsToSet = new HashSet<Field>(Arrays.asList(_fields));
         
         // Constructor arg values
         StringBuilder cvals = new StringBuilder();
@@ -130,7 +128,8 @@ public class BeanParam
             if (cvals.length() > 0) {
                 cvals.append(", ");
             }
-            cvals.append(field.getName());
+            cvals.append(paramName(field));
+            fieldsToSet.remove(field);
         }
         
         StringBuilder sb = new StringBuilder();
@@ -142,17 +141,30 @@ public class BeanParam
         // Constructor call
         sb.append(MessageFormat.format("    {0} result = new {0}({1});\n", type, cvals.toString()));
         
-        // Setter calls 
-        for (Map.Entry<Field, Method> setter : _bean.getSetters().entrySet()) {
-            Field field = setter.getKey();
-            Method method = setter.getValue();
-            sb.append(MessageFormat.format("    result.{0}({1});\n", method.getName(), field.getName()));
+        // Setter calls + direct field set
+        for (Field field : fieldsToSet) {
+            Method method = _bean.getSetters().get(field);
+            if (method != null) {
+                sb.append(MessageFormat.format("    result.{0}({1});\n", method.getName(), paramName(field)));
+            } else {
+                sb.append(MessageFormat.format("    result.{0} = {1};\n", field.getName(), paramName(field)));
+            }
         }
+        
         sb.append("    return result;\n");
         sb.append(">");
         
         template = sb.toString().replace("<", "'{'").replace(">", "'}'");
-        _factoryTemplateMethodsCache.put(_clazz, template);
+        builder.getTemplatesCache().put(_clazz, template);
         return template;
+    }
+    
+    private static String paramName(Field field)
+    {
+        String name = field.getName();
+        if (name.startsWith("_")) { //$NON-NLS-1$
+            name = name.substring(1);
+        }
+        return name;
     }
 }

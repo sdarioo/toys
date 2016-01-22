@@ -14,11 +14,11 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.Type;
 
+import com.github.sdarioo.testgen.generator.impl.UniqueNamesGenerator;
+import com.github.sdarioo.testgen.generator.source.ResourceFile;
+import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.instrument.InstrumentUtil;
-import com.github.sdarioo.testgen.generator.source.ResourceFile;
-import com.github.sdarioo.testgen.generator.impl.UniqueNamesGenerator;
-import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.util.FileUtil;
 
 public class TestSuiteBuilder
@@ -27,7 +27,7 @@ public class TestSuiteBuilder
     private final UniqueNamesGenerator _methodNames = new UniqueNamesGenerator();
     private final UniqueNamesGenerator _fileNames = new UniqueNamesGenerator();
     
-    private final boolean _bFullTypeNames;
+    private final boolean _useFullTypeNames;
     
     private String _qName;
     private String _signature;
@@ -37,6 +37,8 @@ public class TestSuiteBuilder
     private final Map<String, TestMethod> _helperMethods = new HashMap<String, TestMethod>();
     private final List<ResourceFile> _resources = new ArrayList<ResourceFile>();
     
+    private final Map<Class<?>, String> _templatesCache = new HashMap<Class<?>, String>();
+    
     private int _helperMethodOrder = 1000000;
     
     public TestSuiteBuilder()
@@ -44,9 +46,9 @@ public class TestSuiteBuilder
         this(false);
     }
     
-    public TestSuiteBuilder(boolean bFullTypeNames)
+    public TestSuiteBuilder(boolean useFullTypeNames)
     {
-        _bFullTypeNames = bFullTypeNames;
+        _useFullTypeNames = useFullTypeNames;
     }
     
     public TestClass buildTestClass()
@@ -119,7 +121,7 @@ public class TestSuiteBuilder
     
     public String getTypeName(String className)
     {
-        if (_bFullTypeNames) {
+        if (_useFullTypeNames) {
             return className;
         }
         // Add required import
@@ -131,7 +133,11 @@ public class TestSuiteBuilder
         if (componentType.lastIndexOf('.') > 0) {
             String pkg = ClassUtils.getPackageCanonicalName(componentType);
             if (pkg.length() > 0) {
-                addImport(pkg + '.' + ClassUtils.getShortCanonicalName(componentType));
+                String outClassName = ClassUtils.getShortCanonicalName(componentType);
+                if (outClassName.indexOf('.') > 0) {
+                    outClassName = outClassName.substring(0, outClassName.indexOf('.'));
+                }
+                addImport(pkg + '.' + outClassName);
             }
         }
         // Create short name
@@ -163,6 +169,11 @@ public class TestSuiteBuilder
         return uniqueName;
     }
 
+    public Map<Class<?>, String> getTemplatesCache()
+    {
+        return _templatesCache;
+    }
+    
     // Method exposed for junit tests
     Set<String> getImports()
     {

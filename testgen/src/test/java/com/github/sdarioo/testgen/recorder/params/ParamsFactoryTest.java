@@ -9,6 +9,9 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+import java.util.Properties;
+
 import org.junit.Test;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -101,4 +104,16 @@ public class ParamsFactoryTest
         p = ParamsFactory.newValue(Double.valueOf(0.1d));
         assertEquals("0.1d", p.toSouceCode(builder));
     }
+    
+    @Test
+    public void propsShouldBeBeforeMap()
+    {
+        IParameter p = ParamsFactory.newValue(new Properties());
+        assertEquals(PropertiesParam.class, p.getClass());
+        
+        p = ParamsFactory.newValue(new HashMap<String, String>());
+        assertEquals(MapParam.class, p.getClass());
+    }
+    
+    
 }

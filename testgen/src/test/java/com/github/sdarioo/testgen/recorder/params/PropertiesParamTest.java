@@ -23,12 +23,11 @@ public class PropertiesParamTest
     {
         Properties p = new Properties();
         p.setProperty("key1", "value1");
-        p.setProperty("key2", "value2");
         
         PropertiesParam param = new PropertiesParam(p);
         
         String text = param.toSouceCode(new TestSuiteBuilder());
         
-        assertEquals("props(pair(\"key2\", \"value2\"), pair(\"key1\", \"value1\"))", text);
+        assertEquals("asProps(asPair(\"key1\", \"value1\"))", text);
     }
 }

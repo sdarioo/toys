@@ -152,9 +152,7 @@ public final class Recorder
             if (methodCalls.size() < maxCalls) {
                 if (methodCalls.add(call)) {
                     _timestamp.set(System.currentTimeMillis());
-                    
-                    Logger.info(MessageFormat.format("Recording {0} call: {1}",  //$NON-NLS-1$
-                            call.isSupported(new HashSet<String>()) ? "supported" : "unsupported", call)); //$NON-NLS-1$ //$NON-NLS-2$
+                    logCall(call);
                 }
             }
         }
@@ -180,6 +178,21 @@ public final class Recorder
                 }
             }
         }
+    }
+    
+    @SuppressWarnings("nls")
+    private static void logCall(Call call)
+    {
+        Set<String> errors = new HashSet<String>();
+        boolean isSupported = call.isSupported(errors);
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(MessageFormat.format("Recording {0} call: {1}", (isSupported ? "supported" : "unsupported"), call));
+        
+        for (String msg : errors) {
+            sb.append("\n   " + msg); //$NON-NLS-1$
+        }
+        Logger.info(sb.toString());
     }
    
 }

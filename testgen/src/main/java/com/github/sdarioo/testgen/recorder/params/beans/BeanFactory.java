@@ -9,10 +9,12 @@ package com.github.sdarioo.testgen.recorder.params.beans;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.commons.Method;
 
 import com.github.sdarioo.testgen.logging.Logger;
 
@@ -36,12 +38,14 @@ public final class BeanFactory
             if (isBeanHierarchyAllowed(clazz)) {
                 bean = introspect(clazz);
             }
+            
             if (bean == null) {
-                bean = Bean.UNSUPPORTED;
+                bean = NOT_BEAN;
             }
             _cache.put(clazz, bean);
         }
-        return bean.isValid() ? bean : null; 
+        
+        return (bean != NOT_BEAN) ? bean : null; 
     }
     
     private static Bean introspect(Class<?> clazz)
@@ -95,4 +99,9 @@ public final class BeanFactory
         return Object.class.equals(cl);
     }
 
+    
+    private static final Bean NOT_BEAN = new Bean(Collections.<Field>emptyList(),
+            Constructor.DEFAULT,
+            Collections.<Field, Method>emptyMap(),
+            Collections.<Field, Method>emptyMap());
 }
