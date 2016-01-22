@@ -63,8 +63,14 @@ public class TestGenMethodAdapter
         mv.visitLdcInsn(_method.getDescriptor());
         mv.visitMethodInsn(INVOKESTATIC, "com/github/sdarioo/testgen/instrument/InstrumentUtil", "getMethod", "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/reflect/Method;", false);
         
-        mv.visitVarInsn(ALOAD, _args);
-        mv.visitMethodInsn(INVOKESTATIC, Call.TYPE_NAME, Call.NEW_CALL_METHOD_NAME, Call.NEW_CALL_METHOD_DESC, false);
+        if (_isStatic) {
+            mv.visitVarInsn(ALOAD, _args);
+            mv.visitMethodInsn(INVOKESTATIC, Call.TYPE_NAME, Call.NEW_CALL_METHOD_NAME, Call.NEW_STATIC_CALL_METHOD_DESC, false);
+        } else {
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(ALOAD, _args);
+            mv.visitMethodInsn(INVOKESTATIC, Call.TYPE_NAME, Call.NEW_CALL_METHOD_NAME, Call.NEW_CALL_METHOD_DESC, false);
+        }
         
         mv.visitVarInsn(ASTORE, _call);
     }

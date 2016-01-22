@@ -25,11 +25,18 @@ public abstract class AbstractTestSuiteGenerator
     {
     }
     
-    protected abstract void initTestSuite(Class<?> clazz, TestSuiteBuilder builder);
+    protected abstract void initTestSuite(Class<?> targetClass, 
+            TestSuiteBuilder builder);
     
-    protected abstract void addTestCases(Method method, List<Call> callsWithResult, TestSuiteBuilder builder);
+    protected abstract void addTestCases(Class<?> targetClass, 
+            Method method, 
+            List<Call> callsWithResult, 
+            TestSuiteBuilder builder);
     
-    protected abstract void addTestCasesForExceptions(Method method, List<Call> callsWithException, TestSuiteBuilder builder);
+    protected abstract void addTestCasesForExceptions(Class<?> targetClass,
+            Method method, 
+            List<Call> callsWithException, 
+            TestSuiteBuilder builder);
     
     
     /**
@@ -45,11 +52,11 @@ public abstract class AbstractTestSuiteGenerator
      * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#generate(java.lang.Class, java.util.List)
      */
     @Override
-    public TestClass generate(Class<?> testedClass, List<Call> recordedCalls)
+    public TestClass generate(Class<?> targetClass, List<Call> recordedCalls)
     {
         Map<Method, List<Call>> callMap = groupByMethod(recordedCalls);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        initTestSuite(testedClass, builder);
+        initTestSuite(targetClass, builder);
         
         for (Map.Entry<Method, List<Call>> entry : callMap.entrySet()) {
             Method method = entry.getKey();
@@ -57,11 +64,11 @@ public abstract class AbstractTestSuiteGenerator
             
             List<Call> callsWithResult = getCallsWithResult(methodCalls);
             if (!callsWithResult.isEmpty()) {
-                addTestCases(method, callsWithResult, builder);
+                addTestCases(targetClass, method, callsWithResult, builder);
             }
             List<Call> callsWithExc = getCallsWithException(methodCalls);
             if (!callsWithExc.isEmpty()) {
-                addTestCasesForExceptions(method, callsWithExc, builder);
+                addTestCasesForExceptions(targetClass, method, callsWithExc, builder);
             }
         }
         

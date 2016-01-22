@@ -15,7 +15,7 @@ import com.github.sdarioo.testgen.recorder.IArgNamesProvider;
 
 public interface ITestSuiteGenerator 
 {
-    TestClass generate(Class<?> testedClass, List<Call> recordedCalls);
+    TestClass generate(Class<?> targetClass, List<Call> recordedCalls);
     
     void setArgNamesProvider(IArgNamesProvider argNamesProvider);
 }

@@ -69,6 +69,10 @@ public final class Recorder
             Logger.error("Cannot record call without java.lang.reflect.Method object."); //$NON-NLS-1$
             return;
         }
+        if (!call.isStatic() && (call.getTargetClass() == null)) {
+            Logger.error("Missing target class for non-static method."); //$NON-NLS-1$
+            return;
+        }
         if (call.args().size() != call.getMethod().getParameterTypes().length) {
             Logger.error(MessageFormat.format("Recorded call args count {0} is different that method parameters count {1}",  //$NON-NLS-1$
                     call.args().size(), call.getMethod().getParameterTypes().length));
@@ -161,9 +165,13 @@ public final class Recorder
     private static void collectClasses(Map<Method, Set<Call>> calls, Set<Class<?>> result)
     {
         synchronized (calls) {
-            for (Method method : calls.keySet()) {
-                // TODO - method from parent class??
-                result.add(method.getDeclaringClass());
+            
+            for (Set<Call> methodCalls : calls.values()) {
+                for (Call call : methodCalls) {
+                    Method method = call.getMethod();
+                    Class<?> clazz = call.isStatic() ? method.getDeclaringClass() : call.getTargetClass();
+                    result.add(clazz);
+                }
             }
         }
     }
@@ -171,10 +179,14 @@ public final class Recorder
     private static void collectCalls(Map<Method, Set<Call>> calls, Class<?> clazz, List<Call> result)
     {
         synchronized (calls) {
+            
             for (Map.Entry<Method, Set<Call>> entry : calls.entrySet()) {
                 Method method = entry.getKey();
-                if (clazz.equals(method.getDeclaringClass())) {
-                    result.addAll(entry.getValue());
+                for (Call call : entry.getValue()) {
+                    Class<?> callClass = call.isStatic() ? method.getDeclaringClass() : call.getTargetClass();
+                    if (clazz.equals(callClass)) {
+                        result.add(call);
+                    }
                 }
             }
         }

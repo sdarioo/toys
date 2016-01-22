@@ -55,12 +55,12 @@ public class RecorderTest
         int max = Configuration.getDefault().getMaxCalls();
         Recorder r = Recorder.get("testGetCallsWithUnsupported");
         for (int i = 0; i < max; i++) {
-            Call c = Call.newCall(m, "param"+i);
+            Call c = Call.newCall(m, this, new Object[]{"param"+i});
             c.end();
             r.record(c);
         }
         // This call will not be returned by getCalls because there is already max valid calls
-        Call c = Call.newCall(m, new Object());
+        Call c = Call.newCall(m, this, new Object[]{new Object()});
         c.end();
         r.record(c);
         
@@ -77,12 +77,12 @@ public class RecorderTest
         
         Recorder r = Recorder.get("testGetCallsWithUnsupported");
         
-        Call c = Call.newCall(m, "param");
+        Call c = Call.newCall(m, this, new Object[]{"param"});
         c.end();
         r.record(c);
         
         // This call will be returned because size of supported calls is less than max
-        c = Call.newCall(m, new Object());
+        c = Call.newCall(m, this, new Object[]{new Object()});
         c.end();
         r.record(c);
         

@@ -30,7 +30,7 @@ public class JUnitParamsGeneratorTest
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         
-        TestMethod source = gen.generateTestCase(method, new TestSuiteBuilder());
+        TestMethod source = gen.generateTestCase(this.getClass(), method, new TestSuiteBuilder());
         assertNotNull(source.toSourceCode());
     }
     
@@ -55,7 +55,7 @@ public class JUnitParamsGeneratorTest
         assertEquals("private Object[] testSayHello_Parameters() {", lines[0].trim());
         assertEquals("return new Object[] {", lines[1].trim());
         assertEquals("new Object[]{ \"name1\", 1, null },", lines[2].trim());
-        assertEquals("new Object[]{ null, 2, null }", lines[3].trim());
+        assertEquals("new Object[]{ null, 2, null },", lines[3].trim());
         assertEquals("};", lines[4].trim());
         assertEquals("}", lines[5].trim());
     }
@@ -108,7 +108,26 @@ public class JUnitParamsGeneratorTest
     
     @SuppressWarnings("nls")
     @Test
-    public void testGenerateTestCaseForException()
+    public void testStaticCallException()
+    {
+        Method method = getMethod("staticMethodWithProperties");
+        Call call = Call.newCall(method, (Object)null);
+        call.endWithException(new IllegalArgumentException());
+        JUnitParamsGenerator gen = new JUnitParamsGenerator();
+        
+        String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
+        
+        System.out.println(src);
+        
+        Set<String> set = toLines(src);
+        
+        assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
+        assertTrue(set.contains("JUnitParamsGeneratorTest.staticMethodWithProperties(null);"));
+    }
+    
+    @SuppressWarnings("nls")
+    @Test
+    public void testCallException()
     {
         Method method = getMethod("methodWithProperties");
         Call call = Call.newCall(method, (Object)null);
@@ -116,10 +135,14 @@ public class JUnitParamsGeneratorTest
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         
         String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
+        
+        System.out.println(src);
+        
         Set<String> set = toLines(src);
         
         assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
-        assertTrue(set.contains("JUnitParamsGeneratorTest.methodWithProperties(null);"));
+        assertTrue(set.contains("JUnitParamsGeneratorTest obj = new JUnitParamsGeneratorTest();"));
+        assertTrue(set.contains("obj.methodWithProperties(null);"));
     }
     
     public String sayHello(String name, int index)
@@ -128,6 +151,11 @@ public class JUnitParamsGeneratorTest
     }
     
     public int methodWithProperties(Properties p)
+    {
+        return 0;
+    }
+    
+    public static int staticMethodWithProperties(Properties p)
     {
         return 0;
     }

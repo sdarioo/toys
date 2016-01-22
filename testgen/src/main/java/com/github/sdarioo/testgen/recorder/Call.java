@@ -8,6 +8,7 @@
 package com.github.sdarioo.testgen.recorder;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -20,6 +21,7 @@ import com.github.sdarioo.testgen.recorder.params.ParamsUtil;
 public class Call implements Comparable<Call> 
 {
     private final Method _method;
+    private final Class<?> _targetClass;
     
     private final long _callId;
     private final List<IParameter> _args;
@@ -31,25 +33,36 @@ public class Call implements Comparable<Call>
     
     public static Call newCall(Method method, Object... args)
     {
+        return newCall(method, null, args);
+    }
+    
+    public static Call newCall(Method method, Object target, Object[] args)
+    {
         List<IParameter> params = new ArrayList<IParameter>(args.length);
         for (Object arg : args) {
             params.add(ParamsFactory.newValue(arg));
         }
-        return new Call(method, params);
+        return new Call(method, target, params);
     }
     
     public static Call newCall(MethodRef ref, Object... args)
+    {
+        return newCall(ref, null, args);
+    }
+    
+    public static Call newCall(MethodRef ref, Object target, Object[] args)
     {
         Method method = ref.getClass().getEnclosingMethod();
         if (method == null) {
             throw new IllegalArgumentException("MethodRef must be anonymous class within a tested method"); //$NON-NLS-1$
         }
-        return newCall(method, args);
+        return newCall(method, target, args);
     }
     
-    private Call(Method method, List<IParameter> args)
+    private Call(Method method, Object target, List<IParameter> args)
     {
         _method = method;
+        _targetClass = (target != null) ? target.getClass() : null;
         _args = args;
         _callId = _callIdGenerator.incrementAndGet();
     }
@@ -69,6 +82,7 @@ public class Call implements Comparable<Call>
         _exception = new ExceptionInfo(thr);
     }
     
+    
     public Method getMethod()
     {
         return _method;
@@ -79,6 +93,11 @@ public class Call implements Comparable<Call>
         return (_result != null) || (_exception != null);
     }
     
+    public boolean isStatic()
+    {
+        return (_method.getModifiers() & Modifier.STATIC) == Modifier.STATIC; 
+    }
+    
     public boolean isSupported(Set<String> errors)
     {
         if (!ParamsUtil.isSupported(_args, errors)) {
@@ -87,7 +106,13 @@ public class Call implements Comparable<Call>
         if ((_result != null) && !_result.isSupported(errors)) {
             return false;
         }
+        
         return true;
+    }
+    
+    public Class<?> getTargetClass()
+    {
+        return _targetClass;
     }
     
     public List<IParameter> args()
@@ -127,15 +152,19 @@ public class Call implements Comparable<Call>
     @Override
     public boolean equals(Object obj) 
     {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         Call other = (Call) obj;
-        if (!_args.equals(other._args))
+        if (!_args.equals(other._args)) {
             return false;
+        }
         if (_exception == null) {
             if (other._exception != null)
                 return false;
@@ -160,6 +189,7 @@ public class Call implements Comparable<Call>
     
     public static final String TYPE_NAME = Type.getType(Call.class).getInternalName();
     public static final String NEW_CALL_METHOD_NAME = "newCall"; //$NON-NLS-1$
-    public static final String NEW_CALL_METHOD_DESC = "(Ljava/lang/reflect/Method;[Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/Call;"; //$NON-NLS-1$
+    public static final String NEW_CALL_METHOD_DESC = "(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/Call;"; //$NON-NLS-1$
+    public static final String NEW_STATIC_CALL_METHOD_DESC = "(Ljava/lang/reflect/Method;[Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/Call;"; //$NON-NLS-1$
     
 }
