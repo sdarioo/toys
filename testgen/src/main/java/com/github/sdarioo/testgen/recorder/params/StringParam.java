@@ -8,6 +8,7 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.util.Collection;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -65,13 +66,13 @@ public class StringParam
             return false;
         }
         StringParam other = (StringParam)obj;
-        return (_value != null) ? _value.equals(other._value) : (other._value == null);
+        return Objects.equals(_value, other._value);
     }
     
     @Override
     public int hashCode() 
     {
-        return (_value != null) ? _value.hashCode() : 0;
+        return Objects.hash(_value);
     }
     
     static int getLinesCount(String str)

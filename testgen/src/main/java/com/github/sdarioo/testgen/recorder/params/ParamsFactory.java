@@ -11,9 +11,7 @@ import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.beans.Bean;
 import com.github.sdarioo.testgen.recorder.params.beans.BeanFactory;
 
-// TODO
-// - constructor with single String argument
-// - factory method fromString or valueOf
+
 public final class ParamsFactory 
 {
     private ParamsFactory() {}
@@ -88,6 +86,10 @@ public final class ParamsFactory
         Bean bean = BeanFactory.getInstance().getBean(clazz);
         if (bean != null) {
             return new BeanParam(value, bean);
+        }
+        
+        if (StringWrapperParam.isStringWrapper(value)) {
+            return new StringWrapperParam(value);
         }
         
         return new UnknownParam(value.getClass());

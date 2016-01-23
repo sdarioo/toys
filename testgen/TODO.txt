@@ -2,5 +2,4 @@
 
 2. Param types support:
 
- - params with factory method (valueOf, fromString) and String based constructor
  - serializable classes

@@ -68,13 +68,25 @@ public class JUnitParamsGeneratorTest
         assertNotNull(method);
         
         List<Call> calls = new ArrayList<Call>();
-        calls.add(Call.newCall(method, "ret1", "name1", 1));
-        calls.add(Call.newCall(method, null, null, 1));
+        Call c1 = Call.newCall(method, "name1", 1);
+        Call c2 = Call.newCall(method, null, 1);
+        c1.endWithResult("ret1");
+        c2.endWithResult(null);
+        calls.add(c1);
+        calls.add(c2);
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
+        String src = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
+        Set<String> set = toLines(src);
         
-        String text = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
-        assertNotNull(text);
+        assertTrue(set.contains("public void testSayHello(String arg0, int arg1, String expected) throws Exception {"));
+        assertTrue(set.contains("String result = JUnitParamsGeneratorTest.sayHello(arg0, arg1);"));
+        assertTrue(set.contains("Assert.assertEquals(expected, result);"));
+        
+        assertTrue(set.contains("public void testSayHello(String arg0, int arg1, String expected) throws Exception {"));
+        assertTrue(set.contains("String result = JUnitParamsGeneratorTest.sayHello(arg0, arg1);"));
+        assertTrue(set.contains("new Object[]{ \"name1\", 1, \"ret1\" },"));
+        assertTrue(set.contains("new Object[]{ null, 1, null },"));
     }
     
     @SuppressWarnings("nls")
@@ -97,9 +109,7 @@ public class JUnitParamsGeneratorTest
         calls.get(1).endWithResult(null);
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        
         String src = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
-        
         Set<String> set = toLines(src);
         
         assertTrue(set.contains("@Parameters(method = \"testMethodWithProperties_Parameters\")"));
@@ -113,12 +123,9 @@ public class JUnitParamsGeneratorTest
         Method method = getMethod("staticMethodWithProperties");
         Call call = Call.newCall(method, (Object)null);
         call.endWithException(new IllegalArgumentException());
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        
         String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
-        
-        System.out.println(src);
-        
         Set<String> set = toLines(src);
         
         assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
@@ -132,12 +139,9 @@ public class JUnitParamsGeneratorTest
         Method method = getMethod("methodWithProperties");
         Call call = Call.newCall(method, (Object)null);
         call.endWithException(new IllegalArgumentException());
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        
         String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
-        
-        System.out.println(src);
-        
         Set<String> set = toLines(src);
         
         assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
@@ -145,7 +149,23 @@ public class JUnitParamsGeneratorTest
         assertTrue(set.contains("obj.methodWithProperties(null);"));
     }
     
-    public String sayHello(String name, int index)
+    @Test
+    public void testNonDefaultConstructor() throws Exception
+    {
+        Method method = Inner.class.getMethod("foo", Integer.TYPE);
+        Call call = Call.newCall(method, new Inner("", true, 100L, E.value), new Object[]{Integer.valueOf(1)});
+        call.endWithResult(Integer.valueOf(1));
+        
+        JUnitParamsGenerator gen = new JUnitParamsGenerator();
+        String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
+        Set<String> set = toLines(src);
+        
+        assertTrue(set.contains("// WARNING - constructing JUnitParamsGeneratorTest.Inner with default parameters;"));
+        assertTrue(set.contains("JUnitParamsGeneratorTest.Inner obj = new JUnitParamsGeneratorTest.Inner(null, false, 0L, JUnitParamsGeneratorTest.E.value);"));
+        assertTrue(set.contains("int result = obj.foo(arg0);"));
+    }
+    
+    public static String sayHello(String name, int index)
     {
         return null;
     }
@@ -180,4 +200,12 @@ public class JUnitParamsGeneratorTest
         }
         return set;
     }
+    
+    public static class Inner
+    {
+        public Inner(String s, boolean b, long l, E e) {}
+        public int foo(int a) { return 0; }
+    }
+    
+    public static enum E { value; };
 }

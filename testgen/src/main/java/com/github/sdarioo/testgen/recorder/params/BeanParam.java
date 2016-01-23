@@ -76,6 +76,29 @@ public class BeanParam
         return MessageFormat.format("{0}({1})", factoryMethod.getName(), sb.toString());
     }
     
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj == this) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        BeanParam other = (BeanParam)obj;
+        return _clazz.equals(other._clazz) &&
+                ParamsUtil.equals(_params, other._params);
+    }
+    
+    @Override
+    public int hashCode() 
+    {
+        return _clazz.hashCode() + 31 * ParamsUtil.hashCode(_params);
+    }
+    
     private static Object getFieldValue(Object obj, Field field)
     {
         try {
