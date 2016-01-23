@@ -7,10 +7,6 @@
 
 package com.github.sdarioo.testgen.util;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 public final class FileUtil 
@@ -28,19 +24,5 @@ public final class FileUtil
         }
         return Pair.of(base, ext);
     }
-    
-    public static void write(File file, String content)
-        throws IOException
-    {
-        FileWriter writer = null;
-        try {
-            writer = new FileWriter(file);
-            writer.write(content);
-        } finally {
-            if (writer != null) { try { writer.close(); } catch (IOException e) {} }
-        }
-    }
-    
-    
     
 }

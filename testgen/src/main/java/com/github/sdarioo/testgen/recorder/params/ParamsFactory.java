@@ -3,6 +3,7 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.awt.event.KeyEvent;
+import java.io.Serializable;
 import java.util.Properties;
 
 import org.apache.commons.lang3.ClassUtils;
@@ -90,6 +91,10 @@ public final class ParamsFactory
         
         if (StringWrapperParam.isStringWrapper(value)) {
             return new StringWrapperParam(value);
+        }
+        
+        if (value instanceof Serializable) {
+            return new SerializableParam((Serializable)value);
         }
         
         return new UnknownParam(value.getClass());

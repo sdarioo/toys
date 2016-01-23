@@ -92,16 +92,33 @@ public class TestSuiteBuilder
         return method;
     }
     
-    public ResourceFile addResource(String content, String nameSuffix)
+    public ResourceFile addResource(byte[] bytes, String nameSuffix)
     {
-        // Lookup existing resource with the same content
+        // Lookup existing resource with the same binary content
         for (ResourceFile res : _resources) {
-            if (res.getContent().equals(content)) {
+            if (Objects.equals(res.getBinaryContent(), bytes)) {
                 return res;
             }
         }
         String fileName = toResourceName(nameSuffix);
         String uniqueName = newUniqueFileName(fileName);
+        
+        ResourceFile resource = new ResourceFile("res/" + uniqueName, bytes); //$NON-NLS-1$
+        _resources.add(resource);
+        return resource;
+    }
+    
+    public ResourceFile addResource(String content, String nameSuffix)
+    {
+        // Lookup existing resource with the same text content
+        for (ResourceFile res : _resources) {
+            if (Objects.equals(res.getContent(), content)) {
+                return res;
+            }
+        }
+        String fileName = toResourceName(nameSuffix);
+        String uniqueName = newUniqueFileName(fileName);
+        
         ResourceFile resource = new ResourceFile("res/" + uniqueName, content); //$NON-NLS-1$
         _resources.add(resource);
         return resource;
@@ -179,8 +196,7 @@ public class TestSuiteBuilder
     {
         return Collections.unmodifiableSet(_imports);
     }
-    
-
+ 
     private String toResourceName(String suffix)
     {
         if (_qName == null) {

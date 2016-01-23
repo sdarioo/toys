@@ -13,7 +13,7 @@ public class StringWrapperParamTest
     {
         assertFalse(StringWrapperParam.isStringWrapper(this));
         
-        assertTrue(StringWrapperParam.isStringWrapper(new Wrapper1("")));
+        assertFalse(StringWrapperParam.isStringWrapper(new Wrapper1("")));
         assertTrue(StringWrapperParam.isStringWrapper(new Wrapper2()));
         assertFalse(StringWrapperParam.isStringWrapper(new Wrapper22()));
         assertTrue(StringWrapperParam.isStringWrapper(new Wrapper3()));
@@ -32,11 +32,11 @@ public class StringWrapperParamTest
     @Test
     public void toSourceCode()
     {
-        StringWrapperParam p1 = new StringWrapperParam(new Wrapper1("x"));
+        StringWrapperParam p1 = new StringWrapperParam(Wrapper3.valueOf("x"));
         StringWrapperParam p2 = new StringWrapperParam(Wrapper2.fromString("x"));
         TestSuiteBuilder builder = new TestSuiteBuilder();
         
-        assertEquals("new StringWrapperParamTest.Wrapper1(\"x\")", p1.toSouceCode(builder));
+        assertEquals("StringWrapperParamTest.Wrapper3.valueOf(\"x\")", p1.toSouceCode(builder));
         assertEquals("StringWrapperParamTest.Wrapper2.fromString(\"x\")", p2.toSouceCode(builder));
     }
     
@@ -68,10 +68,15 @@ public class StringWrapperParamTest
     }
     public static class Wrapper3
     {
-        public static Wrapper3 valueOf(String s) { return null;}
+        String s;
+        public static Wrapper3 valueOf(String s) { 
+            Wrapper3 w = new Wrapper3();
+            w.s = s;
+            return w;
+        }
         @Override
         public String toString() {
-            return "Wrapper3";
+            return s;
         }
     }
 }

@@ -1,5 +1,4 @@
+
 1. Support for generic methods/types/parameters
 
-2. Param types support:
 
- - serializable classes

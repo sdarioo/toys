@@ -25,9 +25,8 @@ public class StringWrapperParam
     public static boolean isStringWrapper(Object value)
     {
         Class<?> clazz = value.getClass();
-        return (getConstructor(clazz) != null) ||
-                (getFactoryMethod(clazz, "fromString", value.getClass()) != null) ||
-                (getFactoryMethod(clazz, "valueOf", value.getClass()) != null);
+        return (getFactoryMethod(clazz, "fromString", value.getClass()) != null) ||
+               (getFactoryMethod(clazz, "valueOf", value.getClass()) != null);
     }
     
     public StringWrapperParam(Object value)
@@ -47,11 +46,6 @@ public class StringWrapperParam
     {
         String typeName = builder.getTypeName(_clazz);
         String str = _stringParam.toSouceCode(builder);
-        
-        Constructor<?> constructor = getConstructor(_clazz);
-        if (constructor != null) {
-            return MessageFormat.format("new {0}({1})", typeName, str);
-        }
         
         Method method = getFactoryMethod(_clazz, "fromString", _clazz);
         if (method == null) {
@@ -82,14 +76,14 @@ public class StringWrapperParam
         return _clazz.equals(other._clazz) && _stringParam.equals(other._stringParam);
     }
     
-    private static Constructor<?> getConstructor(Class<?> clazz)
-    {
-        try {
-            return clazz.getConstructor(String.class);
-        } catch (NoSuchMethodException | SecurityException e) {
-            return null;
-        }
-    }
+//    private static Constructor<?> getConstructor(Class<?> clazz)
+//    {
+//        try {
+//            return clazz.getConstructor(String.class);
+//        } catch (NoSuchMethodException | SecurityException e) {
+//            return null;
+//        }
+//    }
     
     private static Method getFactoryMethod(Class<?> clazz, String name, Class<?> returnType)
     {
