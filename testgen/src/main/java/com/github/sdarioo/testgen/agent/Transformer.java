@@ -37,7 +37,7 @@ public class Transformer
     static byte[] transform(byte[] classfileBuffer, String className, String methodName)
     {
         ClassReader reader = new ClassReader(classfileBuffer);
-        ClassWriter writer = new ClassWriter(reader, 0);
+        ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
         TestGenClassAdapter adapter = new TestGenClassAdapter(writer, methodName);
         
         try {

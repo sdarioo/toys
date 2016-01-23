@@ -1,8 +1,6 @@
-1. Support for generic methods/generic types
+1. Support for generic methods/types/parameters
 
-2. Support for non-static methods + method from super class (method.getDeclaringClass)
-
-3. Param types support:
+2. Param types support:
 
  - params with factory method (valueOf, fromString) and String based constructor
  - serializable classes

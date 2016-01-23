@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.generator.impl;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
@@ -17,6 +18,7 @@ import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.util.GeneratorUtil;
 
 public class JUnitParamsGenerator
     extends AbstractTestSuiteGenerator
@@ -67,14 +69,8 @@ public class JUnitParamsGenerator
             for (IParameter param : call.args()) {
                 callArgs.add(param.toSouceCode(builder));
             }
-            
-            List<String> body = new ArrayList<String>();
-            if ((method.getModifiers() & Modifier.STATIC) == 0) {
-                body.addAll(getCall(targetClass, method, toArray(callArgs), null, builder));
-            } else {
-                body.add(getStaticCall(method, toArray(callArgs), null, builder));
-            }
-            body.add("Assert.assertTrue(false)"); //$NON-NLS-1$
+            // Tested method invocation - should throw exception
+            List<String> body = getCall(targetClass, method, toArray(callArgs), null, builder);
             
             String testCaseName = getTestCaseName(method, builder);
             String exceptionName = builder.getTypeName(call.getExceptionInfo().getClassName());
@@ -93,17 +89,12 @@ public class JUnitParamsGenerator
         assert(paramTypes.length == paramNames.length);
         
         // Tested method invocation and assert
-        List<String> body = new ArrayList<String>(8);
-        if ((method.getModifiers() & Modifier.STATIC) == 0) {
-            body.addAll(getCall(targetClass, method, paramNames, RESULT, builder));
-        } else {
-            body.add(getStaticCall(method, paramNames, RESULT, builder));
-        }
+        List<String> body = getCall(targetClass, method, paramNames, RESULT, builder);
         if (hasReturn(method)) {
             body.add(fmt("Assert.assertEquals({0}, {1})", EXPECTED, RESULT)); //$NON-NLS-1$
         }
         
-        // Test case signature parameters
+        // Test case method parameter declarations
         List<String> paramsList = new ArrayList<String>();
         for (int i = 0; i < paramTypes.length; i++) {
             paramsList.add(getDecl(paramTypes[i], paramNames[i], builder));
@@ -156,29 +147,38 @@ public class JUnitParamsGenerator
         return builder.getTypeName(type) + ' ' + name;
     }
     
-    private List<String> getCall(Class<?> targetClass, Method method, String[] args, String var, TestSuiteBuilder builder)
+    private List<String> getCall(Class<?> targetClass, Method method, String[] args, 
+            String var, TestSuiteBuilder builder)
     {
         List<String> lines = new ArrayList<String>();
         
-        String className = builder.getTypeName(targetClass);
-        lines.add(fmt("{0} obj = new {0}()", className)); //$NON-NLS-1$
-        lines.add(fmt("obj.{0}({1})", method.getName(), join(args))); //$NON-NLS-1$
+        String typeName = builder.getTypeName(targetClass);
+        String callTarget;
+        
+        if (Modifier.isStatic(method.getModifiers())) {
+            callTarget = typeName;
+        } else {
+            Constructor<?> constructor = GeneratorUtil.findConstructor(targetClass);
+            String[] constructorArgs = new String[0];
+            if (constructor == null) {
+                lines.add(fmt("// ERROR - class {0} has no accessible constructors", typeName));
+            } else if (constructor.getParameterTypes().length > 0) {
+                lines.add(fmt("// WARNING - constructing {0} with default parameters", typeName));
+                constructorArgs = GeneratorUtil.getDefaultArgSourceCode(constructor, builder);
+            }
+            lines.add(fmt("{0} obj = new {0}({1})", typeName, join(constructorArgs))); //$NON-NLS-1$
+            callTarget = "obj";
+        }
+        
+        if (hasReturn(method) && (var != null)) {
+            String retType = getDecl(method.getReturnType(), var, builder);
+            lines.add(fmt("{0} = {1}.{2}({3})", retType, callTarget, method.getName(), join(args))); //$NON-NLS-1$
+        } else {
+            lines.add(fmt("{0}.{1}({2})", callTarget, method.getName(), join(args))); //$NON-NLS-1$
+        }
         return lines;
     }
     
-    private String getStaticCall(Method method, String[] args, String var, TestSuiteBuilder builder)
-    {
-        StringBuilder sb = new StringBuilder();
-        if (hasReturn(method) && (var != null)) {
-            sb.append(getDecl(method.getReturnType(), var, builder));
-            sb.append('=');
-        }
-        String className = builder.getTypeName(method.getDeclaringClass());
-        sb.append(fmt("{0}.{1}({2})", className, method.getName(), join(args))); //$NON-NLS-1$
-        
-        return sb.toString();
-    }
-
     private static String getParamsProviderMethodName(String testCaseName)
     {
         // TestCase name is unique and it guarantees provider name uniqueness
@@ -189,7 +189,9 @@ public class JUnitParamsGenerator
     {
         StringBuilder sb = new StringBuilder();
         for (String arg : args) {
-            appendComma(sb);
+            if (sb.length() > 0) {
+                sb.append(", "); //$NON-NLS-1$
+            }
             sb.append(arg);
         }
         return sb.toString();
@@ -215,13 +217,6 @@ public class JUnitParamsGenerator
         return sb.toString();
     }
     
-    private static void appendComma(StringBuilder sb)
-    {
-        if (sb.length() > 0) {
-            sb.append(", "); //$NON-NLS-1$
-        }
-    }
-    
     private static String[] toArray(List<String> list)
     {
         return list.toArray(new String[list.size()]);
@@ -237,7 +232,7 @@ public class JUnitParamsGenerator
         StringBuilder sb = new StringBuilder();
         if (!errors.isEmpty()) {
             int idx = 1;
-            sb.append("// Problems while recording parameters:"); //$NON-NLS-1$
+            sb.append("// WARNING - cannot record parameters:"); //$NON-NLS-1$
             for (String line : errors) {
                 sb.append(fmt("\n// {0}. {1}", idx++, line)); //$NON-NLS-1$
             }
@@ -263,7 +258,7 @@ public class JUnitParamsGenerator
     private static final String TEST_CASE_WITH_EXCEPTION_TEMPLATE = 
         "@Test(expected={0}.class)\n" + 
         "public void {1}() throws Exception '{'\n" + 
-        "{2};\n" + 
+        "{2}\n" + 
         "'}'";
     
     @SuppressWarnings("nls")

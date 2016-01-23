@@ -95,7 +95,7 @@ public class Call implements Comparable<Call>
     
     public boolean isStatic()
     {
-        return (_method.getModifiers() & Modifier.STATIC) == Modifier.STATIC; 
+        return Modifier.isStatic(_method.getModifiers());
     }
     
     public boolean isSupported(Set<String> errors)
@@ -139,14 +139,7 @@ public class Call implements Comparable<Call>
     @Override
     public int hashCode() 
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + _args.hashCode();
-        result = prime * result
-                + ((_exception == null) ? 0 : _exception.hashCode());
-        result = prime * result 
-                + ((_result == null) ? 0 : _result.hashCode());
-        return result;
+        return Objects.hash(_method, _args, _result, _exception);
     }
 
     @Override
@@ -162,19 +155,21 @@ public class Call implements Comparable<Call>
             return false;
         }
         Call other = (Call) obj;
+        if (!_method.equals(other._method)) {
+            return false;
+        }
         if (!_args.equals(other._args)) {
             return false;
         }
-        if (_exception == null) {
-            if (other._exception != null)
-                return false;
-        } else if (!_exception.equals(other._exception))
+        if (!Objects.equals(_targetClass, other._targetClass)) {
             return false;
-        if (_result == null) {
-            if (other._result != null)
-                return false;
-        } else if (!_result.equals(other._result))
+        }
+        if (!Objects.equals(_exception, other._exception)) {
             return false;
+        }
+        if (!Objects.equals(_result, other._result)) {
+            return false;
+        }
         return true;
     }
 

@@ -1,6 +1,8 @@
 
 package com.github.sdarioo.testgen.recorder;
 
+import java.util.Objects;
+
 public final class ExceptionInfo 
 {
     private final String _className;
@@ -26,7 +28,7 @@ public final class ExceptionInfo
     @Override
     public int hashCode() 
     {
-        return _className.hashCode() + 31*_message.hashCode();
+        return Objects.hash(_className, _message);
     }
     
     @Override
