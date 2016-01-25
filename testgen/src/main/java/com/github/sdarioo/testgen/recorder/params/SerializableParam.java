@@ -33,7 +33,7 @@ public class SerializableParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        builder.addImport("java.io.*");
+        builder.addImport("java.io.*"); //$NON-NLS-1$
         String template = getFactoryMethodTemplate(builder);
         
         String resName = ClassUtils.getShortCanonicalName(_clazz);
@@ -41,7 +41,7 @@ public class SerializableParam
         ResourceFile resFile = builder.addResource(_bytes, resName);
         TestMethod deserialize = builder.addHelperMethod(template, "deserialize"); //$NON-NLS-1$
         
-        return deserialize.getName() + "(\"" + resFile.getFileName() + "\")";
+        return deserialize.getName() + "(\"" + resFile.getFileName() + "\")"; //$NON-NLS-1$ //$NON-NLS-2$
     }
     
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
@@ -77,8 +77,9 @@ public class SerializableParam
         return _clazz.hashCode() + 31 * Arrays.hashCode(_bytes);
     }
     
+    @SuppressWarnings("nls")
     public static final String DESERIALIZE_TEMPLATE_TEMPLATE =
-    "private <TYPE> {0}(String res) throws IOException '{'\n" +
+    "private <TYPE> {0}(String res) throws Exception '{'\n" +
     "    InputStream in = getClass().getResourceAsStream(res);\n" +
     "    try '{'\n" +
     "        ObjectInputStream stream = new ObjectInputStream(in);\n" +

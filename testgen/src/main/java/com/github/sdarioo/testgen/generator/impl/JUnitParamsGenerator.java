@@ -161,13 +161,13 @@ public class JUnitParamsGenerator
             Constructor<?> constructor = GeneratorUtil.findConstructor(targetClass);
             String[] constructorArgs = new String[0];
             if (constructor == null) {
-                lines.add(fmt("// ERROR - class {0} has no accessible constructors", typeName));
+                lines.add(fmt("// ERROR - class {0} has no accessible constructors", typeName)); //$NON-NLS-1$
             } else if (constructor.getParameterTypes().length > 0) {
-                lines.add(fmt("// WARNING - constructing {0} with default parameters", typeName));
+                lines.add(fmt("// WARNING - constructing {0} with default parameters", typeName)); //$NON-NLS-1$
                 constructorArgs = GeneratorUtil.getDefaultArgSourceCode(constructor, builder);
             }
             lines.add(fmt("{0} obj = new {0}({1})", typeName, join(constructorArgs))); //$NON-NLS-1$
-            callTarget = "obj";
+            callTarget = "obj"; //$NON-NLS-1$
         }
         
         if (hasReturn(method) && (var != null)) {
@@ -264,7 +264,7 @@ public class JUnitParamsGenerator
     @SuppressWarnings("nls")
     private static final String PARAMS_PROVIDER_METHOD_TEMPLATE = 
         "{0}\n"+
-        "private Object[] {1}() '{'\n" +
+        "private Object[] {1}() throws Exception '{'\n" +
         "    return new Object[] '{'\n" +
         "{2}\n" +        
         "    '}';\n" +

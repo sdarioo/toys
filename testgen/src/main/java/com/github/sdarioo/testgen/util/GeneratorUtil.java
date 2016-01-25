@@ -56,7 +56,7 @@ public final class GeneratorUtil
     {
         @Override
         public int compare(Constructor<?> o1, Constructor<?> o2) {
-            return NumberUtils.compare(o1.getParameterCount(), o2.getParameterCount());
+            return NumberUtils.compare(o1.getParameterTypes().length, o2.getParameterTypes().length);
         }
     };
 

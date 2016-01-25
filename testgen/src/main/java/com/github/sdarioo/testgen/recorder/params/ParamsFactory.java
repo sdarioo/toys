@@ -74,16 +74,22 @@ public final class ParamsFactory
         if (ClassUtils.isPrimitiveWrapper(value.getClass())) {
             return toPrimitiveValue(value);
         }
+        
+        // Collections
         if (value instanceof java.util.List<?>) {
             return new ListParam((java.util.List<?>)value);
         }
         if (value instanceof Properties) {
             return new PropertiesParam((Properties)value);
         }
+        if (value instanceof java.util.Set<?>) {
+            return new SetParam((java.util.Set<?>)value);
+        }
         if (value instanceof java.util.Map<?,?>) {
             return new MapParam((java.util.Map<?,?>)value);
         }
         
+        // Java Bean
         Bean bean = BeanFactory.getInstance().getBean(clazz);
         if (bean != null) {
             return new BeanParam(value, bean);

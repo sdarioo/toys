@@ -52,7 +52,7 @@ public class JUnitParamsGeneratorTest
 
         String[] lines = new StrTokenizer(text, '\n').getTokenArray();
         assertEquals(6, lines.length);
-        assertEquals("private Object[] testSayHello_Parameters() {", lines[0].trim());
+        assertEquals("private Object[] testSayHello_Parameters() throws Exception {", lines[0].trim());
         assertEquals("return new Object[] {", lines[1].trim());
         assertEquals("new Object[]{ \"name1\", 1, null },", lines[2].trim());
         assertEquals("new Object[]{ null, 2, null },", lines[3].trim());
@@ -113,7 +113,7 @@ public class JUnitParamsGeneratorTest
         Set<String> set = toLines(src);
         
         assertTrue(set.contains("@Parameters(method = \"testMethodWithProperties_Parameters\")"));
-        assertTrue(set.contains("private Object[] testMethodWithProperties_Parameters() {"));
+        assertTrue(set.contains("private Object[] testMethodWithProperties_Parameters() throws Exception {"));
     }
     
     @SuppressWarnings("nls")
