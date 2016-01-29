@@ -39,9 +39,12 @@ public class Call implements Comparable<Call>
     public static Call newCall(Method method, Object target, Object[] args)
     {
         List<IParameter> params = new ArrayList<IParameter>(args.length);
-        for (Object arg : args) {
-            params.add(ParamsFactory.newValue(arg));
+        java.lang.reflect.Type[] paramTypes = method.getGenericParameterTypes();
+        
+        for (int i = 0; i < args.length; i++) {
+            params.add(ParamsFactory.newValue(args[i], paramTypes[i]));
         }
+        
         return new Call(method, target, params);
     }
     

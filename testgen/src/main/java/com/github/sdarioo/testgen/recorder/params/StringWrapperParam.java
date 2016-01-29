@@ -1,6 +1,5 @@
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.text.MessageFormat;
@@ -21,12 +20,14 @@ public class StringWrapperParam
     private final Class<?> _clazz;
     private final StringParam _stringParam;
     
+    private static final String FROM_STRING = "fromString"; //$NON-NLS-1$
+    private static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
     
     public static boolean isStringWrapper(Object value)
     {
         Class<?> clazz = value.getClass();
-        return (getFactoryMethod(clazz, "fromString", value.getClass()) != null) ||
-               (getFactoryMethod(clazz, "valueOf", value.getClass()) != null);
+        return (getFactoryMethod(clazz, FROM_STRING, value.getClass()) != null) ||
+               (getFactoryMethod(clazz, VALUE_OF, value.getClass()) != null);
     }
     
     public StringWrapperParam(Object value)
@@ -47,14 +48,14 @@ public class StringWrapperParam
         String typeName = builder.getTypeName(_clazz);
         String str = _stringParam.toSouceCode(builder);
         
-        Method method = getFactoryMethod(_clazz, "fromString", _clazz);
+        Method method = getFactoryMethod(_clazz, FROM_STRING, _clazz);
         if (method == null) {
-            method = getFactoryMethod(_clazz, "valueOf", _clazz);
+            method = getFactoryMethod(_clazz, VALUE_OF, _clazz);
             if (method == null) {
                 return IParameter.NULL.toSouceCode(builder);
             }
         }
-        return MessageFormat.format("{0}.{1}({2})", typeName, method.getName(), str);
+        return MessageFormat.format("{0}.{1}({2})", typeName, method.getName(), str); //$NON-NLS-1$
     }
     
     @Override

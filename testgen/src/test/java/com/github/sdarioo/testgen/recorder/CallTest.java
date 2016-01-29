@@ -37,29 +37,29 @@ public class CallTest
     
     @SuppressWarnings("nls")
     @Test
-    public void testEquals()
+    public void testEquals() throws Exception
     {
-        Call call1 = Call.newCall(new MethodRef() {});
-        Call call2 = Call.newCall(new MethodRef() {});
+        Call call1 = Call.newCall(getClass().getMethod("m1"));
+        Call call2 = Call.newCall(getClass().getMethod("m1"));
         
         // Empty
         assertEquals(call1, call2);
         assertEquals(call1.hashCode(), call2.hashCode());
         
         // With args
-        call1 = Call.newCall(new MethodRef() {}, 1);
+        call1 = Call.newCall(getClass().getMethod("m3", Integer.TYPE), 1);
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2 = Call.newCall(new MethodRef() {}, 1);
+        call2 = Call.newCall(getClass().getMethod("m3", Integer.TYPE), 1);
         assertEquals(call1, call2);
         assertEquals(call1.hashCode(), call2.hashCode());
         
-        call1 = Call.newCall(new MethodRef() {}, 1, "test");
+        call1 = Call.newCall(getClass().getMethod("m4", Integer.TYPE, String.class), 1, "test");
         assertNotEquals(call1, call2);
         assertNotEquals(call1.hashCode(), call2.hashCode());
         
-        call2 = Call.newCall(new MethodRef() {}, 1, "test");
+        call2 = Call.newCall(getClass().getMethod("m4", Integer.TYPE, String.class), 1, "test");
         assertEquals(call1, call2);
         assertEquals(call1.hashCode(), call2.hashCode());
         
@@ -131,7 +131,8 @@ public class CallTest
     
     public void m1() {}
     public static void m2() {}
-    
+    public static void m3(int x) {}
+    public static void m4(int x, String s) {}
     
     public static class Base
     {

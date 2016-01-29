@@ -102,8 +102,8 @@ public class JUnitParamsGeneratorTest
         p2.setProperty("key2", "value2");
         
         List<Call> calls = new ArrayList<Call>();
-        calls.add(Call.newCall(method, 0, p1));
-        calls.add(Call.newCall(method, 0, p2));
+        calls.add(Call.newCall(method, p1));
+        calls.add(Call.newCall(method, p2));
         
         calls.get(0).endWithResult(null);
         calls.get(1).endWithResult(null);

@@ -7,15 +7,35 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
 
 public final class ParamsUtil 
 {
     private ParamsUtil() {}
+    
+    
+    public static Class<?> getRawType(Type type)
+    {
+        if (type == null) {
+            return null;
+        }
+        if (type instanceof Class<?>) {
+            return (Class<?>)type;
+        }
+        if (type instanceof ParameterizedType) {
+            Type rawType = ((ParameterizedType)type).getRawType();
+            return getRawType(rawType);
+        }
+        
+        Logger.warn("Cannot get raw type from: " + type.getClass().getName()); //$NON-NLS-1$
+        return null;
+    }
     
     public static boolean isSupported(List<IParameter> params, Collection<String> errors)
     {
@@ -58,4 +78,6 @@ public final class ParamsUtil
         }
         return true;
     }
+
+    
 }

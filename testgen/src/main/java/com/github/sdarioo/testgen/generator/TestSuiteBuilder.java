@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.generator;
 
+import java.lang.reflect.ParameterizedType;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -122,6 +123,46 @@ public class TestSuiteBuilder
         ResourceFile resource = new ResourceFile("res/" + uniqueName, content); //$NON-NLS-1$
         _resources.add(resource);
         return resource;
+    }
+    
+    public String getGenericTypeName(java.lang.reflect.Type type)
+    {
+        if (type == null) {
+            return null;
+        }
+        if (type instanceof Class<?>) {
+            return getTypeName((Class<?>)type);
+        }
+       
+        if (type instanceof ParameterizedType) {
+            ParameterizedType ptype = (ParameterizedType)type;
+            java.lang.reflect.Type rawType = ptype.getRawType();
+            String rawTypeName = getGenericTypeName(rawType);
+            if (rawTypeName == null) {
+                return null;
+            }
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append(rawTypeName);
+            
+            java.lang.reflect.Type[] args = ptype.getActualTypeArguments();
+            if ((args != null) && (args.length > 0)) {
+                sb.append('<');
+                for (int i = 0; i < args.length; i++) {
+                    if (i > 0) {
+                        sb.append(", "); //$NON-NLS-1$
+                    }
+                    String argName = getGenericTypeName(args[i]);
+                    if (argName == null) {
+                        return null;
+                    }
+                    sb.append(argName);
+                }
+                sb.append('>');
+            }
+            return sb.toString();    
+        }
+        return null;
     }
     
     /**

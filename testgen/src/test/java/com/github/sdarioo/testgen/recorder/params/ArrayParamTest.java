@@ -2,6 +2,9 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.junit.Test;
@@ -41,4 +44,38 @@ public class ArrayParamTest
         TestSuiteBuilder builder = new TestSuiteBuilder();
         assertEquals("new String[][]{new String[]{\"ala\"}, new String[]{\"ma\"}}", p.toSouceCode(builder));
     }
+    
+    @Test
+    public void testGenericArray() throws Exception
+    {
+        Method m = ArrayParamTest.class.getMethod("foo", List[].class);
+        assertNotNull(m);
+        
+        ArrayParam p = new ArrayParam(new ArrayList[0], m.getGenericParameterTypes()[0]);
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        assertEquals("new List[]{}", p.toSouceCode(builder));
+    }
+    
+    @Test
+    public void testTypeVarArray() throws Exception
+    {
+        System.err.println(String[].class.getName());
+        
+        Method m = ArrayParamTest.class.getMethod("foo", Object[].class);
+        assertNotNull(m);
+        
+        ArrayParam p = new ArrayParam(new String[] {"goo"}, m.getGenericParameterTypes()[0]);
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        assertEquals("new String[]{\"goo\"}", p.toSouceCode(builder));
+    }
+    
+    public static <T> int foo(T[] var)
+    {
+        return 0;
+    }
+    public static int foo(List<String>[] var)
+    {
+        return 0;
+    }
+    
 }

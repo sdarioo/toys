@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -30,8 +31,14 @@ public class MapParam
     
     public MapParam(Map<?,?> map)
     {
+        this(map, null);
+    }
+    
+    public MapParam(Map<?,?> map, Type mapGenericType)
+    {
         _clazz = map.getClass();
         _originalSize = map.size();
+        
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if ((_originalSize > maxSize) || !isMapTypeSupported()) {
             _pairs = new IParameter[0][];

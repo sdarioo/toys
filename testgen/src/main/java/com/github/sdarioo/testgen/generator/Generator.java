@@ -108,5 +108,5 @@ public final class Generator
         return true;
     }
   
-    private static final String ENCODING = "UTF-8";
+    private static final String ENCODING = "UTF-8"; //$NON-NLS-1$
 }

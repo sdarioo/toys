@@ -7,7 +7,10 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
+import java.util.*;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 
@@ -15,20 +18,44 @@ public class SetParam
     extends CollectionParam
 {
     
-    protected SetParam(java.util.Set<?> set) 
+    public SetParam(Set<?> set) 
     {
-        super(set);
+        this(set, null);
     }
+    
+    public SetParam(Set<?> set, Type setGenericType)
+    {
+        super(set, setGenericType);
+    }
+    
+    @Override
+    public boolean isSupported(Collection<String> errors) 
+    {
+        // toSourceCode output generates HashSet so it must be compatible with generic type if provided
+        Type setGenericType = getGenericType();
+        Class<?> setType = ParamsUtil.getRawType(setGenericType);
+        if ((setType != null) && !setType.isAssignableFrom(HashSet.class)) {
+            errors.add("Unsupported set type: " + setType.getName()); //$NON-NLS-1$
+            return false;
+        }
+        
+        return super.isSupported(errors);
+    }
+    
     
     @SuppressWarnings("nls")
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        String setImpl = builder.getTypeName("java.util.HashSet");
-        String arrays = builder.getTypeName("java.util.Arrays");
+        builder.addImport(Arrays.class.getName());
+        builder.addImport(HashSet.class.getName());
         
-        String template = "new {0}({1}.asList({2}))";
-        return MessageFormat.format(template, setImpl, arrays, getValuesSourceCode(builder));
+        Type elementType = getElementType();
+        String elementTypeName = builder.getGenericTypeName(elementType);
+        String elementTypeSpec = (elementTypeName != null) ? ('<' + elementTypeName + '>') : "";
+        
+        return MessageFormat.format(TEMPLATE, elementTypeSpec, getValuesSourceCode(builder));
     }
 
+    private static final String TEMPLATE = "new HashSet{0}(Arrays.asList({1}))"; //$NON-NLS-1$
 }

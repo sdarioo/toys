@@ -4,6 +4,7 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.awt.event.KeyEvent;
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.Properties;
 
 import org.apache.commons.lang3.ClassUtils;
@@ -17,45 +18,13 @@ public final class ParamsFactory
 {
     private ParamsFactory() {}
 
-    // PRIMITIVE TYPES
-    public static IParameter newValue(boolean b)
-    {
-        return new PrimitiveParam(b ? Boolean.TRUE.toString() : Boolean.FALSE.toString());
-    }
-    public static IParameter newValue(char c)
-    {
-        return isPrintableChar(c) ?
-                new PrimitiveParam('\'' + String.valueOf(c) + '\'') :
-                new PrimitiveParam("(char)"+Integer.toString(c)); //$NON-NLS-1$
-    }
-    public static IParameter newValue(byte b)
-    {
-        return new PrimitiveParam("(byte)"+String.valueOf(b)); //$NON-NLS-1$
-    }
-    public static IParameter newValue(short s)
-    {
-        return new PrimitiveParam("(short)"+String.valueOf(s)); //$NON-NLS-1$
-    }
-    public static IParameter newValue(int i)
-    {
-        return new PrimitiveParam(String.valueOf(i));
-    }
-    public static IParameter newValue(float f)
-    {
-        return new PrimitiveParam(String.valueOf(f) + 'f');
-    }
-    public static IParameter newValue(long l)
-    {
-        return new PrimitiveParam(String.valueOf(l) + 'L');
-    }
-    public static IParameter newValue(double d)
-    {
-        return new PrimitiveParam(String.valueOf(d) + 'd');
-    }
     
-    
-    // OBJECT TYPES
     public static IParameter newValue(Object value)
+    {
+        return newValue(value, null);
+    }
+
+    public static IParameter newValue(Object value, Type paramType)
     {
         if (value == null) {
             return IParameter.NULL;
@@ -66,7 +35,7 @@ public final class ParamsFactory
             return new StringParam((String)value);
         }
         if (clazz.isArray()) {
-            return new ArrayParam(value);
+            return new ArrayParam(value, paramType);
         }
         if (clazz.isEnum()) {
             return new EnumParam((Enum<?>)value);
@@ -76,17 +45,17 @@ public final class ParamsFactory
         }
         
         // Collections
-        if (value instanceof java.util.List<?>) {
-            return new ListParam((java.util.List<?>)value);
-        }
         if (value instanceof Properties) {
             return new PropertiesParam((Properties)value);
         }
+        if (value instanceof java.util.List<?>) {
+            return new ListParam((java.util.List<?>)value, paramType);
+        }
         if (value instanceof java.util.Set<?>) {
-            return new SetParam((java.util.Set<?>)value);
+            return new SetParam((java.util.Set<?>)value, paramType);
         }
         if (value instanceof java.util.Map<?,?>) {
-            return new MapParam((java.util.Map<?,?>)value);
+            return new MapParam((java.util.Map<?,?>)value, paramType);
         }
         
         // Java Bean
@@ -94,11 +63,11 @@ public final class ParamsFactory
         if (bean != null) {
             return new BeanParam(value, bean);
         }
-        
+        // Class with fromString or valueOf factory methods
         if (StringWrapperParam.isStringWrapper(value)) {
             return new StringWrapperParam(value);
         }
-        
+        // Serializable class
         if (value instanceof Serializable) {
             return new SerializableParam((Serializable)value);
         }
@@ -108,31 +77,26 @@ public final class ParamsFactory
         
     private static IParameter toPrimitiveValue(Object value)
     {
+        String str = null;
         if (value instanceof Boolean) {
-            return newValue(((Boolean)value).booleanValue());
+            str = value.toString();
+        } else if (value instanceof Byte) {
+            str = "(byte)" + value.toString(); //$NON-NLS-1$
+        } else if (value instanceof Character) {
+            char c = ((Character)value).charValue();
+            str = isPrintableChar(c) ?  ('\'' + String.valueOf(c) + '\'') : "(char)" + Integer.toString(c); //$NON-NLS-1$
+        } else if (value instanceof Short) {
+            str = "(short)" + value.toString(); //$NON-NLS-1$
+        } if (value instanceof Integer) {
+            str = value.toString();
+        } if (value instanceof Long) {
+            str = value.toString() + 'L';
+        } if (value instanceof Double) {
+            str = value.toString() + 'd';
+        } else if (value instanceof Float) {
+            str = value.toString() + 'f';
         }
-        if (value instanceof Byte) {
-            return newValue(((Byte)value).byteValue());
-        }
-        if (value instanceof Character) {
-            return newValue(((Character)value).charValue());
-        }
-        if (value instanceof Short) {
-            return newValue(((Short)value).shortValue());
-        }
-        if (value instanceof Integer) {
-            return newValue(((Integer)value).intValue());
-        }
-        if (value instanceof Long) {
-            return newValue(((Long)value).longValue());
-        }
-        if (value instanceof Double) {
-            return newValue(((Double)value).doubleValue());
-        }
-        if (value instanceof Float) {
-            return newValue(((Float)value).floatValue());
-        }
-        return new UnknownParam(value.getClass());
+        return (str != null) ? new PrimitiveParam(str) : new UnknownParam(value.getClass());
     }
     
     

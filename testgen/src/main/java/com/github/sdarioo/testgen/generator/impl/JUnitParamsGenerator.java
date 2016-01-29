@@ -7,9 +7,7 @@
 
 package com.github.sdarioo.testgen.generator.impl;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -85,8 +83,8 @@ public class JUnitParamsGenerator
     protected TestMethod generateTestCase(Class<?> targetClass, Method method, TestSuiteBuilder builder)
     {
         Class<?>[] paramTypes = method.getParameterTypes();
+        Type[] genericTypes = method.getGenericParameterTypes();
         String[] paramNames = getParameterNames(method);
-        assert(paramTypes.length == paramNames.length);
         
         // Tested method invocation and assert
         List<String> body = getCall(targetClass, method, paramNames, RESULT, builder);
@@ -97,10 +95,10 @@ public class JUnitParamsGenerator
         // Test case method parameter declarations
         List<String> paramsList = new ArrayList<String>();
         for (int i = 0; i < paramTypes.length; i++) {
-            paramsList.add(getDecl(paramTypes[i], paramNames[i], builder));
+            paramsList.add(getDecl(paramTypes[i], genericTypes[i], paramNames[i], builder));
         }
         if (hasReturn(method)) {
-            paramsList.add(getDecl(method.getReturnType(), EXPECTED, builder));
+            paramsList.add(getDecl(method.getReturnType(), method.getGenericReturnType(), EXPECTED, builder));
         }
         
         String params = join(toArray(paramsList));
@@ -142,9 +140,13 @@ public class JUnitParamsGenerator
         return !Void.TYPE.equals(method.getReturnType());
     }
     
-    private String getDecl(Class<?> type, String name, TestSuiteBuilder builder)
+    private String getDecl(Class<?> type, Type genericType, String name, TestSuiteBuilder builder)
     {
-        return builder.getTypeName(type) + ' ' + name;
+        String typeName = builder.getGenericTypeName(genericType);
+        if (typeName == null) {
+            typeName = builder.getTypeName(type);
+        }
+        return typeName + ' ' + name;
     }
     
     private List<String> getCall(Class<?> targetClass, Method method, String[] args, 
@@ -171,7 +173,7 @@ public class JUnitParamsGenerator
         }
         
         if (hasReturn(method) && (var != null)) {
-            String retType = getDecl(method.getReturnType(), var, builder);
+            String retType = getDecl(method.getReturnType(), method.getGenericReturnType(), var, builder);
             lines.add(fmt("{0} = {1}.{2}({3})", retType, callTarget, method.getName(), join(args))); //$NON-NLS-1$
         } else {
             lines.add(fmt("{0}.{1}({2})", callTarget, method.getName(), join(args))); //$NON-NLS-1$

@@ -1,4 +1,8 @@
 
 1. Support for generic methods/types/parameters
 
+2. Nadpisywanie istniejącego testu
+
+3. Interfejse proxy params
+
 
