@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.*;
@@ -19,104 +20,88 @@ import com.github.sdarioo.testgen.recorder.IParameter;
 public class MapParam
     implements IParameter
 {
-    private final Class<?> _clazz;
+    private final Type _genericType;
     private final int _originalSize;
     
-    protected final IParameter[][] _pairs;
-    
-    private static final Class<?>[] SUPPORTED = {
-        java.util.HashMap.class,
-        java.util.TreeMap.class
-    };
-    
+    private final Map<IParameter, IParameter> _elements;
+
     public MapParam(Map<?,?> map)
     {
         this(map, null);
     }
     
-    public MapParam(Map<?,?> map, Type mapGenericType)
+    public MapParam(Map<?,?> map, Type genericType)
     {
-        _clazz = map.getClass();
+        _genericType = genericType;
         _originalSize = map.size();
+        _elements = new HashMap<IParameter, IParameter>();
         
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
-        if ((_originalSize > maxSize) || !isMapTypeSupported()) {
-            _pairs = new IParameter[0][];
+        if (_originalSize > maxSize) {
             return;
         }
-        _pairs = new IParameter[map.size()][];
         
-        int i = 0;
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            _pairs[i] = new IParameter[2];
-            _pairs[i][0] = ParamsFactory.newValue(entry.getKey());
-            _pairs[i][1] = ParamsFactory.newValue(entry.getValue());
-            i++;
+            IParameter key = ParamsFactory.newValue(entry.getKey(), getKeyType());
+            IParameter value = ParamsFactory.newValue(entry.getValue(), getValueType());
+            _elements.put(key, value);
         }
     }
     
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
-        if (!isMapTypeSupported()) {
-            errors.add("Unsupported map instance: " + _clazz.getName()); //$NON-NLS-1$
+        if (!ParamsUtil.isTypeCompatible(_genericType, getGeneratedSourceCodeType())) {
+            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(_genericType)); //$NON-NLS-1$
             return false;
         }
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if (_originalSize > maxSize) {
-            errors.add(MessageFormat.format("Map size exceeds maximum permitted size. Max={0}, size={1}.", //$NON-NLS-1$
+            errors.add(MessageFormat.format("Map size exceeds maximum permitted size. Max={0}, current={1}.", //$NON-NLS-1$
                     maxSize, _originalSize));
             return false;
         }
         boolean isSupported = true;
-        for (IParameter[] pair : _pairs) {
-            isSupported = isSupported & pair[0].isSupported(errors) && pair[1].isSupported(errors);
+        for (Map.Entry<IParameter, IParameter> entry : _elements.entrySet()) {
+            isSupported = isSupported & entry.getKey().isSupported(errors) && entry.getValue().isSupported(errors);
         }
         return isSupported;
+    }
+    
+    protected Class<?> getGeneratedSourceCodeType() 
+    {
+        return Map.class;
     }
     
     @SuppressWarnings("nls")
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        String template = getFactoryMethodTemplate(builder);
-        TestMethod asMap = builder.addHelperMethod(template, "asMap"); //$NON-NLS-1$
+        builder.addImport(Map.class.getName());
+        builder.addImport(HashMap.class.getName());
+        
+        TestMethod asMap = builder.addHelperMethod(AS_MAP_TEMPLATE, "asMap"); //$NON-NLS-1$
         TestMethod asPair = builder.addHelperMethod(AS_PAIR_TEMPLATE, "asPair"); //$NON-NLS-1$
-     
-        StringBuilder sb = new StringBuilder();
-        for (IParameter[] keyValue : _pairs) {
-            if (sb.length() > 0) {
-                sb.append(", ");
-            }
-            sb.append(asPair.getName());
-            sb.append('(');
-            sb.append(keyValue[0].toSouceCode(builder));
-            sb.append(", ");
-            sb.append(keyValue[1].toSouceCode(builder));
-            sb.append(')');
-        }
-        return MessageFormat.format("{0}({1})", asMap.getName(), sb.toString());
-    }
-    
-    private boolean isMapTypeSupported()
-    {
-        for (Class<?> supportedMap : SUPPORTED) {
-            if (_clazz.equals(supportedMap)) {
-                return true;
-            }
-        }
-        return false;
+
+        String elements = getElementsSourceCode(asPair, builder);
+        
+        return MessageFormat.format("{0}({1})", asMap.getName(), elements);
     }
 
-    private String getFactoryMethodTemplate(TestSuiteBuilder builder)
+    private Type getKeyType()
     {
-        String template = builder.getTemplatesCache().get(_clazz);
-        if (template == null) {
-            String mapClass = builder.getTypeName(_clazz);
-            template = AS_MAP_TEMPLATE_TEMPLATE.replace("<MAP>", mapClass); //$NON-NLS-1$
-            builder.getTemplatesCache().put(_clazz, template);
+        if (_genericType instanceof ParameterizedType) {
+            return ((ParameterizedType)_genericType).getActualTypeArguments()[0];
         }
-        return template;
+        return null;
+    }
+    
+    private Type getValueType()
+    {
+        if (_genericType instanceof ParameterizedType) {
+            return ((ParameterizedType)_genericType).getActualTypeArguments()[1];
+        }
+        return null;
     }
     
     @Override
@@ -131,31 +116,36 @@ public class MapParam
         if (getClass() != obj.getClass()) {
             return false;
         }
-        
         MapParam other = (MapParam)obj;
         if (_originalSize != other._originalSize) {
             return false;
         }
-        if (_pairs.length != other._pairs.length) {
-            return false;
-        }
-        for (int i = 0; i < _pairs.length; i++) {
-            if (!ParamsUtil.equals(_pairs[i], other._pairs[i])) {
-                return false;
-            }
-        }
-        return true;
+        return _elements.equals(other._elements);
     }
     
     @Override
     public int hashCode() 
     {
-        int hash = 0;
-        for (IParameter[] pair : _pairs) {
-            hash = (31 * hash) + ParamsUtil.hashCode(pair);
-        }
-        return hash;
+        return _elements.hashCode();
     }
+    
+    protected String getElementsSourceCode(TestMethod asPair, TestSuiteBuilder builder)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<IParameter, IParameter> entry : _elements.entrySet()) {
+            if (sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(asPair.getName());
+            sb.append('(');
+            sb.append(entry.getKey().toSouceCode(builder));
+            sb.append(", ");
+            sb.append(entry.getValue().toSouceCode(builder));
+            sb.append(')');
+        }
+        return sb.toString();
+    }
+    
 
     @SuppressWarnings("nls")
     private static final String AS_PAIR_TEMPLATE =
@@ -164,12 +154,12 @@ public class MapParam
         "'}'";
     
     @SuppressWarnings("nls")
-    private static final String AS_MAP_TEMPLATE_TEMPLATE = 
-            "private static <MAP> {0}(Object[]... pairs) '{'\n" +
-            "    <MAP> p = new <MAP>();\n" +
+    private static final String AS_MAP_TEMPLATE = 
+            "private static <K,V> Map<K,V> {0}(Object[]... pairs) '{'\n" +
+            "    Map<K,V> map = new HashMap<K,V>();\n" +
             "    for (Object[] pair : pairs) '{'\n" +
-            "        p.put(pair[0], pair[1]);\n" +
+            "        map.put((K)pair[0], (V)pair[1]);\n" +
             "    '}'\n" +
-            "    return p;\n" +
+            "    return map;\n" +
             "}";
 }

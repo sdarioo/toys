@@ -13,6 +13,8 @@ import java.text.MessageFormat;
 import java.util.*;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.TestMethod;
+import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class SetParam
     extends CollectionParam
@@ -25,37 +27,36 @@ public class SetParam
     
     public SetParam(Set<?> set, Type setGenericType)
     {
-        super(set, setGenericType);
+        super(set, new HashSet<IParameter>(), setGenericType);
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    protected Class<?> getGeneratedSourceCodeType() 
     {
-        // toSourceCode output generates HashSet so it must be compatible with generic type if provided
-        Type setGenericType = getGenericType();
-        Class<?> setType = ParamsUtil.getRawType(setGenericType);
-        if ((setType != null) && !setType.isAssignableFrom(HashSet.class)) {
-            errors.add("Unsupported set type: " + setType.getName()); //$NON-NLS-1$
-            return false;
-        }
-        
-        return super.isSupported(errors);
+        return Set.class;
     }
-    
     
     @SuppressWarnings("nls")
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
         builder.addImport(Arrays.class.getName());
+        builder.addImport(Set.class.getName());
         builder.addImport(HashSet.class.getName());
         
-        Type elementType = getElementType();
-        String elementTypeName = builder.getGenericTypeName(elementType);
-        String elementTypeSpec = (elementTypeName != null) ? ('<' + elementTypeName + '>') : "";
-        
-        return MessageFormat.format(TEMPLATE, elementTypeSpec, getValuesSourceCode(builder));
+        String elements = getElementsSourceCode(builder);
+        if (elements.length() > 0) {
+           TestMethod asSet = builder.addHelperMethod(AS_SET_TEMPLATE, "asSet");
+            return MessageFormat.format("{0}({1})", asSet.getName(), elements);
+        } else {
+            return MessageFormat.format("new HashSet{0}()", getElementTypeSpec(builder));
+        }
     }
 
-    private static final String TEMPLATE = "new HashSet{0}(Arrays.asList({1}))"; //$NON-NLS-1$
+    @SuppressWarnings("nls")
+    private static final String AS_SET_TEMPLATE = 
+            "private static <T> Set<T> {0}(T... elements)  '{'\n"+
+            "    return new HashSet<T>(Arrays.<T>asList(elements));\n"+
+            "'}'\n";
+    
 }

@@ -20,49 +20,52 @@ public abstract class CollectionParam
     implements IParameter
 {
     private final int _originalSize;
-    protected final IParameter[] _values;
+    protected final Collection<IParameter> _elements;
     
     private final Type _genericType;
     
-    protected CollectionParam(Collection<?> collection, Type genericType)
+    protected CollectionParam(Collection<?> collection, Collection<IParameter> elements, Type genericType)
     {
         _genericType = genericType;
         _originalSize = collection.size();
+        _elements = elements;
         
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if (_originalSize > maxSize) {
-            _values = new IParameter[0];
             return;
         }
-        
-        _values = new IParameter[_originalSize];
-        int i = 0;
         for (Object obj : collection) {
-            _values[i] = ParamsFactory.newValue(obj);
-            i++;
+            _elements.add(ParamsFactory.newValue(obj, getElementType()));
         }
     }
+    
+    protected abstract Class<?> getGeneratedSourceCodeType();
     
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
+        if (!ParamsUtil.isTypeCompatible(_genericType, getGeneratedSourceCodeType())) {
+            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(_genericType)); //$NON-NLS-1$
+            return false;
+        }
+        
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if (_originalSize > maxSize) {
             errors.add(MessageFormat.format("Collection size exceeds maximum permitted size. Max={0}, size={1}.", //$NON-NLS-1$
                     maxSize, _originalSize));
             return false;
         }
-        return ParamsUtil.isSupported(_values, errors);
+        return ParamsUtil.isSupported(_elements, errors);
     }
     
     /**
      * @param builder
-     * @return string representing comma separated list of all collection values source code 
+     * @return string representing comma separated list of all collection elements source code 
      */
-    protected String getValuesSourceCode(TestSuiteBuilder builder)
+    protected String getElementsSourceCode(TestSuiteBuilder builder)
     {
         StringBuilder sb = new StringBuilder();
-        for (IParameter param : _values) {
+        for (IParameter param : _elements) {
             if (sb.length() > 0) {
                 sb.append(", "); //$NON-NLS-1$
             }
@@ -70,12 +73,10 @@ public abstract class CollectionParam
         }
         return sb.toString();
     }
-    
-    protected Type getGenericType()
-    {
-        return _genericType;
-    }
-    
+
+    /**
+     * @return collection element generic type or null if unknown
+     */
     protected Type getElementType()
     {
         if (_genericType instanceof ParameterizedType) {
@@ -84,10 +85,22 @@ public abstract class CollectionParam
         return null;
     }
     
+    /**
+     * @param builder
+     * @return string representing collection element specification e.g <String> 
+     * or empty string in no generic element information available
+     */
+    protected String getElementTypeSpec(TestSuiteBuilder builder)
+    {
+        Type elementType = getElementType();
+        String elementTypeName = builder.getGenericTypeName(elementType);
+        return (elementTypeName != null) ? ('<' + elementTypeName + '>') : "";
+    }
+    
     @Override
     public int hashCode() 
     {
-        return ParamsUtil.hashCode(_values);
+        return _elements.hashCode();
     }
     
     @Override
@@ -103,10 +116,7 @@ public abstract class CollectionParam
             return false;
         }
         CollectionParam other = (CollectionParam)obj;
-        if (_originalSize != other._originalSize) {
-            return false;
-        }
-        return ParamsUtil.equals(_values, other._values);
+        return (_originalSize == other._originalSize) && _elements.equals(other._elements);
     }
     
      

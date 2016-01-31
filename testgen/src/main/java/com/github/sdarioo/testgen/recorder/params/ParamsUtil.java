@@ -7,10 +7,9 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.lang.reflect.*;
-import java.util.Arrays;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.List;
 
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
@@ -19,6 +18,12 @@ public final class ParamsUtil
 {
     private ParamsUtil() {}
     
+    
+    public static String getRawTypeName(Type type)
+    {
+        Class<?> rawType = getRawType(type);
+        return (rawType != null) ? rawType.getName() : type.getClass().getName();
+    }
     
     public static Class<?> getRawType(Type type)
     {
@@ -37,7 +42,7 @@ public final class ParamsUtil
         return null;
     }
     
-    public static boolean isSupported(List<IParameter> params, Collection<String> errors)
+    public static boolean isSupported(Collection<IParameter> params, Collection<String> errors)
     {
         boolean bValid = true;
         for (IParameter param : params) {
@@ -48,11 +53,15 @@ public final class ParamsUtil
         return bValid;
     }
     
-    public static boolean isSupported(IParameter[] params, Collection<String> errors)
+    public static boolean isTypeCompatible(Type expectedType, Class<?> generatedClass)
     {
-        return isSupported(Arrays.asList(params), errors);
+        Class<?> expectedRawType = ParamsUtil.getRawType(expectedType);
+        if ((expectedRawType != null) && !expectedRawType.isAssignableFrom(generatedClass)) {
+            return false;
+        }
+        return true;
     }
-    
+
     public static int hashCode(IParameter[] params)
     {
         int hash = 1;

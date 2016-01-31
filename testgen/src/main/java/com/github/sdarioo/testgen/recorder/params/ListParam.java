@@ -9,38 +9,30 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class ListParam
     extends CollectionParam
 {
-    
     public ListParam(List<?> list)
     {
         this(list, null);
     }
     
-    public ListParam(java.util.List<?> list, Type listGenericType)
+    public ListParam(List<?> list, Type listGenericType)
     {
-        super(list, listGenericType);
+        super(list, new ArrayList<IParameter>(), listGenericType);
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    protected Class<?> getGeneratedSourceCodeType() 
     {
-       // toSourceCode output generates List so it must be compatible with generic type if provided
-        Type listGenericType = getGenericType();
-        Class<?> listType = ParamsUtil.getRawType(listGenericType);
-        if ((listType != null) && !listType.isAssignableFrom(List.class)) {
-            errors.add("Unsupported list type: " + listType.getName()); //$NON-NLS-1$
-            return false;
-        }
-        
-        return super.isSupported(errors);
+        return List.class;
     }
 
     @SuppressWarnings("nls")
@@ -48,13 +40,14 @@ public class ListParam
     public String toSouceCode(TestSuiteBuilder builder) 
     {
         builder.addImport(Arrays.class.getName());
+        builder.addImport(ArrayList.class.getName());
         
-        Type elementType = getElementType();
-        String elementTypeName = builder.getGenericTypeName(elementType);
-        String elementTypeSpec = (elementTypeName != null) ? ('<' + elementTypeName + '>') : "";
-        
-        return MessageFormat.format(TEMPLATE, elementTypeSpec, getValuesSourceCode(builder));
+        String elements = getElementsSourceCode(builder);
+        if (elements.length() > 0) {
+            return MessageFormat.format("Arrays.{0}asList({1})", getElementTypeSpec(builder), elements);
+        } else {
+            return MessageFormat.format("new ArrayList{0}()", getElementTypeSpec(builder));
+        }
     }
-    
-    private static final String TEMPLATE = "Arrays.{0}asList({1})"; //$NON-NLS-1$
+
 }

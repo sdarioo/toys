@@ -31,36 +31,44 @@ public class ListParamTest
     
     @SuppressWarnings("nls")
     @Test
-    public void testRawList() throws Exception
+    public void testEmptyList() throws Exception
     {
-        List<List<String>> list = new ArrayList<List<String>>();
-        
-        ListParam p = new ListParam(list);
-        
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.asList()", p.toSouceCode(builder));
+        
+        List<String> list = new ArrayList<String>();
+        ListParam p = new ListParam(list);
+        assertEquals("new ArrayList()", p.toSouceCode(builder));
+        
+        Method m = getClass().getMethod("foo1", List.class);
+        p = new ListParam(list, m.getGenericParameterTypes()[0]);
+        assertEquals("new ArrayList<String>()", p.toSouceCode(builder));
     }
     
     @SuppressWarnings("nls")
     @Test
     public void testGenericList() throws Exception
     {
-        Method m = ListParamTest.class.getMethod("foo", List.class);
+        Method m = ListParamTest.class.getMethod("foo2", List.class);
         assertNotNull(m);
         
         List<List<String>> list = new ArrayList<List<String>>();
+        list.add(Collections.<String>emptyList());
         
         ListParam p = new ListParam(list, m.getGenericParameterTypes()[0]);
         
+        foo2(Arrays.<List<String>>asList(new ArrayList<String>()));
+        
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.<List<String>>asList()", p.toSouceCode(builder));
+        assertEquals("Arrays.<List<String>>asList(new ArrayList<String>())", p.toSouceCode(builder));
+        
+        foo2(Arrays.<List<String>>asList(new ArrayList<String>()));
     }
     
     @SuppressWarnings("nls")
     @Test
     public void testWildcardList() throws Exception
     {
-        Method m = ListParamTest.class.getMethod("foo1", List.class);
+        Method m = ListParamTest.class.getMethod("foo3", List.class);
         assertNotNull(m);
         
         List<String> list = new ArrayList<String>();
@@ -68,28 +76,35 @@ public class ListParamTest
         ListParam p = new ListParam(list, m.getGenericParameterTypes()[0]);
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.asList()", p.toSouceCode(builder));
+        assertEquals("new ArrayList()", p.toSouceCode(builder));
     }
     
     @SuppressWarnings("nls")
     @Test
     public void testListOfArrays() throws Exception
     {
-        Method m = ListParamTest.class.getMethod("foo2", List.class);
+        Method m = ListParamTest.class.getMethod("foo4", List.class);
         assertNotNull(m);
         
-        ListParam p = new ListParam(Collections.emptyList(), m.getGenericParameterTypes()[0]);
+        ListParam p = new ListParam(Collections.singletonList(new String[]{"x"}), m.getGenericParameterTypes()[0]);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.<String[]>asList()", p.toSouceCode(builder));
+        assertEquals("Arrays.<String[]>asList(new String[]{\"x\"})", p.toSouceCode(builder));
+        
+        foo4(Arrays.<String[]>asList(new String[]{"x"}));
     }
     
-    public void foo(List<List<String>> list)
+
+    
+    public void foo1(List<String> list)
     {
     }
-    public static <T> void foo1(List<T> list)
+    public void foo2(List<List<String>> list)
     {
     }
-    public void foo2(List<String[]> list)
+    public static <T> void foo3(List<T> list)
+    {
+    }
+    public void foo4(List<String[]> list)
     {
     }
 }

@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class ArrayParam
     extends CollectionParam
 {
+    private final Class<?> _arrayType;
     private final Class<?> _componentType;
     
     ArrayParam(Object array)
@@ -21,8 +23,9 @@ public class ArrayParam
     
     ArrayParam(Object array, Type genericArrayType)
     {
-        super(asList(array), genericArrayType);
+        super(asList(array), new ArrayList<IParameter>(), genericArrayType);
         
+        _arrayType = array.getClass();
         Class<?> componentType = null;
         if (genericArrayType instanceof GenericArrayType) {
             componentType = ParamsUtil.getRawType(((GenericArrayType)genericArrayType).getGenericComponentType());
@@ -46,11 +49,17 @@ public class ArrayParam
     }
 
     @Override
+    protected Class<?> getGeneratedSourceCodeType() 
+    {
+        return _arrayType;
+    }
+    
+    @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
         return MessageFormat.format(TEMPLATE, 
                 builder.getTypeName(_componentType),
-                getValuesSourceCode(builder));
+                getElementsSourceCode(builder));
     }
 
     private static final String TEMPLATE = "new {0}[]'{'{1}'}'"; //$NON-NLS-1$

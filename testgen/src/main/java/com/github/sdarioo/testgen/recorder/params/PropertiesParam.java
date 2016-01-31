@@ -14,39 +14,35 @@ import java.util.Properties;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
-import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class PropertiesParam 
     extends MapParam
 {
     public PropertiesParam(Properties props)
     {
-        super(asMap(props));
+        super(propsToMap(props));
+    }
+    
+    @Override
+    protected Class<?> getGeneratedSourceCodeType() 
+    {
+        return Properties.class;
     }
     
     @SuppressWarnings("nls")
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
+        builder.addImport(Properties.class.getName());
+        
         TestMethod asProps = builder.addHelperMethod(AS_PROPS_TEMPLATE, "asProps"); //$NON-NLS-1$
         TestMethod asPair = builder.addHelperMethod(AS_PAIR_TEMPLATE, "asPair"); //$NON-NLS-1$
      
-        StringBuilder sb = new StringBuilder();
-        for (IParameter[] keyValue : _pairs) {
-            if (sb.length() > 0) {
-                sb.append(", ");
-            }
-            sb.append(asPair.getName());
-            sb.append('(');
-            sb.append(keyValue[0].toSouceCode(builder));
-            sb.append(", ");
-            sb.append(keyValue[1].toSouceCode(builder));
-            sb.append(')');
-        }
-        return MessageFormat.format("{0}({1})", asProps.getName(), sb.toString());
+        String elements = getElementsSourceCode(asPair, builder);
+        return MessageFormat.format("{0}({1})", asProps.getName(), elements);
     }
     
-    private static Map<String, String> asMap(Properties props)
+    private static Map<String, String> propsToMap(Properties props)
     {
         Map<String, String> map = new HashMap<String, String>();
         for (Object key : props.keySet()) {
@@ -58,14 +54,14 @@ public class PropertiesParam
 
     @SuppressWarnings("nls")
     private static final String AS_PAIR_TEMPLATE =
-        "private static String[] {0}(String key, String value) '{'\n" +
-        "    return new String[] '{' key, value'}';\n" +
-        "'}'";
+            "private static String[] {0}(String key, String value) '{'\n" +
+            "    return new String[] '{' key, value'}';\n" +
+            "'}'";
     
     @SuppressWarnings("nls")
     private static final String AS_PROPS_TEMPLATE = 
-            "private static java.util.Properties {0}(String[]... pairs) '{'\n" +
-            "    java.util.Properties p = new java.util.Properties();\n" +
+            "private static Properties {0}(String[]... pairs) '{'\n" +
+            "    Properties p = new Properties();\n" +
             "    for (String[] pair : pairs) '{'\n" +
             "        p.setProperty(pair[0], pair[1]);\n" +
             "    '}'\n" +
