@@ -13,17 +13,12 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.junit.Test;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.TestMethod;
 
 public class SetParamTest 
 {
@@ -38,15 +33,16 @@ public class SetParamTest
     
     @SuppressWarnings("nls")
     @Test
-    public void testEmptySet()
+    public void testEmptySet() throws Exception
     {
         TestSuiteBuilder builder = new TestSuiteBuilder();
         
         SetParam p = new SetParam(new HashSet<String>());
         assertEquals("new HashSet()", p.toSouceCode(builder));
         
-        p = new SetParam(Collections.singleton("s1"));
-        assertEquals("asSet(\"s1\")", p.toSouceCode(builder));
+        Method m = getClass().getMethod("foo", Set.class);
+        p = new SetParam(Collections.emptySet(), m.getGenericParameterTypes()[0]);
+        assertEquals("new HashSet<String>()", p.toSouceCode(new TestSuiteBuilder()));
     }
     
     @Test
@@ -62,27 +58,52 @@ public class SetParamTest
     }
     
     @Test
+    public void testRawSet() throws Exception
+    {
+        SetParam p = new SetParam(Collections.singleton("x"));
+        testSet(p, "asSet(\"x\")", "private static <T> Set<T> asSet(T... elements)  {");
+    }
+    
+    @Test
     public void testGenericSet() throws Exception
     {
         Method m = getClass().getMethod("foo", Set.class);
-        SetParam p = new SetParam(Collections.emptySet(), m.getGenericParameterTypes()[0]);
-        assertEquals("new HashSet<String>()", p.toSouceCode(new TestSuiteBuilder()));
+        SetParam p = new SetParam(Collections.singleton("x"), m.getGenericParameterTypes()[0]);
         
-        p = new SetParam(Collections.singleton("x"), m.getGenericParameterTypes()[0]);
-        assertEquals("asSet(\"x\")", p.toSouceCode(new TestSuiteBuilder()));
+        testSet(p, "asSet(\"x\")", "private static <T> Set<T> asSet(T... elements)  {");
     }
     
-    public void foo(Set<String> set)
+    @Test
+    public void testWildcardSet() throws Exception
     {
+        Method m = getClass().getMethod("foo1", Set.class);
+        SetParam p = new SetParam(Collections.singleton("x"), m.getGenericParameterTypes()[0]);
+        
+        testSet(p, "asSet(\"x\")", "private static <T> Set<T> asSet(T... elements)  {");
     }
-    public static <T> void foo1(Set<T> set)
+    
+    
+    private void testSet(SetParam p, String sourceCode, String helperSignature)
     {
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        assertEquals(sourceCode, p.toSouceCode(builder));
+        
+        List<TestMethod> helperMethods = builder.getHelperMethods();
+        assertEquals(1, helperMethods.size());
+        assertEquals(helperSignature, getFirstLine(helperMethods.get(0).toSourceCode()));
     }
-    public void foo2(Set<String[]> list)
+    
+    
+    private static String getFirstLine(String text)
     {
+        return text.split("\\n")[0];
     }
-    public void foo3(TreeSet set)
-    {
-    }
+    
+    
+ // DONT REMOVE - USED IN TEST
+    public void foo(Set<String> set)        { }
+    public static <T> void foo1(Set<T> set) { }
+    public void foo2(Set<String[]> list)    { }
+    public void foo3(TreeSet set)           { }
 
 }

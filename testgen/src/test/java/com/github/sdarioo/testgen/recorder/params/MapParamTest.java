@@ -1,28 +1,28 @@
 package com.github.sdarioo.testgen.recorder.params;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 
 import org.junit.Test;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.TestMethod;
 
 public class MapParamTest
 {
     @Test
     public void testIsMapSupported() throws Exception
     {
-        Method m = MapParamTest.class.getMethod("foo", Map.class);
+        Method m = MapParamTest.class.getMethod("foo1", Map.class);
         MapParam p = new MapParam(new HashMap(), m.getGenericParameterTypes()[0]);
         assertTrue(p.isSupported(new HashSet<String>()));
         
-        m = MapParamTest.class.getMethod("foo1", TreeMap.class);
+        m = MapParamTest.class.getMethod("foo2", TreeMap.class);
         p = new MapParam(new HashMap(), m.getGenericParameterTypes()[0]);
         assertFalse(p.isSupported(new HashSet<String>()));
     }
@@ -43,20 +43,68 @@ public class MapParamTest
     @Test
     public void testRawMap() throws Exception
     {
-        
+        MapParam p = new MapParam(Collections.emptyMap(), null);
+        testMap(p, "asMap()", "private static Map asMap(Object[]... pairs) {");
     }
     
     @Test
     public void testGenericMap() throws Exception
     {
-        Method m = MapParamTest.class.getMethod("foo", Map.class);
-        MapParam p = new MapParam(Collections.singletonMap(1, "1"), m.getGenericParameterTypes()[0]);
-        assertEquals("asMap(asPair(1, \"1\"))", p.toSouceCode(new TestSuiteBuilder()));
+        Method m = MapParamTest.class.getMethod("foo1", Map.class);
+        MapParam p = new MapParam(Collections.emptyMap(), m.getGenericParameterTypes()[0]);
         
-        fail("fixme");
-        //foo(asMap(asPair(1, "1")));
+        testMap(p, "asMap()", "private static Map<Integer, String> asMap(Object[]... pairs) {");
     }
     
-
+    @Test
+    public void testWildcardMap() throws Exception
+    {
+        Method m = MapParamTest.class.getMethod("foo3", Map.class);
+        MapParam p = new MapParam(Collections.<Integer, String>emptyMap(), m.getGenericParameterTypes()[0]);
+        
+        testMap(p, "asMap()", "private static Map asMap(Object[]... pairs) {");
+    }
     
+    @Test
+    public void testMapOfLists() throws Exception
+    {
+        Method m = MapParamTest.class.getMethod("foo4", Map.class);
+        MapParam p = new MapParam(Collections.<Integer, String>emptyMap(), m.getGenericParameterTypes()[0]);
+        
+        testMap(p, "asMap()", "private static Map<Integer, List<String>> asMap(Object[]... pairs) {");
+    }
+    
+    private void testMap(MapParam p, String sourceCode, String expectedSignature)
+    {
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        assertEquals(sourceCode, p.toSouceCode(builder));
+        
+        List<TestMethod> helperMethods = builder.getHelperMethods();
+        assertEquals(2, helperMethods.size());
+        
+        boolean found = false;
+        for (TestMethod helperMethod : helperMethods) {
+            if (helperMethod.getName().equals("asMap")) {
+                found = true;
+                String signature = getFirstLine(helperMethod.toSourceCode());
+                assertEquals(expectedSignature, signature);
+            }
+        }
+        assertTrue("asMap not found", found);
+    }
+
+    private static String getFirstLine(String text)
+    {
+        return text.split("\\n")[0];
+    }
+
+    // DONT REMOVE - USED IN TEST 
+    public void foo1(Map<Integer, String> map)   {}
+    public void foo2(TreeMap map)                {}
+    public static <K,V> void foo3(Map<K,V> map)  {}
+    public void foo4(Map<Integer, List<String>> map)   {}
+    // DONT REMOVE - USED IN TEST
+    
+    
+
 }

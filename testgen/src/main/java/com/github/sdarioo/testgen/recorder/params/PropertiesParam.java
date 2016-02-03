@@ -24,6 +24,12 @@ public class PropertiesParam
     }
     
     @Override
+    public Class<?> getRecordedType() 
+    {
+        return Properties.class;
+    }
+    
+    @Override
     protected Class<?> getGeneratedSourceCodeType() 
     {
         return Properties.class;

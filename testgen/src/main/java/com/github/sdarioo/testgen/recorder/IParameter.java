@@ -7,12 +7,13 @@
 
 package com.github.sdarioo.testgen.recorder;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 
 /**
- * Base abstraction for method call parameter value
+ * Base abstraction for recorded method call parameter value
  */
 public interface IParameter 
 {
@@ -28,6 +29,17 @@ public interface IParameter
      */
     String toSouceCode(TestSuiteBuilder builder);
     
+    /**
+     * @return parameter type e.g simple Class, generic Type or null if not known
+     */
+    Type getType();
+    
+    /**
+     * @return recorded value type, may be null if recorded null value
+     */
+    Class<?> getRecordedType();
+  
+    
     @Override
     boolean equals(Object obj);
     
@@ -39,12 +51,16 @@ public interface IParameter
     public static final IParameter VOID = new IParameter() {
         public boolean isSupported(Collection<String> errors) { return true; };
         public String toSouceCode(TestSuiteBuilder builder) { return null; };
+        public Type getType() { return Void.class; };
+        public Class<?> getRecordedType() { return Void.class; };
     };
     
     /** Special value that represents null object */
     public static final IParameter NULL = new IParameter() { 
         public boolean isSupported(Collection<String> errors) { return true; };
         public String toSouceCode(TestSuiteBuilder builder) { return "null"; }; //$NON-NLS-1$
+        public Type getType() { return null; };
+        public Class<?> getRecordedType() { return null; };
     };
 
 }

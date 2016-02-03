@@ -37,15 +37,11 @@ public class ArrayParam
         }
         _componentType = componentType;
     }
-
-    private static List<?> asList(Object array)
+    
+    @Override
+    public Class<?> getRecordedType() 
     {
-        List<Object> list = new ArrayList<Object>();
-        int length = Array.getLength(array);
-        for (int i = 0; i < length; i++) {
-            list.add(Array.get(array, i));
-        }
-        return list;
+        return _arrayType;
     }
 
     @Override
@@ -61,6 +57,17 @@ public class ArrayParam
                 builder.getTypeName(_componentType),
                 getElementsSourceCode(builder));
     }
+
+    private static List<?> asList(Object array)
+    {
+        List<Object> list = new ArrayList<Object>();
+        int length = Array.getLength(array);
+        for (int i = 0; i < length; i++) {
+            list.add(Array.get(array, i));
+        }
+        return list;
+    }
+
 
     private static final String TEMPLATE = "new {0}[]'{'{1}'}'"; //$NON-NLS-1$
 }

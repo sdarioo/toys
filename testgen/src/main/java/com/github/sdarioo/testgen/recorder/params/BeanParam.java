@@ -21,28 +21,31 @@ import com.github.sdarioo.testgen.recorder.params.beans.Bean;
 import com.github.sdarioo.testgen.recorder.params.beans.Field;
 
 public class BeanParam
-    implements IParameter
+    extends AbstractParam
 {
     private final Bean _bean;
-    private final Class<?> _clazz;
     
     private final Field[] _fields;
     private final IParameter[] _params;
     
     public BeanParam(Object obj, Bean bean)
     {
+        this(obj, bean, null);
+    }
+    
+    public BeanParam(Object obj, Bean bean, java.lang.reflect.Type genericType)
+    {
+        super(obj.getClass(), genericType);
         _bean = bean;
-        _clazz = obj.getClass();
     
         _fields = new Field[bean.getFields().size()];
         _params = new IParameter[_fields.length];
         for (int i = 0; i < _params.length; i++) {
             _fields[i] = bean.getFields().get(i);
-            Object fieldValue = getFieldValue(obj, _fields[i]);
-            _params[i] = ParamsFactory.newValue(fieldValue);
+            _params[i] = getFieldValue(obj, _fields[i]);
         }
     }
-
+    
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
@@ -59,7 +62,8 @@ public class BeanParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        String type = builder.getTypeName(_clazz);
+         
+        String type = builder.getTypeName(getRecordedType());
         
         StringBuilder sb = new StringBuilder();
         for (IParameter param : _params) {
@@ -89,26 +93,34 @@ public class BeanParam
             return false;
         }
         BeanParam other = (BeanParam)obj;
-        return _clazz.equals(other._clazz) &&
+        return getRecordedType().equals(other.getRecordedType()) &&
                 ParamsUtil.equals(_params, other._params);
     }
     
     @Override
     public int hashCode() 
     {
-        return _clazz.hashCode() + 31 * ParamsUtil.hashCode(_params);
+        return getRecordedType().hashCode() + 31 * ParamsUtil.hashCode(_params);
     }
     
-    private static Object getFieldValue(Object obj, Field field)
+    private static IParameter getFieldValue(Object obj, Field field)
     {
         try {
             java.lang.reflect.Field refield = obj.getClass().getDeclaredField(field.getName());
+            boolean accessible = refield.isAccessible();
             refield.setAccessible(true);
-            return refield.get(obj);
+            Object value = refield.get(obj);
+            java.lang.reflect.Type genericType = refield.getGenericType();
+            
+            
+            
+            
+            refield.setAccessible(accessible);
+            return ParamsFactory.newValue(value, genericType);
         } catch (Throwable e) {
             Logger.error(e.toString());
         }
-        return null;
+        return IParameter.NULL;
     }
     
     private static String getFactoryMethodName(String typeName)
@@ -123,7 +135,7 @@ public class BeanParam
     @SuppressWarnings("nls")
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
-        String template = builder.getTemplatesCache().get(_clazz);
+        String template = builder.getTemplatesCache().get(getRecordedType()); // TODO - generic type
         if (template != null) {
             return template;
         }
@@ -154,15 +166,20 @@ public class BeanParam
             cvals.append(paramName(field));
             fieldsToSet.remove(field);
         }
+        String returnType = builder.getGenericTypeName(getType());
+        if (returnType == null) {
+            returnType = builder.getTypeName(getRecordedType()); 
+        }
+        String instanceType = getRecordedType().equals(ParamsUtil.getRawType(getType())) ? 
+                returnType : builder.getTypeName(getRecordedType()); 
         
         StringBuilder sb = new StringBuilder();
-        String type = builder.getTypeName(_clazz);
         
         // Signature
-        sb.append(MessageFormat.format("private static {0} '{'0'}'({1}) <\n", type, args.toString()));
+        sb.append(MessageFormat.format("private static {0} '{'0'}'({1}) <<\n", returnType, args.toString()));
         
         // Constructor call
-        sb.append(MessageFormat.format("    {0} result = new {0}({1});\n", type, cvals.toString()));
+        sb.append(MessageFormat.format("    {0} result = new {1}({2});\n", returnType, instanceType, cvals.toString()));
         
         // Setter calls + direct field set
         for (Field field : fieldsToSet) {
@@ -175,10 +192,10 @@ public class BeanParam
         }
         
         sb.append("    return result;\n");
-        sb.append(">");
+        sb.append(">>");
         
-        template = sb.toString().replace("<", "'{'").replace(">", "'}'");
-        builder.getTemplatesCache().put(_clazz, template);
+        template = sb.toString().replace("<<", "'{'").replace(">>", "'}'");
+        builder.getTemplatesCache().put(getRecordedType(), template);
         return template;
     }
     

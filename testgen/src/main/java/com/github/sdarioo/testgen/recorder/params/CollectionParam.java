@@ -17,16 +17,15 @@ import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
 
 public abstract class CollectionParam
-    implements IParameter
+    extends AbstractParam
 {
     private final int _originalSize;
     protected final Collection<IParameter> _elements;
     
-    private final Type _genericType;
-    
     protected CollectionParam(Collection<?> collection, Collection<IParameter> elements, Type genericType)
     {
-        _genericType = genericType;
+        super(collection.getClass(), genericType);
+    
         _originalSize = collection.size();
         _elements = elements;
         
@@ -41,11 +40,12 @@ public abstract class CollectionParam
     
     protected abstract Class<?> getGeneratedSourceCodeType();
     
+    
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
-        if (!ParamsUtil.isTypeCompatible(_genericType, getGeneratedSourceCodeType())) {
-            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(_genericType)); //$NON-NLS-1$
+        if (!ParamsUtil.isTypeCompatible(getType(), getGeneratedSourceCodeType())) {
+            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(getType())); //$NON-NLS-1$
             return false;
         }
         
@@ -75,12 +75,12 @@ public abstract class CollectionParam
     }
 
     /**
-     * @return collection element generic type or null if unknown
+     * @return collection element generic type or null if collection is not parameterized type
      */
     protected Type getElementType()
     {
-        if (_genericType instanceof ParameterizedType) {
-            return ((ParameterizedType)_genericType).getActualTypeArguments()[0];
+        if (getType() instanceof ParameterizedType) {
+            return ((ParameterizedType)getType()).getActualTypeArguments()[0];
         }
         return null;
     }
@@ -94,7 +94,7 @@ public abstract class CollectionParam
     {
         Type elementType = getElementType();
         String elementTypeName = builder.getGenericTypeName(elementType);
-        return (elementTypeName != null) ? ('<' + elementTypeName + '>') : "";
+        return (elementTypeName != null) ? ('<' + elementTypeName + '>') : ""; //$NON-NLS-1$
     }
     
     @Override

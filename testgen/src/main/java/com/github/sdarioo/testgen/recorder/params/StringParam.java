@@ -16,10 +16,9 @@ import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
-import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class StringParam
-    implements IParameter
+    extends AbstractParam
 {
     private final String _value;
     
@@ -29,6 +28,7 @@ public class StringParam
      */
     public StringParam(String value)
     {
+        super(String.class, String.class);
         _value = value;
     }
     

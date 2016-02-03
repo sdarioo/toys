@@ -125,6 +125,49 @@ public class TestSuiteBuilder
         return resource;
     }
     
+    /**
+     * Returns type name used by code generators. If using short type names than
+     * apropriate import will be added to this builder.
+     * @param type class
+     * @param builder test class builder
+     * @return type name 
+     */
+    public String getTypeName(Class<?> type)
+    {
+        return getTypeName(type.getName());
+    }
+    
+    public String getTypeName(String className)
+    {
+        if (_useFullTypeNames) {
+            return className;
+        }
+        // Add required import
+        String componentType = className;
+        int index = className.lastIndexOf('[');
+        if (index >= 0) {
+            componentType =  getElementType(className);
+        }
+        if (componentType.lastIndexOf('.') > 0) {
+            String pkg = ClassUtils.getPackageCanonicalName(componentType);
+            if (pkg.length() > 0) {
+                String outClassName = ClassUtils.getShortCanonicalName(componentType);
+                if (outClassName.indexOf('.') > 0) {
+                    outClassName = outClassName.substring(0, outClassName.indexOf('.'));
+                }
+                addImport(pkg + '.' + outClassName);
+            }
+        }
+        // Create short name
+        String shortName = ClassUtils.getShortCanonicalName(className);
+        return shortName;
+    }
+    
+    /**
+     * Returns type name with generic type information if available e.g 'List<String>'
+     * @param type
+     * @return
+     */
     public String getGenericTypeName(java.lang.reflect.Type type)
     {
         if (type == null) {
@@ -166,44 +209,6 @@ public class TestSuiteBuilder
     }
     
     /**
-     * Returns type name used by code generators. If using short type names than
-     * apropriate import will be added to this builder.
-     * @param type class
-     * @param builder test class builder
-     * @return type name 
-     */
-    public String getTypeName(Class<?> type)
-    {
-        return getTypeName(type.getName());
-    }
-    
-    public String getTypeName(String className)
-    {
-        if (_useFullTypeNames) {
-            return className;
-        }
-        // Add required import
-        String componentType = className;
-        int index = className.lastIndexOf('[');
-        if (index >= 0) {
-            componentType =  getElementType(className);
-        }
-        if (componentType.lastIndexOf('.') > 0) {
-            String pkg = ClassUtils.getPackageCanonicalName(componentType);
-            if (pkg.length() > 0) {
-                String outClassName = ClassUtils.getShortCanonicalName(componentType);
-                if (outClassName.indexOf('.') > 0) {
-                    outClassName = outClassName.substring(0, outClassName.indexOf('.'));
-                }
-                addImport(pkg + '.' + outClassName);
-            }
-        }
-        // Create short name
-        String shortName = ClassUtils.getShortCanonicalName(className);
-        return shortName;
-    }
-    
-    /**
      * @see com.github.sdarioo.testgen.generator.IUniqueNamesProvider#newUniqueMethodName(java.lang.String)
      */
     @Override
@@ -232,10 +237,15 @@ public class TestSuiteBuilder
         return _templatesCache;
     }
     
-    // Method exposed for junit tests
-    Set<String> getImports()
+    
+    public Set<String> getImports()
     {
         return Collections.unmodifiableSet(_imports);
+    }
+    
+    public List<TestMethod> getHelperMethods()
+    {
+        return new ArrayList<TestMethod>(_helperMethods.values());
     }
  
     private String toResourceName(String suffix)

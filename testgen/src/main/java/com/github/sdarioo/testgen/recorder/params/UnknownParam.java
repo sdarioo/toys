@@ -13,19 +13,18 @@ import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class UnknownParam
-    implements IParameter
+    extends AbstractParam
 {
-    private final Class<?> _clazz;
     
     public UnknownParam(Class<?> clazz)
     {
-        _clazz = clazz;
+        super(clazz, null);
     }
     
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
-        errors.add("Unsupported type: " + _clazz.getName()); //$NON-NLS-1$
+        errors.add("Unsupported type: " + getRecordedType().getName()); //$NON-NLS-1$
         return false;
     }
 
@@ -42,13 +41,13 @@ public class UnknownParam
             return false;
         }
         UnknownParam other = (UnknownParam)obj;
-        return _clazz.equals(other._clazz);
+        return getRecordedType().equals(other.getRecordedType());
     }
     
     @Override
     public int hashCode() 
     {
-        return _clazz.hashCode();
+        return getRecordedType().hashCode();
     }
     
 }

@@ -15,9 +15,8 @@ import com.github.sdarioo.testgen.recorder.IParameter;
  * - valueOf(String)
  */
 public class StringWrapperParam
-    implements IParameter
+    extends AbstractParam
 {
-    private final Class<?> _clazz;
     private final StringParam _stringParam;
     
     private static final String FROM_STRING = "fromString"; //$NON-NLS-1$
@@ -32,7 +31,7 @@ public class StringWrapperParam
     
     public StringWrapperParam(Object value)
     {
-        _clazz = value.getClass();
+        super(value.getClass(), null);
         _stringParam = new StringParam(value.toString());
     }
 
@@ -45,12 +44,14 @@ public class StringWrapperParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder)
     {
-        String typeName = builder.getTypeName(_clazz);
+        Class<?> clazz = getRecordedType();
+        
+        String typeName = builder.getTypeName(clazz);
         String str = _stringParam.toSouceCode(builder);
         
-        Method method = getFactoryMethod(_clazz, FROM_STRING, _clazz);
+        Method method = getFactoryMethod(clazz, FROM_STRING, clazz);
         if (method == null) {
-            method = getFactoryMethod(_clazz, VALUE_OF, _clazz);
+            method = getFactoryMethod(clazz, VALUE_OF, clazz);
             if (method == null) {
                 return IParameter.NULL.toSouceCode(builder);
             }
@@ -61,7 +62,7 @@ public class StringWrapperParam
     @Override
     public int hashCode() 
     {
-        return Objects.hash(_clazz, _stringParam);
+        return Objects.hash(getRecordedType(), _stringParam);
     }
     
     @Override
@@ -74,17 +75,8 @@ public class StringWrapperParam
             return false;
         }
         StringWrapperParam other = (StringWrapperParam)obj;
-        return _clazz.equals(other._clazz) && _stringParam.equals(other._stringParam);
+        return getRecordedType().equals(other.getRecordedType()) && _stringParam.equals(other._stringParam);
     }
-    
-//    private static Constructor<?> getConstructor(Class<?> clazz)
-//    {
-//        try {
-//            return clazz.getConstructor(String.class);
-//        } catch (NoSuchMethodException | SecurityException e) {
-//            return null;
-//        }
-//    }
     
     private static Method getFactoryMethod(Class<?> clazz, String name, Class<?> returnType)
     {

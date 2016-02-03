@@ -10,17 +10,15 @@ import org.apache.commons.lang3.SerializationUtils;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
-import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class SerializableParam
-    implements IParameter
+    extends AbstractParam
 {
-    private final Class<?> _clazz;
     private final byte[] _bytes;
     
     public SerializableParam(Serializable value)
     {
-        _clazz = value.getClass();
+        super(value.getClass(), null);
         _bytes = SerializationUtils.serialize(value);
     }
 
@@ -29,14 +27,14 @@ public class SerializableParam
     {
         return true;
     }
-
+    
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
         builder.addImport("java.io.*"); //$NON-NLS-1$
         String template = getFactoryMethodTemplate(builder);
         
-        String resName = ClassUtils.getShortCanonicalName(_clazz);
+        String resName = ClassUtils.getShortCanonicalName(getRecordedType());
         
         ResourceFile resFile = builder.addResource(_bytes, resName);
         TestMethod deserialize = builder.addHelperMethod(template, "deserialize"); //$NON-NLS-1$
@@ -46,11 +44,12 @@ public class SerializableParam
     
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
-        String template = builder.getTemplatesCache().get(_clazz);
+        Class<?> clazz = getRecordedType();
+        String template = builder.getTemplatesCache().get(clazz);
         if (template == null) {
-            String typeName = builder.getTypeName(_clazz);
+            String typeName = builder.getTypeName(clazz);
             template = DESERIALIZE_TEMPLATE_TEMPLATE.replace("<TYPE>", typeName); //$NON-NLS-1$
-            builder.getTemplatesCache().put(_clazz, template);
+            builder.getTemplatesCache().put(clazz, template);
         }
         return template;
     }
@@ -68,13 +67,13 @@ public class SerializableParam
             return false;
         }
         SerializableParam other = (SerializableParam)obj;
-        return _clazz.equals(other._clazz) && Arrays.equals(_bytes, other._bytes);
+        return getRecordedType().equals(other.getRecordedType()) && Arrays.equals(_bytes, other._bytes);
     }
     
     @Override
     public int hashCode() 
     {
-        return _clazz.hashCode() + 31 * Arrays.hashCode(_bytes);
+        return getRecordedType().hashCode() + 31 * Arrays.hashCode(_bytes);
     }
     
     @SuppressWarnings("nls")

@@ -10,14 +10,15 @@ package com.github.sdarioo.testgen.recorder.params;
 import java.util.Collection;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
-import com.github.sdarioo.testgen.recorder.IParameter;
 
-public class PrimitiveParam implements IParameter
+public class PrimitiveParam 
+    extends AbstractParam
 {
     private final String _sourceCode;
     
-    PrimitiveParam(String sourceCode)
+    PrimitiveParam(String sourceCode, Class<?> type)
     {
+        super(type, type);
         _sourceCode = sourceCode;
     }
     
@@ -26,7 +27,7 @@ public class PrimitiveParam implements IParameter
     {
         return true;
     }
-    
+        
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {

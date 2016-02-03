@@ -18,9 +18,8 @@ import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class MapParam
-    implements IParameter
+    extends AbstractParam
 {
-    private final Type _genericType;
     private final int _originalSize;
     
     private final Map<IParameter, IParameter> _elements;
@@ -32,7 +31,8 @@ public class MapParam
     
     public MapParam(Map<?,?> map, Type genericType)
     {
-        _genericType = genericType;
+        super(map.getClass(), genericType);
+        
         _originalSize = map.size();
         _elements = new HashMap<IParameter, IParameter>();
         
@@ -51,8 +51,8 @@ public class MapParam
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
-        if (!ParamsUtil.isTypeCompatible(_genericType, getGeneratedSourceCodeType())) {
-            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(_genericType)); //$NON-NLS-1$
+        if (!ParamsUtil.isTypeCompatible(getType(), getGeneratedSourceCodeType())) {
+            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(getType())); //$NON-NLS-1$
             return false;
         }
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
@@ -80,7 +80,8 @@ public class MapParam
         builder.addImport(Map.class.getName());
         builder.addImport(HashMap.class.getName());
         
-        TestMethod asMap = builder.addHelperMethod(AS_MAP_TEMPLATE, "asMap"); //$NON-NLS-1$
+        String asMapTemplate = getAsMapTemplate(builder);
+        TestMethod asMap = builder.addHelperMethod(asMapTemplate, "asMap"); //$NON-NLS-1$
         TestMethod asPair = builder.addHelperMethod(AS_PAIR_TEMPLATE, "asPair"); //$NON-NLS-1$
 
         String elements = getElementsSourceCode(asPair, builder);
@@ -90,16 +91,16 @@ public class MapParam
 
     private Type getKeyType()
     {
-        if (_genericType instanceof ParameterizedType) {
-            return ((ParameterizedType)_genericType).getActualTypeArguments()[0];
+        if (getType() instanceof ParameterizedType) {
+            return ((ParameterizedType)getType()).getActualTypeArguments()[0];
         }
         return null;
     }
     
     private Type getValueType()
     {
-        if (_genericType instanceof ParameterizedType) {
-            return ((ParameterizedType)_genericType).getActualTypeArguments()[1];
+        if (getType() instanceof ParameterizedType) {
+            return ((ParameterizedType)getType()).getActualTypeArguments()[1];
         }
         return null;
     }
@@ -134,19 +135,42 @@ public class MapParam
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<IParameter, IParameter> entry : _elements.entrySet()) {
             if (sb.length() > 0) {
-                sb.append(", ");
+                sb.append(", "); //$NON-NLS-1$
             }
             sb.append(asPair.getName());
             sb.append('(');
             sb.append(entry.getKey().toSouceCode(builder));
-            sb.append(", ");
+            sb.append(", "); //$NON-NLS-1$
             sb.append(entry.getValue().toSouceCode(builder));
             sb.append(')');
         }
         return sb.toString();
     }
     
-
+    @SuppressWarnings("nls")
+    private String getAsMapTemplate(TestSuiteBuilder builder)
+    {
+        Type keyType = getKeyType();
+        Type valType = getValueType();
+        
+        String keyTypeName = builder.getGenericTypeName(keyType);
+        String valTypeName = builder.getGenericTypeName(valType);
+        
+        String mapType = "";
+        String castKey = "";
+        String castVal = "";
+        if ((keyTypeName != null) && (valTypeName != null)) {
+            mapType = MessageFormat.format("<{0}, {1}>", keyTypeName, valTypeName);
+            castKey = '(' + keyTypeName + ')';
+            castVal = '(' + valTypeName + ')';
+        }
+        String template = AS_MAP_TEMPLATE_TEMPLATE.replace("#1#", mapType);
+        template = template.replace("#2#", castKey);
+        template = template.replace("#3#", castVal);
+        return template;
+    }
+    
+    
     @SuppressWarnings("nls")
     private static final String AS_PAIR_TEMPLATE =
         "private static Object[] {0}(Object key, Object value) '{'\n" +
@@ -154,11 +178,11 @@ public class MapParam
         "'}'";
     
     @SuppressWarnings("nls")
-    private static final String AS_MAP_TEMPLATE = 
-            "private static <K,V> Map<K,V> {0}(Object[]... pairs) '{'\n" +
-            "    Map<K,V> map = new HashMap<K,V>();\n" +
+    private static final String AS_MAP_TEMPLATE_TEMPLATE = 
+            "private static Map#1# {0}(Object[]... pairs) '{'\n" +
+            "    Map#1# map = new HashMap#1#();\n" +
             "    for (Object[] pair : pairs) '{'\n" +
-            "        map.put((K)pair[0], (V)pair[1]);\n" +
+            "        map.put(#2#pair[0], #3#pair[1]);\n" +
             "    '}'\n" +
             "    return map;\n" +
             "}";

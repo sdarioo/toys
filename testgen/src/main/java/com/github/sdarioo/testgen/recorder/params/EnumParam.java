@@ -3,20 +3,18 @@ package com.github.sdarioo.testgen.recorder.params;
 import java.util.Collection;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
-import com.github.sdarioo.testgen.recorder.IParameter;
 
 public class EnumParam
-    implements IParameter
+    extends AbstractParam
 {
-    private final Class<?> _enumClass;
     private final String _name;
     
     EnumParam(Enum<?> e)
     {
-        _enumClass = e.getClass();
+        super(e.getClass(), null);
         _name = e.toString();
     }
-
+    
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
@@ -26,14 +24,14 @@ public class EnumParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        String enumClass = builder.getTypeName(_enumClass);
+        String enumClass = builder.getTypeName(getRecordedType());
         return enumClass + '.' + _name;
     }
     
     @Override
     public int hashCode() 
     {
-        return _enumClass.hashCode() + 31 * _name.hashCode();
+        return getRecordedType().hashCode() + 31 * _name.hashCode();
     }
     
     @Override
@@ -43,6 +41,6 @@ public class EnumParam
             return false;
         }
         EnumParam other = (EnumParam)obj;
-        return _enumClass.equals(other._enumClass) && _name.equals(other._name);
+        return getRecordedType().equals(other.getRecordedType()) && _name.equals(other._name);
     }
 }

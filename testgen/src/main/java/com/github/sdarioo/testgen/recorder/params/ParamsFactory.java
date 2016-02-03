@@ -41,7 +41,7 @@ public final class ParamsFactory
             return new EnumParam((Enum<?>)value);
         }
         if (ClassUtils.isPrimitiveWrapper(value.getClass())) {
-            return toPrimitiveValue(value);
+            return toPrimitiveValue(value, paramType);
         }
         
         // Collections
@@ -61,7 +61,7 @@ public final class ParamsFactory
         // Java Bean
         Bean bean = BeanFactory.getInstance().getBean(clazz);
         if (bean != null) {
-            return new BeanParam(value, bean);
+            return new BeanParam(value, bean, paramType);
         }
         // Class with fromString or valueOf factory methods
         if (StringWrapperParam.isStringWrapper(value)) {
@@ -75,7 +75,7 @@ public final class ParamsFactory
         return new UnknownParam(value.getClass());
     }
         
-    private static IParameter toPrimitiveValue(Object value)
+    private static IParameter toPrimitiveValue(Object value, Type paramType)
     {
         String str = null;
         if (value instanceof Boolean) {
@@ -96,7 +96,8 @@ public final class ParamsFactory
         } else if (value instanceof Float) {
             str = value.toString() + 'f';
         }
-        return (str != null) ? new PrimitiveParam(str) : new UnknownParam(value.getClass());
+        Class<?> type = ParamsUtil.getRawType(paramType);
+        return (str != null) ? new PrimitiveParam(str, type) : new UnknownParam(value.getClass());
     }
     
     

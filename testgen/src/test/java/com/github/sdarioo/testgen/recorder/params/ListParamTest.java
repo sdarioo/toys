@@ -49,7 +49,6 @@ public class ListParamTest
     public void testGenericList() throws Exception
     {
         Method m = ListParamTest.class.getMethod("foo2", List.class);
-        assertNotNull(m);
         
         List<List<String>> list = new ArrayList<List<String>>();
         list.add(Collections.<String>emptyList());
@@ -69,7 +68,6 @@ public class ListParamTest
     public void testWildcardList() throws Exception
     {
         Method m = ListParamTest.class.getMethod("foo3", List.class);
-        assertNotNull(m);
         
         List<String> list = new ArrayList<String>();
         
@@ -84,27 +82,15 @@ public class ListParamTest
     public void testListOfArrays() throws Exception
     {
         Method m = ListParamTest.class.getMethod("foo4", List.class);
-        assertNotNull(m);
         
         ListParam p = new ListParam(Collections.singletonList(new String[]{"x"}), m.getGenericParameterTypes()[0]);
         TestSuiteBuilder builder = new TestSuiteBuilder();
         assertEquals("Arrays.<String[]>asList(new String[]{\"x\"})", p.toSouceCode(builder));
-        
-        foo4(Arrays.<String[]>asList(new String[]{"x"}));
     }
-    
 
-    
-    public void foo1(List<String> list)
-    {
-    }
-    public void foo2(List<List<String>> list)
-    {
-    }
-    public static <T> void foo3(List<T> list)
-    {
-    }
-    public void foo4(List<String[]> list)
-    {
-    }
+ // DONT REMOVE - USED IN TEST
+    public void foo1(List<String> list)        { }
+    public void foo2(List<List<String>> list)  { }
+    public static <T> void foo3(List<T> list)  { }
+    public void foo4(List<String[]> list)      { }
 }
