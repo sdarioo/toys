@@ -30,7 +30,7 @@ public interface IParameter
     String toSouceCode(TestSuiteBuilder builder);
     
     /**
-     * @return parameter type e.g simple Class, generic Type or null if not known
+     * @return parameter type declaration in recorded method e.g simple class or generic class. May be null. 
      */
     Type getType();
     

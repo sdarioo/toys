@@ -7,10 +7,11 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -91,18 +92,14 @@ public class MapParam
 
     private Type getKeyType()
     {
-        if (getType() instanceof ParameterizedType) {
-            return ((ParameterizedType)getType()).getActualTypeArguments()[0];
-        }
-        return null;
+        Type[] argTypes = getActualTypeArguments();
+        return argTypes.length == 2 ? argTypes[0] : null;
     }
     
     private Type getValueType()
     {
-        if (getType() instanceof ParameterizedType) {
-            return ((ParameterizedType)getType()).getActualTypeArguments()[1];
-        }
-        return null;
+        Type[] argTypes = getActualTypeArguments();
+        return argTypes.length == 2 ? argTypes[1] : null;
     }
     
     @Override

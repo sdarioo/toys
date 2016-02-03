@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import com.github.sdarioo.testgen.recorder.IParameter;
@@ -33,5 +34,18 @@ public abstract class AbstractParam
     public Type getType() 
     {
         return _paramType;
+    }
+    
+    /**
+     * If this parameter type represents parameterized generic type than return array
+     * of actual type arguments. Otheriwse returns empty array
+     * @return
+     */
+    protected Type[] getActualTypeArguments()
+    {
+        if (_paramType instanceof ParameterizedType) {
+            return ((ParameterizedType)_paramType).getActualTypeArguments();
+        }
+        return new Type[0];
     }
 }

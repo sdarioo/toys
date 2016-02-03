@@ -7,6 +7,8 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -33,14 +35,17 @@ public class BeanParam
         this(obj, bean, null);
     }
     
-    public BeanParam(Object obj, Bean bean, java.lang.reflect.Type genericType)
+    public BeanParam(Object obj, Bean bean, java.lang.reflect.Type paramType)
     {
-        super(obj.getClass(), genericType);
+        super(obj.getClass(), paramType);
         _bean = bean;
     
-        _fields = new Field[bean.getFields().size()];
-        _params = new IParameter[_fields.length];
-        for (int i = 0; i < _params.length; i++) {
+        int length = bean.getFields().size();
+        
+        _fields = new Field[length];
+        _params = new IParameter[length];
+        
+        for (int i = 0; i < length; i++) {
             _fields[i] = bean.getFields().get(i);
             _params[i] = getFieldValue(obj, _fields[i]);
         }
@@ -62,9 +67,6 @@ public class BeanParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-         
-        String type = builder.getTypeName(getRecordedType());
-        
         StringBuilder sb = new StringBuilder();
         for (IParameter param : _params) {
             if (sb.length() > 0) {
@@ -73,7 +75,7 @@ public class BeanParam
             sb.append(param.toSouceCode(builder));
         }
         
-        String factoryMethodName = getFactoryMethodName(type);
+        String factoryMethodName = getFactoryMethodName(builder);
         String factoryMethodTemplate = getFactoryMethodTemplate(builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
@@ -103,56 +105,66 @@ public class BeanParam
         return getRecordedType().hashCode() + 31 * ParamsUtil.hashCode(_params);
     }
     
-    private static IParameter getFieldValue(Object obj, Field field)
+    private IParameter getFieldValue(Object obj, Field field)
     {
+        TypeVariable<?>[] typeParams = obj.getClass().getTypeParameters();
+        Type[] actualTypeParams = getActualTypeArguments();
+        
         try {
             java.lang.reflect.Field refield = obj.getClass().getDeclaredField(field.getName());
             boolean accessible = refield.isAccessible();
             refield.setAccessible(true);
             Object value = refield.get(obj);
-            java.lang.reflect.Type genericType = refield.getGenericType();
-            
-            
-            
+            Type fieldType = refield.getGenericType();
+            int index = Arrays.asList(typeParams).indexOf(fieldType);
+            if (index >= 0 && (typeParams.length == actualTypeParams.length)) {
+                fieldType = actualTypeParams[index];
+            }
             
             refield.setAccessible(accessible);
-            return ParamsFactory.newValue(value, genericType);
+            return ParamsFactory.newValue(value, fieldType);
         } catch (Throwable e) {
             Logger.error(e.toString());
         }
         return IParameter.NULL;
     }
     
-    private static String getFactoryMethodName(String typeName)
+    private String getFactoryMethodName(TestSuiteBuilder builder)
     {
-        int index = typeName.lastIndexOf('.');
+        String objectClass = builder.getTypeName(getRecordedType());
+        int index = objectClass.lastIndexOf('.');
         if (index > 0) {
-            typeName = typeName.substring(index + 1);
+            objectClass = objectClass.substring(index + 1);
         }
-        return "new" + typeName; //$NON-NLS-1$
+        return "new" + objectClass; //$NON-NLS-1$
     }
     
     @SuppressWarnings("nls")
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
-        String template = builder.getTemplatesCache().get(getRecordedType()); // TODO - generic type
+        Type type = (getType() != null) ? getType() : getRecordedType();
+        
+        String template = builder.getTemplatesCache().get(type);
         if (template != null) {
             return template;
         }
         
         // Method signature arguments
         StringBuilder args = new StringBuilder();
-        for (Field field : _fields) {
+        for (int i = 0; i < _fields.length; i++) {
             if (args.length() > 0) {
                 args.append(", ");
             }
-            org.objectweb.asm.Type type = org.objectweb.asm.Type.getType(field.getDesc());
-            String className = InstrumentUtil.isPrimitive(type) ? 
-                    type.getClassName() : 
-                    type.getInternalName().replace('/', '.');
-                    
-            className = builder.getTypeName(className);
-            args.append(className).append(' ').append(paramName(field));
+            String fieldType = builder.getGenericTypeName(_params[i].getType());
+            if (fieldType == null) {
+                org.objectweb.asm.Type asmType = org.objectweb.asm.Type.getType(_fields[i].getDesc());
+                String className = InstrumentUtil.isPrimitive(asmType) ? 
+                        asmType.getClassName() : 
+                            asmType.getInternalName().replace('/', '.');
+                        
+                fieldType = builder.getTypeName(className);
+            }
+            args.append(fieldType).append(' ').append(paramName(_fields[i]));
         }
         
         Set<Field> fieldsToSet = new HashSet<Field>(Arrays.asList(_fields));
@@ -166,11 +178,9 @@ public class BeanParam
             cvals.append(paramName(field));
             fieldsToSet.remove(field);
         }
-        String returnType = builder.getGenericTypeName(getType());
-        if (returnType == null) {
-            returnType = builder.getTypeName(getRecordedType()); 
-        }
-        String instanceType = getRecordedType().equals(ParamsUtil.getRawType(getType())) ? 
+        String returnType = builder.getGenericTypeName(type);
+        
+        String instanceType = getRecordedType().equals(ParamsUtil.getRawType(type)) ? 
                 returnType : builder.getTypeName(getRecordedType()); 
         
         StringBuilder sb = new StringBuilder();
@@ -195,7 +205,7 @@ public class BeanParam
         sb.append(">>");
         
         template = sb.toString().replace("<<", "'{'").replace(">>", "'}'");
-        builder.getTemplatesCache().put(getRecordedType(), template);
+        builder.getTemplatesCache().put(type, template);
         return template;
     }
     
@@ -207,4 +217,5 @@ public class BeanParam
         }
         return name;
     }
+    
 }

@@ -19,7 +19,7 @@ public class UniqueNamesProviderTest
     {
         IUniqueNamesProvider provider = new TestSuiteBuilder();
         assertEquals("method", provider.newUniqueMethodName("method"));
-        assertEquals("method1", provider.newUniqueMethodName("method"));
+        assertEquals("method2", provider.newUniqueMethodName("method"));
     }
     
     @SuppressWarnings("nls")
@@ -29,10 +29,10 @@ public class UniqueNamesProviderTest
         IUniqueNamesProvider provider = new TestSuiteBuilder();
         
         assertEquals("test.txt", provider.newUniqueFileName("test.txt"));
-        assertEquals("test1.txt", provider.newUniqueFileName("test.txt"));
         assertEquals("test2.txt", provider.newUniqueFileName("test.txt"));
+        assertEquals("test3.txt", provider.newUniqueFileName("test.txt"));
         
         assertEquals("readme", provider.newUniqueFileName("readme"));
-        assertEquals("readme1", provider.newUniqueFileName("readme"));
+        assertEquals("readme2", provider.newUniqueFileName("readme"));
     }
 }

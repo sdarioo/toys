@@ -3,6 +3,8 @@
 
 2. Nadpisywanie istniejącego testu
 
+3. Factory should peek params based on param type
+
 3. Interfejse proxy params
 
 

@@ -1,13 +1,11 @@
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Objects;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
-import com.github.sdarioo.testgen.recorder.IParameter;
 
 /**
  * Represents classes that has constructor with single String argument or static factory method:
@@ -18,20 +16,19 @@ public class StringWrapperParam
     extends AbstractParam
 {
     private final StringParam _stringParam;
+    private final String _factoryMethod;
+
     
-    private static final String FROM_STRING = "fromString"; //$NON-NLS-1$
-    private static final String VALUE_OF = "valueOf"; //$NON-NLS-1$
-    
-    public static boolean isStringWrapper(Object value)
+    public StringWrapperParam(Object value, String factoryMethod)
     {
-        Class<?> clazz = value.getClass();
-        return (getFactoryMethod(clazz, FROM_STRING, value.getClass()) != null) ||
-               (getFactoryMethod(clazz, VALUE_OF, value.getClass()) != null);
+        this(value, factoryMethod, null);
     }
     
-    public StringWrapperParam(Object value)
+    public StringWrapperParam(Object value, String factoryMethod, Type paramType)
     {
-        super(value.getClass(), null);
+        super(value.getClass(), paramType);
+        
+        _factoryMethod = factoryMethod;
         _stringParam = new StringParam(value.toString());
     }
 
@@ -49,14 +46,8 @@ public class StringWrapperParam
         String typeName = builder.getTypeName(clazz);
         String str = _stringParam.toSouceCode(builder);
         
-        Method method = getFactoryMethod(clazz, FROM_STRING, clazz);
-        if (method == null) {
-            method = getFactoryMethod(clazz, VALUE_OF, clazz);
-            if (method == null) {
-                return IParameter.NULL.toSouceCode(builder);
-            }
-        }
-        return MessageFormat.format("{0}.{1}({2})", typeName, method.getName(), str); //$NON-NLS-1$
+        
+        return MessageFormat.format("{0}.{1}({2})", typeName, _factoryMethod, str); //$NON-NLS-1$
     }
     
     @Override
@@ -78,17 +69,6 @@ public class StringWrapperParam
         return getRecordedType().equals(other.getRecordedType()) && _stringParam.equals(other._stringParam);
     }
     
-    private static Method getFactoryMethod(Class<?> clazz, String name, Class<?> returnType)
-    {
-        try {
-            Method method = clazz.getMethod(name, String.class);
-            if (Modifier.isStatic(method.getModifiers()) &&
-                    returnType.equals(method.getReturnType())) 
-            {
-                return method;
-            }
-        } catch (NoSuchMethodException | SecurityException e1) {}
-        return null;
-    }
+
     
 }

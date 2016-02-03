@@ -33,7 +33,7 @@ public class ArrayParam
             componentType = ((Class<?>)genericArrayType).getComponentType();
         }
         if (componentType == null) {
-            componentType = array.getClass().getComponentType();
+            componentType = _arrayType.getComponentType();
         }
         _componentType = componentType;
     }

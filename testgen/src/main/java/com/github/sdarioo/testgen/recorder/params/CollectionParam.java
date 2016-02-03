@@ -7,7 +7,6 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
 import java.util.Collection;
@@ -22,9 +21,11 @@ public abstract class CollectionParam
     private final int _originalSize;
     protected final Collection<IParameter> _elements;
     
-    protected CollectionParam(Collection<?> collection, Collection<IParameter> elements, Type genericType)
+    protected CollectionParam(Collection<?> collection, 
+            Collection<IParameter> elements, 
+            Type paramType)
     {
-        super(collection.getClass(), genericType);
+        super(collection.getClass(), paramType);
     
         _originalSize = collection.size();
         _elements = elements;
@@ -79,10 +80,8 @@ public abstract class CollectionParam
      */
     protected Type getElementType()
     {
-        if (getType() instanceof ParameterizedType) {
-            return ((ParameterizedType)getType()).getActualTypeArguments()[0];
-        }
-        return null;
+        Type[] argTypes = getActualTypeArguments();
+        return argTypes.length == 1 ? argTypes[0] : null;
     }
     
     /**

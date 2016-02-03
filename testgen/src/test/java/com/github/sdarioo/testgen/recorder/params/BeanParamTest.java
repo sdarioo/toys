@@ -18,8 +18,8 @@ public class BeanParamTest
     {
         BeanParam p1 = new BeanParam(new Bean1(), BeanFactory.getInstance().getBean(Bean1.class));
         BeanParam p2 = new BeanParam(new Bean1(), BeanFactory.getInstance().getBean(Bean1.class));
-        BeanParam p3 = new BeanParam(new Bean2(0), BeanFactory.getInstance().getBean(Bean2.class));
-        BeanParam p4 = new BeanParam(new Bean2(1), BeanFactory.getInstance().getBean(Bean2.class));
+        BeanParam p3 = new BeanParam(new Bean2(new Bean1()), BeanFactory.getInstance().getBean(Bean2.class));
+        BeanParam p4 = new BeanParam(new Bean2(null), BeanFactory.getInstance().getBean(Bean2.class));
         
         assertEquals(p1, p2);
         assertNotEquals(p1, p3);
@@ -30,14 +30,27 @@ public class BeanParamTest
     public void toSourceCode()
     {
         BeanParam p1 = new BeanParam(new Bean1(), BeanFactory.getInstance().getBean(Bean1.class));
-        BeanParam p2 = new BeanParam(new Bean2(0), BeanFactory.getInstance().getBean(Bean2.class));
+        BeanParam p2 = new BeanParam(new Bean2(new Bean1()), BeanFactory.getInstance().getBean(Bean2.class));
         BeanParam p3 = new BeanParam(new Bean3(), BeanFactory.getInstance().getBean(Bean3.class));
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
         assertEquals("newBean1(0, 0)", p1.toSouceCode(builder));
-        assertEquals("newBean2(0)", p2.toSouceCode(builder));
+        assertEquals("newBean2(newBean1(0, 0))", p2.toSouceCode(builder));
         assertEquals("newBean3(0)", p3.toSouceCode(builder));
     }
+    
+    @Test
+    public void testSimpleBeans()
+    {
+        BeanParam p1 = new BeanParam(new Bean1(), BeanFactory.getInstance().getBean(Bean1.class));
+        BeanParam p2 = new BeanParam(new Bean2(null), BeanFactory.getInstance().getBean(Bean2.class));
+        BeanParam p3 = new BeanParam(new Bean3(), BeanFactory.getInstance().getBean(Bean3.class));
+        
+        testBeanParam(p1, "newBean1(0, 0)", "private static BeanParamTest.Bean1 newBean1(int x, int y) {");
+        testBeanParam(p2, "newBean2(null)", "private static BeanParamTest.Bean2 newBean2(BeanParamTest.Bean1 x) {");
+        testBeanParam(p3, "newBean3(0)", "private static BeanParamTest.Bean3 newBean3(int x) {");
+    }
+    
     
     @Test
     public void testRawBean() throws Exception
@@ -49,7 +62,7 @@ public class BeanParamTest
     @Test
     public void testGenericBean() throws Exception
     {
-        Method m = getClass().getMethod("foo", Pair.class);
+        Method m = getClass().getMethod("foo1", Pair.class);
         
         BeanParam p = new BeanParam(new Pair<Integer>(1,2), 
                 BeanFactory.getInstance().getBean(Pair.class),
@@ -58,8 +71,31 @@ public class BeanParamTest
         testBeanParam(p, "newPair(1, 2)", "private static BeanParamTest.Pair<Integer> newPair(Integer x, Integer y) {");
     }
     
+    @Test
+    public void testHelperMethods() throws Exception
+    {
+        Method m1 = getClass().getMethod("foo1", Pair.class);
+        Method m2 = getClass().getMethod("foo2", Pair.class);
+        
+        BeanParam p1 = new BeanParam(new Pair<Integer>(1,2), 
+                BeanFactory.getInstance().getBean(Pair.class),
+                m1.getGenericParameterTypes()[0]);
+        
+        BeanParam p2 = new BeanParam(new Pair<String>("x", "y"), 
+                BeanFactory.getInstance().getBean(Pair.class),
+                m2.getGenericParameterTypes()[0]);
+        
+        assertFalse(p1.equals(p2));
+        
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        assertEquals("newPair(1, 2)", p1.toSouceCode(builder));
+        assertEquals("newPair2(\"x\", \"y\")", p2.toSouceCode(builder));
+        
+        assertEquals(2, builder.getHelperMethods().size());
+    }
     
-    private void testBeanParam(BeanParam p, String sourceCode, String expectedSignature)
+    
+    private void testBeanParam(BeanParam p, String sourceCode, String... expectedLines)
     {
         TestSuiteBuilder builder = new TestSuiteBuilder();
         assertEquals(sourceCode, p.toSouceCode(builder));
@@ -67,13 +103,17 @@ public class BeanParamTest
         List<TestMethod> helperMethods = builder.getHelperMethods();
         assertEquals(1, helperMethods.size());
         
-        String signature = helperMethods.get(0).toSourceCode().split("\\n")[0];
-        assertEquals(expectedSignature, signature);
+        String[] lines = helperMethods.get(0).toSourceCode().split("\\n");
+        
+        for (int i = 0; i < Math.min(expectedLines.length, lines.length); i++) {
+            assertEquals(expectedLines[i], lines[0]);
+        }
     }
     
     
  // DONT REMOVE - USED IN TEST
-    public void foo(Pair<Integer> pair) {}
+    public void foo1(Pair<Integer> pair) {}
+    public void foo2(Pair<String> pair) {}
     
     public static class Bean1
     {
@@ -82,8 +122,8 @@ public class BeanParamTest
     
     public static class Bean2
     {
-        private int x;
-        Bean2(int x) { this.x = x; }
+        private Bean1 x;
+        Bean2(Bean1 x) { this.x = x; }
     }
     
     public static class Bean3

@@ -24,9 +24,9 @@ public class ListParam
         this(list, null);
     }
     
-    public ListParam(List<?> list, Type listGenericType)
+    public ListParam(List<?> list, Type paramType)
     {
-        super(list, new ArrayList<IParameter>(), listGenericType);
+        super(list, new ArrayList<IParameter>(), paramType);
     }
     
     @Override

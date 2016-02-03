@@ -11,29 +11,30 @@ public class StringWrapperParamTest
     @Test
     public void isStringWrapper()
     {
-        assertFalse(StringWrapperParam.isStringWrapper(this));
+        assertFalse(ParamsFactory.newValue(this) instanceof StringWrapperParam);
+        assertFalse(ParamsFactory.newValue(new Wrapper1("")) instanceof StringWrapperParam);
+        assertFalse(ParamsFactory.newValue(new Wrapper22()) instanceof StringWrapperParam);
         
-        assertFalse(StringWrapperParam.isStringWrapper(new Wrapper1("")));
-        assertTrue(StringWrapperParam.isStringWrapper(new Wrapper2()));
-        assertFalse(StringWrapperParam.isStringWrapper(new Wrapper22()));
-        assertTrue(StringWrapperParam.isStringWrapper(new Wrapper3()));
+        assertTrue(ParamsFactory.newValue(new Wrapper2()) instanceof StringWrapperParam);
+        assertTrue(ParamsFactory.newValue(new Wrapper3()) instanceof StringWrapperParam);
     }
     
     @Test
     public void testEquals()
     {
-        assertEquals(new StringWrapperParam(new Wrapper1("")), new StringWrapperParam(new Wrapper1("")));
-        assertEquals(new StringWrapperParam(Wrapper2.fromString("a")), new StringWrapperParam(Wrapper2.fromString("a")));
         
-        assertNotEquals(new StringWrapperParam(new Wrapper1("a")), new StringWrapperParam(new Wrapper1("b")));
-        assertNotEquals(new StringWrapperParam(new Wrapper1("a")), new StringWrapperParam(Wrapper2.fromString("a")));
+        assertEquals(new StringWrapperParam(Wrapper2.fromString("a"), "fromString"),
+                     new StringWrapperParam(Wrapper2.fromString("a"), "fromString"));
+        
+        assertNotEquals(new StringWrapperParam(Wrapper2.fromString("a"), "fromString"),
+                new StringWrapperParam(Wrapper3.valueOf("a"), "valueOf"));
     }
     
     @Test
     public void toSourceCode()
     {
-        StringWrapperParam p1 = new StringWrapperParam(Wrapper3.valueOf("x"));
-        StringWrapperParam p2 = new StringWrapperParam(Wrapper2.fromString("x"));
+        StringWrapperParam p1 = new StringWrapperParam(Wrapper3.valueOf("x"), "valueOf");
+        StringWrapperParam p2 = new StringWrapperParam(Wrapper2.fromString("x"), "fromString");
         TestSuiteBuilder builder = new TestSuiteBuilder();
         
         assertEquals("StringWrapperParamTest.Wrapper3.valueOf(\"x\")", p1.toSouceCode(builder));

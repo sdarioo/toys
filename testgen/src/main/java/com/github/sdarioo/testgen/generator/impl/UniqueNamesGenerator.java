@@ -31,7 +31,7 @@ public class UniqueNamesGenerator
     {
         MutableInt count = _names.get(name);
         if (count == null) {
-            count = new MutableInt(0);
+            count = new MutableInt(1);
             _names.put(name, count);
             return name;
         }

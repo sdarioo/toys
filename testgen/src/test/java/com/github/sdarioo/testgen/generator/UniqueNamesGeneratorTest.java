@@ -21,11 +21,11 @@ public class UniqueNamesGeneratorTest
     {
         UniqueNamesGenerator gen = new UniqueNamesGenerator();
         assertEquals("name", gen.generateUniqueName("name"));
-        assertEquals("name1", gen.generateUniqueName("name"));
         assertEquals("name2", gen.generateUniqueName("name"));
+        assertEquals("name3", gen.generateUniqueName("name"));
         
         assertEquals("other", gen.generateUniqueName("other"));
-        assertEquals("other1", gen.generateUniqueName("other"));
+        assertEquals("other2", gen.generateUniqueName("other"));
     }
     
     @SuppressWarnings("nls")
@@ -34,10 +34,10 @@ public class UniqueNamesGeneratorTest
     {
         UniqueNamesGenerator gen = new UniqueNamesGenerator("name", "other");
         
-        assertEquals("name1", gen.generateUniqueName("name"));
         assertEquals("name2", gen.generateUniqueName("name"));
+        assertEquals("name3", gen.generateUniqueName("name"));
         
-        assertEquals("other1", gen.generateUniqueName("other"));
+        assertEquals("other2", gen.generateUniqueName("other"));
         
         assertEquals("new", gen.generateUniqueName("new"));
     }

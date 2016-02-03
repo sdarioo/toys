@@ -1,6 +1,7 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -18,7 +19,12 @@ public class SerializableParam
     
     public SerializableParam(Serializable value)
     {
-        super(value.getClass(), null);
+        this(value, null);
+    }
+    
+    public SerializableParam(Serializable value, Type paramType)
+    {
+        super(value.getClass(), paramType);
         _bytes = SerializationUtils.serialize(value);
     }
 
@@ -44,12 +50,13 @@ public class SerializableParam
     
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
-        Class<?> clazz = getRecordedType();
-        String template = builder.getTemplatesCache().get(clazz);
+        Type type = (getType() != null) ? getType() : getRecordedType();
+        
+        String template = builder.getTemplatesCache().get(type);
         if (template == null) {
-            String typeName = builder.getTypeName(clazz);
+            String typeName = builder.getGenericTypeName(type);
             template = DESERIALIZE_TEMPLATE_TEMPLATE.replace("<TYPE>", typeName); //$NON-NLS-1$
-            builder.getTemplatesCache().put(clazz, template);
+            builder.getTemplatesCache().put(type, template);
         }
         return template;
     }

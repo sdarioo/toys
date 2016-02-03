@@ -4,6 +4,8 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.awt.event.KeyEvent;
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.Properties;
 
@@ -57,19 +59,19 @@ public final class ParamsFactory
         if (value instanceof java.util.Map<?,?>) {
             return new MapParam((java.util.Map<?,?>)value, paramType);
         }
-        
+        // Class with fromString or valueOf factory methods
+        String factoryMethod = getStaticFactoryMethodName(value);
+        if (factoryMethod != null) {
+            return new StringWrapperParam(value, factoryMethod, paramType);
+        }
         // Java Bean
         Bean bean = BeanFactory.getInstance().getBean(clazz);
         if (bean != null) {
             return new BeanParam(value, bean, paramType);
         }
-        // Class with fromString or valueOf factory methods
-        if (StringWrapperParam.isStringWrapper(value)) {
-            return new StringWrapperParam(value);
-        }
         // Serializable class
         if (value instanceof Serializable) {
-            return new SerializableParam((Serializable)value);
+            return new SerializableParam((Serializable)value, paramType);
         }
         
         return new UnknownParam(value.getClass());
@@ -109,4 +111,29 @@ public final class ParamsFactory
                 block != null &&
                 block != Character.UnicodeBlock.SPECIALS;
     }
+    
+    
+    private static String getStaticFactoryMethodName(Object value)
+    {
+        Class<?> clazz = value.getClass();
+        Method method = getStaticMethod(clazz, "fromString", value.getClass()); //$NON-NLS-1$
+        if (method == null) {
+            method = getStaticMethod(clazz, "valueOf", value.getClass()); //$NON-NLS-1$
+        }
+        return method != null ? method.getName() : null;
+    }
+    
+    private static Method getStaticMethod(Class<?> clazz, String name, Class<?> returnType)
+    {
+        try {
+            Method method = clazz.getMethod(name, String.class);
+            if (Modifier.isStatic(method.getModifiers()) &&
+                    returnType.equals(method.getReturnType())) 
+            {
+                return method;
+            }
+        } catch (NoSuchMethodException | SecurityException e1) {}
+        return null;
+    }
+    
 }

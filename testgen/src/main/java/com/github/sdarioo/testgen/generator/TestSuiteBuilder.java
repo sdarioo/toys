@@ -38,7 +38,8 @@ public class TestSuiteBuilder
     private final Map<String, TestMethod> _helperMethods = new HashMap<String, TestMethod>();
     private final List<ResourceFile> _resources = new ArrayList<ResourceFile>();
     
-    private final Map<Class<?>, String> _templatesCache = new HashMap<Class<?>, String>();
+    private final Map<java.lang.reflect.Type, String> _templatesCache = 
+            new HashMap<java.lang.reflect.Type, String>();
     
     private int _helperMethodOrder = 1000000;
     
@@ -232,7 +233,7 @@ public class TestSuiteBuilder
         return uniqueName;
     }
 
-    public Map<Class<?>, String> getTemplatesCache()
+    public Map<java.lang.reflect.Type, String> getTemplatesCache()
     {
         return _templatesCache;
     }
