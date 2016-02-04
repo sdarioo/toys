@@ -8,7 +8,6 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.Collection;
 
 import com.github.sdarioo.testgen.Configuration;
@@ -52,7 +51,7 @@ public abstract class CollectionParam
         
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if (_originalSize > maxSize) {
-            errors.add(MessageFormat.format("Collection size exceeds maximum permitted size. Max={0}, size={1}.", //$NON-NLS-1$
+            errors.add(fmt("Collection size exceeds maximum permitted size. Max={0}, size={1}.", //$NON-NLS-1$
                     maxSize, _originalSize));
             return false;
         }

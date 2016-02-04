@@ -7,7 +7,6 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -45,7 +44,7 @@ public class PropertiesParam
         TestMethod asPair = builder.addHelperMethod(AS_PAIR_TEMPLATE, "asPair"); //$NON-NLS-1$
      
         String elements = getElementsSourceCode(asPair, builder);
-        return MessageFormat.format("{0}({1})", asProps.getName(), elements);
+        return fmt("{0}({1})", asProps.getName(), elements);
     }
     
     private static Map<String, String> propsToMap(Properties props)

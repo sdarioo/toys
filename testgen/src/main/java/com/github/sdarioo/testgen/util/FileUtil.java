@@ -13,6 +13,11 @@ public final class FileUtil
 {
     private FileUtil() {}
     
+    public static String stripExtension(String name)
+    {
+        return getNameWithExtension(name).getLeft();
+    }
+    
     public static Pair<String, String> getNameWithExtension(String fileName)
     {
         String base = fileName;
@@ -24,5 +29,6 @@ public final class FileUtil
         }
         return Pair.of(base, ext);
     }
+    
     
 }

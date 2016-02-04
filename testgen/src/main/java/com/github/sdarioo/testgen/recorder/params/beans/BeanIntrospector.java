@@ -19,7 +19,8 @@ public class BeanIntrospector
     
     public Bean getBean()
     {
-        return _isClassAccessible ? _builder.build() : null;
+        _builder.setAccessible(_isClassAccessible);
+        return _isClassVisitable ? _builder.build() : null;
     }
     
     @Override
@@ -36,7 +37,7 @@ public class BeanIntrospector
     {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         
-        if (!isMethodAccessible(name, access)) {
+        if (!isMethodVisitable(name, access) || !isMethodAccessible(name, access)) {
             return mv;
         }
         

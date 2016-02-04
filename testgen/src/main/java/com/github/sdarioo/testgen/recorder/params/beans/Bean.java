@@ -14,20 +14,29 @@ import org.objectweb.asm.commons.Method;
 
 public class Bean
 {
+    private final boolean _isAccessible;
+    
     private final List<Field> _fields;
     private final Constructor _constructor;
     private final Map<Field, Method> _setters;
     private final Map<Field, Method> _getters;
     
-    public Bean(List<Field> fields,
+    public Bean(boolean isAccessible,
+            List<Field> fields,
             Constructor constructor, 
             Map<Field, Method> getters,
             Map<Field, Method> setters)
     {
+        _isAccessible = isAccessible;
         _fields = fields;
         _constructor = constructor;
         _getters = getters;
         _setters = setters;
+    }
+    
+    public boolean isAccessible()
+    {
+        return _isAccessible;
     }
     
     public List<Field> getFields()

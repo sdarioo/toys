@@ -62,17 +62,18 @@ public final class Generator
         
         Collection<Class<?>> classes = _recorder.getRecordedClasses();
         for (Class<?> clazz : classes) {
-            File destDir = TestLocationUtil.getTestLocation(clazz);
-            if (destDir == null) {
+            File locationDir = TestLocationUtil.getTestLocation(clazz);
+            if (locationDir == null) {
                 Logger.error("Null test location for class: " + clazz.getName());
                 continue;
             }
             List<Call> calls = _recorder.getCalls(clazz);
             ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
+            generator.setLocationDir(locationDir);
             generator.setArgNamesProvider(_recorder);
             TestClass testSuite = generator.generate(clazz, calls);
-            if (write(testSuite, destDir)) {
-                Logger.info("Generated test: " + destDir.getAbsolutePath() + File.separator + testSuite.getFileName());
+            if (write(testSuite, locationDir)) {
+                Logger.info("Generated test: " + locationDir.getAbsolutePath() + File.separator + testSuite.getFileName());
             }
         }
     }
@@ -92,6 +93,11 @@ public final class Generator
         
         String content = testSuite.toSourceCode();
         Path testPath = Paths.get(destDir.getAbsolutePath(), testSuite.getFileName());
+        if (testPath.toFile().isFile()) {
+            Logger.warn("Removing existing test file: " + testPath); //$NON-NLS-1$
+            testPath.toFile().delete();
+        }
+        
         Files.write(testPath, content.getBytes(ENCODING), StandardOpenOption.CREATE);
         
         for (ResourceFile res : testSuite.getResources()) {
@@ -102,6 +108,11 @@ public final class Generator
             byte[] bytes = res.isBinary() ? 
                     res.getBinaryContent() : 
                     res.getContent().getBytes(ENCODING);
+            
+            if (path.toFile().isFile()) {
+                Logger.warn("Removing existing resource file: " + testPath); //$NON-NLS-1$
+                path.toFile().delete();
+            }
                     
             Files.write(path, bytes, StandardOpenOption.CREATE);
         }
@@ -109,4 +120,5 @@ public final class Generator
     }
   
     private static final String ENCODING = "UTF-8"; //$NON-NLS-1$
+    
 }

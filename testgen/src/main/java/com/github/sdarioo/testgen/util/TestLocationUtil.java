@@ -40,8 +40,9 @@ public class TestLocationUtil
                 }
                 
                 // Maven
-                if (path.endsWith("/target/classes")) {
-                    File testSrcDir = new File(loc.getParentFile().getParentFile(), "src/test/java");
+                File mavenRoot = getMavenProjectRoot(loc);
+                if (mavenRoot != null) {
+                    File testSrcDir = new File(mavenRoot, "src/test/java");
                     if (testSrcDir.isDirectory()) {
                         return new File(testSrcDir, pkgPath);
                     }
@@ -70,6 +71,19 @@ public class TestLocationUtil
             Logger.warn("Null ProtectionDomein.CodeSource for: " + testedClass.getName());
         }
         
+        return null;
+    }
+    
+    private static File getMavenProjectRoot(File dir)
+    {
+        File pom = new File(dir, "pom.xml"); //$NON-NLS-1$
+        if (pom.isFile()) {
+            return dir;
+        }
+        File parentDir = dir.getParentFile();
+        if (parentDir != null) {
+            return getMavenProjectRoot(parentDir);
+        }
         return null;
     }
     

@@ -8,7 +8,6 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -44,9 +43,9 @@ public class ListParam
         
         String elements = getElementsSourceCode(builder);
         if (elements.length() > 0) {
-            return MessageFormat.format("Arrays.{0}asList({1})", getElementTypeSpec(builder), elements);
+            return fmt("Arrays.{0}asList({1})", getElementTypeSpec(builder), elements);
         } else {
-            return MessageFormat.format("new ArrayList{0}()", getElementTypeSpec(builder));
+            return fmt("new ArrayList{0}()", getElementTypeSpec(builder));
         }
     }
 

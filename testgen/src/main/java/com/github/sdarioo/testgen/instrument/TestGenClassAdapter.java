@@ -25,15 +25,21 @@ public class TestGenClassAdapter
     {
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         
-        if ((mv != null) && isMethodAccessible(name, access) && isTransformMethod(name)) {
+        if ((mv != null) && isTransformMethod(name, access)) {
             mv = new TestGenMethodAdapter(_type, mv, access, name, desc);
         }
         return mv;
     }
 
-    private boolean isTransformMethod(String methodName)
+    private boolean isTransformMethod(String methodName, int access)
     {
         if ("<cinit>".equals(methodName) || "<init>".equals(methodName)) { //$NON-NLS-1$ //$NON-NLS-2$
+            return false;
+        }
+        if (!isMethodVisitable(methodName, access)) {
+            return false;
+        }
+        if (!isMethodAccessible(methodName, access)) {
             return false;
         }
         

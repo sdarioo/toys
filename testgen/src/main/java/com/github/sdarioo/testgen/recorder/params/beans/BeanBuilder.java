@@ -21,6 +21,13 @@ public class BeanBuilder
     private final Map<Field, Method> _getters = new HashMap<Field, Method>();
     private final Map<Field, Method> _setters = new HashMap<Field, Method>();
     
+    private boolean _isAccessible = true;
+    
+    
+    public void setAccessible(boolean isAccessible)
+    {
+        _isAccessible = isAccessible;
+    }
     
     public void addField(Field field)
     {
@@ -66,6 +73,7 @@ public class BeanBuilder
         return null;
     }
     
+    
     /**
      * @return non null if all fields can be set using constructor + setter + accessible field
      */
@@ -95,7 +103,7 @@ public class BeanBuilder
             fieldsToSet.removeAll(fieldsWithSetter);
             
             if (fieldsToSet.isEmpty()) {
-                result = new Bean(_fields, constructor, _getters, _setters);
+                result = new Bean(_isAccessible, _fields, constructor, _getters, _setters);
                 break;
             }
         }

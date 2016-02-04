@@ -9,6 +9,7 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.text.MessageFormat;
 
 import com.github.sdarioo.testgen.recorder.IParameter;
 
@@ -47,5 +48,11 @@ public abstract class AbstractParam
             return ((ParameterizedType)_paramType).getActualTypeArguments();
         }
         return new Type[0];
+    }
+    
+    
+    protected static String fmt(String pattern, Object... args)
+    {
+        return MessageFormat.format(pattern, args);
     }
 }

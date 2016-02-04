@@ -3,7 +3,6 @@ package com.github.sdarioo.testgen.recorder.params;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +52,7 @@ public class ArrayParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        return MessageFormat.format(TEMPLATE, 
+        return fmt(TEMPLATE, 
                 builder.getTypeName(_componentType),
                 getElementsSourceCode(builder));
     }

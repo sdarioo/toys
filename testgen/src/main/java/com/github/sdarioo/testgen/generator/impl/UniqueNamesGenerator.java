@@ -9,6 +9,7 @@ package com.github.sdarioo.testgen.generator.impl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -18,6 +19,11 @@ public class UniqueNamesGenerator
     
     public UniqueNamesGenerator()
     {
+    }
+    
+    public UniqueNamesGenerator(Set<String> usedNames)
+    {
+        this(usedNames.toArray(new String[0]));
     }
     
     public UniqueNamesGenerator(String... usedNames)

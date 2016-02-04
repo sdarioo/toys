@@ -9,7 +9,6 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.text.MessageFormat;
 import java.util.*;
 
 import org.objectweb.asm.commons.Method;
@@ -54,6 +53,11 @@ public class BeanParam
     @Override
     public boolean isSupported(Collection<String> errors) 
     {
+        if (!_bean.isAccessible()) {
+            errors.add(fmt("Bean {0} is not accessible.", getRecordedType().getName())); //$NON-NLS-1$
+            return false;
+        }
+        
         boolean bResult = true;
         for (IParameter param : _params) {
             if (!param.isSupported(errors)) {
@@ -79,7 +83,7 @@ public class BeanParam
         String factoryMethodTemplate = getFactoryMethodTemplate(builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
-        return MessageFormat.format("{0}({1})", factoryMethod.getName(), sb.toString());
+        return fmt("{0}({1})", factoryMethod.getName(), sb.toString());
     }
     
     @Override
@@ -179,6 +183,9 @@ public class BeanParam
             fieldsToSet.remove(field);
         }
         String returnType = builder.getGenericTypeName(type);
+        if (returnType == null) {
+            returnType = builder.getTypeName(getRecordedType());
+        }
         
         String instanceType = getRecordedType().equals(ParamsUtil.getRawType(type)) ? 
                 returnType : builder.getTypeName(getRecordedType()); 
@@ -186,18 +193,18 @@ public class BeanParam
         StringBuilder sb = new StringBuilder();
         
         // Signature
-        sb.append(MessageFormat.format("private static {0} '{'0'}'({1}) <<\n", returnType, args.toString()));
+        sb.append(fmt("private static {0} '{'0'}'({1}) <<\n", returnType, args.toString()));
         
         // Constructor call
-        sb.append(MessageFormat.format("    {0} result = new {1}({2});\n", returnType, instanceType, cvals.toString()));
+        sb.append(fmt("    {0} result = new {1}({2});\n", returnType, instanceType, cvals.toString()));
         
         // Setter calls + direct field set
         for (Field field : fieldsToSet) {
             Method method = _bean.getSetters().get(field);
             if (method != null) {
-                sb.append(MessageFormat.format("    result.{0}({1});\n", method.getName(), paramName(field)));
+                sb.append(fmt("    result.{0}({1});\n", method.getName(), paramName(field)));
             } else {
-                sb.append(MessageFormat.format("    result.{0} = {1};\n", field.getName(), paramName(field)));
+                sb.append(fmt("    result.{0} = {1};\n", field.getName(), paramName(field)));
             }
         }
         

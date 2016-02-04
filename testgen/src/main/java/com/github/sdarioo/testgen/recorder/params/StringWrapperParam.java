@@ -1,7 +1,6 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -47,7 +46,7 @@ public class StringWrapperParam
         String str = _stringParam.toSouceCode(builder);
         
         
-        return MessageFormat.format("{0}.{1}({2})", typeName, _factoryMethod, str); //$NON-NLS-1$
+        return fmt("{0}.{1}({2})", typeName, _factoryMethod, str); //$NON-NLS-1$
     }
     
     @Override

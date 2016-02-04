@@ -3,6 +3,9 @@ package com.github.sdarioo.testgen.recorder.params;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.List;
 
 import org.junit.Test;
@@ -72,6 +75,20 @@ public class BeanParamTest
     }
     
     @Test
+    public void testGenericBeanInGenericMethod() throws Exception
+    {
+        Method m = getClass().getMethod("foo3", List.class);
+        ParameterizedType type = (ParameterizedType)m.getGenericParameterTypes()[0];
+        Type beanType = type.getActualTypeArguments()[0];
+        
+        BeanParam p = new BeanParam(new Pair<Integer>(1,2), 
+                BeanFactory.getInstance().getBean(Pair.class),
+                beanType);
+        
+        testBeanParam(p, "newPair(1, 2)", "private static BeanParamTest.Pair newPair(Object x, Object y) {");
+    }
+    
+    @Test
     public void testHelperMethods() throws Exception
     {
         Method m1 = getClass().getMethod("foo1", Pair.class);
@@ -94,6 +111,16 @@ public class BeanParamTest
         assertEquals(2, builder.getHelperMethods().size());
     }
     
+    @Test
+    public void testNotAccessibleBean()
+    {
+        BeanParam p = new BeanParam(new PrivateBean(), 
+                BeanFactory.getInstance().getBean(PrivateBean.class),
+                PrivateBean.class);
+        
+        assertFalse(p.isSupported(new HashSet<String>()));
+    }
+    
     
     private void testBeanParam(BeanParam p, String sourceCode, String... expectedLines)
     {
@@ -113,7 +140,8 @@ public class BeanParamTest
     
  // DONT REMOVE - USED IN TEST
     public void foo1(Pair<Integer> pair) {}
-    public void foo2(Pair<String> pair) {}
+    public void foo2(Pair<String> pair)  {}
+    public <T> void foo3(List<Pair<T>> list) {}
     
     public static class Bean1
     {
@@ -141,4 +169,6 @@ public class BeanParamTest
             this.y = y;
         }
     }
+    
+    private static class PrivateBean {}
 }

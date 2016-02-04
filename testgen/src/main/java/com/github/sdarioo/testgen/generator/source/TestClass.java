@@ -49,13 +49,14 @@ public class TestClass
     public String getFileName()
     {
         String name = ClassUtils.getShortCanonicalName(_qName);
-        return name + ".java"; //$NON-NLS-1$
+        return name + FILE_EXT;
     }
     
     @SuppressWarnings("nls")
     public String toSourceCode() 
     {
         StringBuilder result = new StringBuilder();
+        result.append(AUTO_GENERATED_SIGNATURE).append('\n');
         
         String pkg = getPackage();
         if (pkg != null && pkg.length() > 0) {
@@ -83,4 +84,10 @@ public class TestClass
         return Collections.unmodifiableList(_resources);
     }
 
+    
+    public static final String FILE_EXT = ".java"; //$NON-NLS-1$
+    
+    // When first line in existing file matches this comment than test will be overwritten.
+    // Otherwise new test suite file will be created.
+    public static final String AUTO_GENERATED_SIGNATURE = "// AUTO-GENERATED"; //$NON-NLS-1$
 }

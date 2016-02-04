@@ -8,7 +8,6 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +57,7 @@ public class MapParam
         }
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if (_originalSize > maxSize) {
-            errors.add(MessageFormat.format("Map size exceeds maximum permitted size. Max={0}, current={1}.", //$NON-NLS-1$
+            errors.add(fmt("Map size exceeds maximum permitted size. Max={0}, current={1}.", //$NON-NLS-1$
                     maxSize, _originalSize));
             return false;
         }
@@ -87,7 +86,7 @@ public class MapParam
 
         String elements = getElementsSourceCode(asPair, builder);
         
-        return MessageFormat.format("{0}({1})", asMap.getName(), elements);
+        return fmt("{0}({1})", asMap.getName(), elements);
     }
 
     private Type getKeyType()
@@ -157,7 +156,7 @@ public class MapParam
         String castKey = "";
         String castVal = "";
         if ((keyTypeName != null) && (valTypeName != null)) {
-            mapType = MessageFormat.format("<{0}, {1}>", keyTypeName, valTypeName);
+            mapType = fmt("<{0}, {1}>", keyTypeName, valTypeName);
             castKey = '(' + keyTypeName + ')';
             castVal = '(' + valTypeName + ')';
         }

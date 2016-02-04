@@ -89,7 +89,7 @@ public final class BeanFactory
     static boolean isBeanHierarchyAllowed(Class<?> clazz)
     {
         Class<?> cl = clazz.getSuperclass();
-        // java.lang.Object, interface, privitive, void
+        // java.lang.Object, interface, primitive, void
         if (cl == null) {
             return false;
         }
@@ -100,7 +100,7 @@ public final class BeanFactory
     }
 
     
-    private static final Bean NOT_BEAN = new Bean(Collections.<Field>emptyList(),
+    private static final Bean NOT_BEAN = new Bean(true, Collections.<Field>emptyList(),
             Constructor.DEFAULT,
             Collections.<Field, Method>emptyMap(),
             Collections.<Field, Method>emptyMap());

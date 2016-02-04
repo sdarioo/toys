@@ -8,7 +8,6 @@
 package com.github.sdarioo.testgen.generator.impl;
 
 import java.lang.reflect.*;
-import java.text.MessageFormat;
 import java.util.*;
 
 import com.github.sdarioo.testgen.generator.AbstractTestSuiteGenerator;
@@ -23,6 +22,7 @@ public class JUnitParamsGenerator
 {
     private int _testMethodOrder = 0;
     private int _paramMethodOrder = 1000;
+    
     
     @Override
     protected void initTestSuite(Class<?> targetClass, TestSuiteBuilder builder) 
@@ -131,7 +131,11 @@ public class JUnitParamsGenerator
             }
             lines.add(fmt("new Object[]'{' {0} '}'", join(toArray(callArgs)))); //$NON-NLS-1$
         }
-        String source = fmt(PARAMS_PROVIDER_METHOD_TEMPLATE, getProblemsComment(errors), name, toCodeLines(lines, 2, ','));
+        String javadoc = getProblemsComment(errors);
+        String source = fmt(PARAMS_PROVIDER_METHOD_TEMPLATE, name, toCodeLines(lines, 2, ','));
+        if (javadoc.length() > 0) {
+            source = javadoc + '\n' + source;
+        }
         return new TestMethod(name, source, _paramMethodOrder++);
     }
     
@@ -224,11 +228,6 @@ public class JUnitParamsGenerator
         return list.toArray(new String[list.size()]);
     }
     
-    private static String fmt(String pattern, Object... args)
-    {
-        return MessageFormat.format(pattern, args);
-    }
-    
     private static String getProblemsComment(Set<String> errors)
     {
         StringBuilder sb = new StringBuilder();
@@ -265,10 +264,9 @@ public class JUnitParamsGenerator
     
     @SuppressWarnings("nls")
     private static final String PARAMS_PROVIDER_METHOD_TEMPLATE = 
-        "{0}\n"+
-        "private Object[] {1}() throws Exception '{'\n" +
+        "private Object[] {0}() throws Exception '{'\n" +
         "    return new Object[] '{'\n" +
-        "{2}\n" +        
+        "{1}\n" +        
         "    '}';\n" +
         "'}'";
     

@@ -16,7 +16,8 @@ public class AccessibleClassVisitor
     extends ClassVisitor
 {
     protected Type _type;
-    protected boolean _isClassAccessible;
+    protected boolean _isClassAccessible; // non-private
+    protected boolean _isClassVisitable;  // non-synthetic etc.. 
     
     protected AccessibleClassVisitor() 
     {
@@ -35,6 +36,7 @@ public class AccessibleClassVisitor
         
         _type = Type.getObjectType(name);
         _isClassAccessible = isClassAccessible(access);
+        _isClassVisitable = isClassVisitable(access);
     }
     
     @Override
@@ -45,18 +47,13 @@ public class AccessibleClassVisitor
         Type type = Type.getObjectType(name);
         if (type.equals(_type)) {
             _isClassAccessible = isClassAccessible(access);
+            _isClassVisitable = isClassVisitable(access);
         }
     }
-
+    
     protected boolean isClassAccessible(int access)
     {
-        int[] excludeFlags = {
-                Opcodes.ACC_PRIVATE,
-                Opcodes.ACC_INTERFACE,
-                Opcodes.ACC_SYNTHETIC,
-                Opcodes.ACC_ANNOTATION,
-                Opcodes.ACC_ENUM
-            };
+        int[] excludeFlags = { Opcodes.ACC_PRIVATE };
         if (InstrumentUtil.isFlagSet(access, excludeFlags)) {
             return false;
         }
@@ -68,8 +65,33 @@ public class AccessibleClassVisitor
         if (!_isClassAccessible) {
             return false;
         }
+        int[] excludeFlags = { Opcodes.ACC_PRIVATE };
+        if (InstrumentUtil.isFlagSet(access, excludeFlags)) {
+            return false;
+        }
+        return true;
+    }
+
+    protected boolean isClassVisitable(int access)
+    {
         int[] excludeFlags = {
-            Opcodes.ACC_PRIVATE,
+                Opcodes.ACC_INTERFACE,
+                Opcodes.ACC_SYNTHETIC,
+                Opcodes.ACC_ANNOTATION,
+                Opcodes.ACC_ENUM
+            };
+        if (InstrumentUtil.isFlagSet(access, excludeFlags)) {
+            return false;
+        }
+        return true;
+    }
+    
+    protected boolean isMethodVisitable(String methodName, int access)
+    {
+        if (!_isClassVisitable) {
+            return false;
+        }
+        int[] excludeFlags = {
             Opcodes.ACC_BRIDGE,
             Opcodes.ACC_NATIVE,
             Opcodes.ACC_ABSTRACT,

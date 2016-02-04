@@ -7,7 +7,9 @@
 
 package com.github.sdarioo.testgen.generator;
 
+import java.io.File;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.*;
 
 import org.apache.commons.lang3.ClassUtils;
@@ -20,10 +22,7 @@ public abstract class AbstractTestSuiteGenerator
     implements ITestSuiteGenerator
 {
     private IArgNamesProvider _argNamesProvider;
-    
-    protected AbstractTestSuiteGenerator()
-    {
-    }
+    private File _locationDir;
     
     protected abstract void initTestSuite(Class<?> targetClass, 
             TestSuiteBuilder builder);
@@ -49,13 +48,22 @@ public abstract class AbstractTestSuiteGenerator
     }
     
     /**
+     * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#setLocationDir(java.io.File)
+     */
+    public void setLocationDir(File locationDir)
+    {
+        _locationDir = locationDir;
+    }
+    
+    /**
      * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#generate(java.lang.Class, java.util.List)
      */
     @Override
     public TestClass generate(Class<?> targetClass, List<Call> recordedCalls)
     {
         Map<Method, List<Call>> callMap = groupByMethod(recordedCalls);
-        TestSuiteBuilder builder = new TestSuiteBuilder();
+        
+        TestSuiteBuilder builder = new TestSuiteBuilder(false, _locationDir);
         initTestSuite(targetClass, builder);
         
         for (Map.Entry<Method, List<Call>> entry : callMap.entrySet()) {
@@ -103,6 +111,11 @@ public abstract class AbstractTestSuiteGenerator
             }
         }
         return names;
+    }
+    
+    protected static String fmt(String pattern, Object... args)
+    {
+        return MessageFormat.format(pattern, args);
     }
     
     private static Map<Method, List<Call>> groupByMethod(List<Call> clazzCalls)

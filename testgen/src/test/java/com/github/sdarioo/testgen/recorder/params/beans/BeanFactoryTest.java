@@ -88,6 +88,24 @@ public class BeanFactoryTest
         assertEquals(0, bean.getGetters().size());
     }
     
+    @Test
+    public void testGenericBean()
+    {
+        BeanFactory f = BeanFactory.getInstance();
+        Bean bean = f.getBean(Pair.class);
+        assertNotNull(bean);
+        assertTrue(bean.isAccessible());
+    }
+    
+    @Test
+    public void testPrivateBean()
+    {
+        BeanFactory f = BeanFactory.getInstance();
+        Bean bean = f.getBean(PrivateBean.class);
+        assertNotNull(bean);
+        assertFalse(bean.isAccessible());
+    }
+    
     public static class Empty
     {
     }
@@ -160,4 +178,19 @@ public class BeanFactoryTest
     }
     
     public static class BeanSClass extends Empty {}
+    
+    public static class Pair<T>
+    {
+        final T _x, _y;
+        
+        Pair(T x, T y) {
+            _x = x;
+            _y = y;
+        }
+        
+        T getX() { return _x; }
+        T getY() { return _y; }
+    }
+    
+    private static class PrivateBean {}
 }

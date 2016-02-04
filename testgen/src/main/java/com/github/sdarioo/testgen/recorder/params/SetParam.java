@@ -9,8 +9,9 @@ package com.github.sdarioo.testgen.recorder.params;
 
 
 import java.lang.reflect.Type;
-import java.text.MessageFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
@@ -47,9 +48,9 @@ public class SetParam
         String elements = getElementsSourceCode(builder);
         if (elements.length() > 0) {
            TestMethod asSet = builder.addHelperMethod(AS_SET_TEMPLATE, "asSet");
-            return MessageFormat.format("{0}({1})", asSet.getName(), elements);
+            return fmt("{0}({1})", asSet.getName(), elements);
         } else {
-            return MessageFormat.format("new HashSet{0}()", getElementTypeSpec(builder));
+            return fmt("new HashSet{0}()", getElementTypeSpec(builder));
         }
     }
 

@@ -1,9 +1,9 @@
 
 1. Support for generic methods/types/parameters
 
-2. Nadpisywanie istniejącego testu
+ - clean getTypeName vs getGenericTypeName
 
-3. Factory should peek params based on param type
+2. Factory should peek params based on param type
 
 3. Interfejse proxy params
 
