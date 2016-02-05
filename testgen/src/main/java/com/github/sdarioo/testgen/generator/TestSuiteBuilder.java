@@ -179,6 +179,7 @@ public class TestSuiteBuilder
     
     /**
      * Returns type name with generic type information if available e.g 'List<String>'
+     * If using short type names than apropriate import will be added to this builder.
      * @param type
      * @return
      */
@@ -188,7 +189,7 @@ public class TestSuiteBuilder
             return null;
         }
         if (type instanceof Class<?>) {
-            return getTypeName((Class<?>)type);
+            return getTypeName(((Class<?>)type).getName());
         }
        
         if (type instanceof ParameterizedType) {
@@ -198,26 +199,21 @@ public class TestSuiteBuilder
             if (rawTypeName == null) {
                 return null;
             }
-            
             StringBuilder sb = new StringBuilder();
-            sb.append(rawTypeName);
-            
             java.lang.reflect.Type[] args = ptype.getActualTypeArguments();
-            if ((args != null) && (args.length > 0)) {
-                sb.append('<');
-                for (int i = 0; i < args.length; i++) {
-                    if (i > 0) {
-                        sb.append(", "); //$NON-NLS-1$
-                    }
-                    String argName = getGenericTypeName(args[i]);
-                    if (argName == null) {
-                        return null;
-                    }
-                    sb.append(argName);
+            for (java.lang.reflect.Type arg : args) {
+				if (sb.length() > 0) {
+					sb.append(", ");
+				}
+				String argName = getGenericTypeName(arg);
+                if (argName == null) {
+                    sb.delete(0, sb.length());
+                    break;
                 }
-                sb.append('>');
-            }
-            return sb.toString();    
+                sb.append(argName);
+			}
+            return (sb.length() > 0) ? 
+            		(rawTypeName + '<' + sb.toString() + '>') : rawTypeName;
         }
         return null;
     }

@@ -9,6 +9,9 @@ package com.github.sdarioo.testgen.generator;
 
 import static org.junit.Assert.*;
 
+import java.lang.reflect.Method;
+import java.util.List;
+
 import org.junit.Test;
 
 public class TestSuiteBuilderTest 
@@ -61,6 +64,27 @@ public class TestSuiteBuilderTest
         assertTrue(b.getImports().contains("com.parasoft.dtp.shared.UuidCalculator"));
         
     }
+    
+    @Test
+    public void typeName() throws Exception
+    {
+    	TestSuiteBuilder b = new TestSuiteBuilder(true, null);
+    	Method m = getClass().getMethod("foo", Object.class);
+    	assertEquals("java.lang.Object", b.getTypeName(m.getParameterTypes()[0]));
+    	assertEquals(null, b.getGenericTypeName(m.getGenericParameterTypes()[0]));
+    }
+    
+    @Test
+    public void genericTypeName() throws Exception
+    {
+    	TestSuiteBuilder b = new TestSuiteBuilder(true, null);
+    	Method m = getClass().getMethod("foo2", List.class);
+    	assertEquals("java.util.List", b.getGenericTypeName(m.getGenericParameterTypes()[0]));
+    }
+    
+    
+    public static <T> void foo(T arg) {}
+    public static <T> void foo2(List<T> arg) {}
     
     public static class Inner {}
 }
