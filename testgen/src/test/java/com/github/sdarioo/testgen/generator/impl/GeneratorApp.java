@@ -42,9 +42,7 @@ public class GeneratorApp
     {
         return 0;
     }
-    
-    
-    
+       
     public static String concat(StringList list)
     {
         return "";
