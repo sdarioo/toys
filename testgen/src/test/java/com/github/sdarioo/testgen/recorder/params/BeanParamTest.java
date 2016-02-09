@@ -59,7 +59,7 @@ public class BeanParamTest
     public void testRawBean() throws Exception
     {
         BeanParam p = new BeanParam(new Pair<Integer>(1,2), BeanFactory.getInstance().getBean(Pair.class));
-        testBeanParam(p, "newPair(1, 2)", "private static BeanParamTest.Pair newPair(Object x, Object y) {");
+        testBeanParam(p, "newPair(1, 2)", "private static <T> BeanParamTest.Pair<T> newPair(T x, T y) {");
     }
     
     @Test
@@ -71,7 +71,7 @@ public class BeanParamTest
                 BeanFactory.getInstance().getBean(Pair.class),
                 m.getGenericParameterTypes()[0]);
         
-        testBeanParam(p, "newPair(1, 2)", "private static BeanParamTest.Pair<Integer> newPair(Integer x, Integer y) {");
+        testBeanParam(p, "newPair(1, 2)", "private static <T> BeanParamTest.Pair<T> newPair(T x, T y) {");
     }
     
     @Test
@@ -85,7 +85,7 @@ public class BeanParamTest
                 BeanFactory.getInstance().getBean(Pair.class),
                 beanType);
         
-        testBeanParam(p, "newPair(1, 2)", "private static BeanParamTest.Pair newPair(Object x, Object y) {");
+        testBeanParam(p, "newPair(1, 2)", "private static <T> BeanParamTest.Pair<T> newPair(T x, T y) {");
     }
     
     @Test
@@ -106,9 +106,9 @@ public class BeanParamTest
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
         assertEquals("newPair(1, 2)", p1.toSouceCode(builder));
-        assertEquals("newPair2(\"x\", \"y\")", p2.toSouceCode(builder));
+        assertEquals("newPair(\"x\", \"y\")", p2.toSouceCode(builder));
         
-        assertEquals(2, builder.getHelperMethods().size());
+        assertEquals(1, builder.getHelperMethods().size());
     }
     
     @Test

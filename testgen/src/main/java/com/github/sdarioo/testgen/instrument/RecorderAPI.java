@@ -3,6 +3,8 @@ package com.github.sdarioo.testgen.instrument;
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 
+import org.objectweb.asm.Type;
+
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.Recorder;
@@ -14,7 +16,7 @@ public final class RecorderAPI
 		
 		protected ThreadLocalRecorder initialValue() {
 			String thread = Thread.currentThread().getName();
-			Logger.info("New ThreadLocalRecorder [" + thread + ']');
+			Logger.info("New ThreadLocalRecorder [" + thread + ']'); //$NON-NLS-1$
 			return new ThreadLocalRecorder();
 		};
 	};
@@ -82,4 +84,5 @@ public final class RecorderAPI
 		}
 	}
 	
+	static final String TYPE_NAME = Type.getType(RecorderAPI.class).getInternalName();
 }

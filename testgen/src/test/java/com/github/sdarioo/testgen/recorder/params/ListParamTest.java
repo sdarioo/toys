@@ -37,11 +37,11 @@ public class ListParamTest
         
         List<String> list = new ArrayList<String>();
         ListParam p = new ListParam(list);
-        assertEquals("new ArrayList()", p.toSouceCode(builder));
+        assertEquals("Arrays.asList()", p.toSouceCode(builder));
         
         Method m = getClass().getMethod("foo1", List.class);
         p = new ListParam(list, m.getGenericParameterTypes()[0]);
-        assertEquals("new ArrayList<String>()", p.toSouceCode(builder));
+        assertEquals("Arrays.<String>asList()", p.toSouceCode(builder));
     }
     
     @SuppressWarnings("nls")
@@ -58,7 +58,7 @@ public class ListParamTest
         foo2(Arrays.<List<String>>asList(new ArrayList<String>()));
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.<List<String>>asList(new ArrayList<String>())", p.toSouceCode(builder));
+        assertEquals("Arrays.<List<String>>asList(Arrays.<String>asList())", p.toSouceCode(builder));
         
         foo2(Arrays.<List<String>>asList(new ArrayList<String>()));
     }
@@ -74,7 +74,8 @@ public class ListParamTest
         ListParam p = new ListParam(list, m.getGenericParameterTypes()[0]);
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("new ArrayList()", p.toSouceCode(builder));
+        assertEquals("Arrays.asList()", p.toSouceCode(builder));
+        
     }
     
     @SuppressWarnings("nls")

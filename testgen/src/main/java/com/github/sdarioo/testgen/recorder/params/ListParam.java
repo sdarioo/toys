@@ -38,15 +38,9 @@ public class ListParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
-        builder.addImport(Arrays.class.getName());
-        builder.addImport(ArrayList.class.getName());
-        
         String elements = getElementsSourceCode(builder);
-        if (elements.length() > 0) {
-            return fmt("Arrays.{0}asList({1})", getElementTypeSpec(builder), elements);
-        } else {
-            return fmt("new ArrayList{0}()", getElementTypeSpec(builder));
-        }
+        builder.addImport(Arrays.class.getName());
+        return fmt("Arrays.{0}asList({1})", getElementTypeSpec(builder), elements);
     }
 
 }

@@ -9,7 +9,6 @@ package com.github.sdarioo.testgen.generator;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.text.MessageFormat;
@@ -40,11 +39,10 @@ public class TestSuiteBuilder
     
     private final Set<String> _imports = new HashSet<String>();
     private final List<TestMethod> _testCases = new ArrayList<TestMethod>();
-    private final Map<String, TestMethod> _helperMethods = new HashMap<String, TestMethod>();
+    private final Map<String, TestMethod> _helperMethods = new LinkedHashMap<String, TestMethod>();
     private final List<ResourceFile> _resources = new ArrayList<ResourceFile>();
     
-    private final Map<java.lang.reflect.Type, String> _templatesCache = 
-            new HashMap<java.lang.reflect.Type, String>();
+    private final Map<String, String> _templatesCache = new HashMap<String, String>();
     
     private int _helperMethodOrder = 1000000;
     
@@ -77,7 +75,9 @@ public class TestSuiteBuilder
     
     public void addImport(String classOrPkg) 
     {
-        _imports.add(classOrPkg);
+        if (!classOrPkg.startsWith("java.lang.")) { //$NON-NLS-1$
+            _imports.add(classOrPkg);
+        }
     }
     
     public void setCanonicalName(String qName)
@@ -178,47 +178,6 @@ public class TestSuiteBuilder
     }
     
     /**
-     * Returns type name with generic type information if available e.g 'List<String>'
-     * If using short type names than apropriate import will be added to this builder.
-     * @param type
-     * @return
-     */
-    public String getGenericTypeName(java.lang.reflect.Type type)
-    {
-        if (type == null) {
-            return null;
-        }
-        if (type instanceof Class<?>) {
-            return getTypeName(((Class<?>)type).getName());
-        }
-       
-        if (type instanceof ParameterizedType) {
-            ParameterizedType ptype = (ParameterizedType)type;
-            java.lang.reflect.Type rawType = ptype.getRawType();
-            String rawTypeName = getGenericTypeName(rawType);
-            if (rawTypeName == null) {
-                return null;
-            }
-            StringBuilder sb = new StringBuilder();
-            java.lang.reflect.Type[] args = ptype.getActualTypeArguments();
-            for (java.lang.reflect.Type arg : args) {
-				if (sb.length() > 0) {
-					sb.append(", ");
-				}
-				String argName = getGenericTypeName(arg);
-                if (argName == null) {
-                    sb.delete(0, sb.length());
-                    break;
-                }
-                sb.append(argName);
-			}
-            return (sb.length() > 0) ? 
-            		(rawTypeName + '<' + sb.toString() + '>') : rawTypeName;
-        }
-        return null;
-    }
-    
-    /**
      * @see com.github.sdarioo.testgen.generator.IUniqueNamesProvider#newUniqueMethodName(java.lang.String)
      */
     @Override
@@ -242,7 +201,7 @@ public class TestSuiteBuilder
         return uniqueName;
     }
 
-    public Map<java.lang.reflect.Type, String> getTemplatesCache()
+    public Map<String, String> getTemplatesCache()
     {
         return _templatesCache;
     }

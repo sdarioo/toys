@@ -11,26 +11,26 @@ public class UtilsTest
     @Test
     public void testGetMethod()
     {
-        Method m = InstrumentUtil.getMethod(UtilsTest.class, "m1", "()V");
+        Method m = RecorderAPI.getMethod(UtilsTest.class, "m1", "()V");
         assertNotNull(m);
         assertEquals("m1", m.getName());
         
-        m = InstrumentUtil.getMethod(UtilsTest.class, "m2", "()V");
+        m = RecorderAPI.getMethod(UtilsTest.class, "m2", "()V");
         assertNotNull(m);
         assertEquals("m2", m.getName());
 
-        m = InstrumentUtil.getMethod(UtilsTest.class, "m3", "()Ljava/lang/String;");
+        m = RecorderAPI.getMethod(UtilsTest.class, "m3", "()Ljava/lang/String;");
         assertNotNull(m);
         assertEquals("m3", m.getName());
         
-        m = InstrumentUtil.getMethod(TestRunnable.class, "run", "()V");
+        m = RecorderAPI.getMethod(TestRunnable.class, "run", "()V");
         assertNotNull(m);
         assertEquals("run", m.getName());
         
-        m = InstrumentUtil.getMethod(A.class, "a", "()V");
+        m = RecorderAPI.getMethod(A.class, "a", "()V");
         assertNotNull(m);
         
-        m = InstrumentUtil.getMethod(B.class, "a", "()V");
+        m = RecorderAPI.getMethod(B.class, "a", "()V");
         assertNull(m);
     }
     

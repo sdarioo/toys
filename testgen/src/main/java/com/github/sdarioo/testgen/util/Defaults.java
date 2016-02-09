@@ -23,7 +23,7 @@ public final class Defaults
                 return DEFAULT_DOUBLE;
             } else {
                 throw new IllegalArgumentException(
-                    "Class type " + clazz + " not supported");
+                    "Class type " + clazz + " not supported"); //$NON-NLS-1$ //$NON-NLS-2$
             }
         } else if (clazz.isEnum()) {
             if (clazz.getEnumConstants().length > 0) {

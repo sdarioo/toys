@@ -1,10 +1,8 @@
 
-1. Support for generic methods/types/parameters
-
- - clean getTypeName vs getGenericTypeName
 
 2. Factory should peek params based on param type
+ - try to move parmaType to toSourceCode method
 
 3. Interfejse proxy params
 
-
+4. Zaznajomic sie z CodeModel: https://codemodel.java.net/

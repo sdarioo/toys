@@ -13,6 +13,7 @@ import java.util.Collection;
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.util.TypeUtils;
 
 public abstract class CollectionParam
     extends AbstractParam
@@ -91,8 +92,10 @@ public abstract class CollectionParam
     protected String getElementTypeSpec(TestSuiteBuilder builder)
     {
         Type elementType = getElementType();
-        String elementTypeName = builder.getGenericTypeName(elementType);
-        return (elementTypeName != null) ? ('<' + elementTypeName + '>') : ""; //$NON-NLS-1$
+        if ((elementType == null) || TypeUtils.containsTypeVariables(elementType)) {
+            return ""; //$NON-NLS-1$
+        }
+        return '<' + TypeUtils.getName(elementType, builder) + '>';
     }
     
     @Override

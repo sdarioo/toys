@@ -11,6 +11,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
+import com.github.sdarioo.testgen.util.TypeUtils;
 
 public class SerializableParam
     extends AbstractParam
@@ -50,13 +51,15 @@ public class SerializableParam
     
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
-        Type type = (getType() != null) ? getType() : getRecordedType();
+        Type genericType = getType();
+        String returnType = (genericType != null && !TypeUtils.containsTypeVariables(genericType)) ?
+                TypeUtils.getName(genericType, builder) :
+                builder.getTypeName(getRecordedType());
         
-        String template = builder.getTemplatesCache().get(type);
+        String template = builder.getTemplatesCache().get(returnType);
         if (template == null) {
-            String typeName = builder.getGenericTypeName(type);
-            template = DESERIALIZE_TEMPLATE_TEMPLATE.replace("<TYPE>", typeName); //$NON-NLS-1$
-            builder.getTemplatesCache().put(type, template);
+            template = DESERIALIZE_TEMPLATE_TEMPLATE.replace("<TYPE>", returnType); //$NON-NLS-1$
+            builder.getTemplatesCache().put(returnType, template);
         }
         return template;
     }

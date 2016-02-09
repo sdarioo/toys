@@ -2,8 +2,6 @@
 package com.github.sdarioo.testgen.generator.impl;
 
 import com.github.sdarioo.testgen.generator.impl.GeneratorApp;
-import java.lang.String;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import junitparams.JUnitParamsRunner;
@@ -16,6 +14,16 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitParamsRunner.class)
 public class GeneratorAppTest
 {
+    @Test(expected=NullPointerException.class)
+    public void testRuntimeException() throws NullPointerException {
+        GeneratorApp.runtimeException(null);
+    }
+
+    @Test(expected=NullPointerException.class)
+    public void testCheckedException() throws NullPointerException {
+        GeneratorApp.checkedException(null);
+    }
+
     @Test
     @Parameters(method = "testMain_Parameters")
     public void testMain(String[] args) throws Exception {
@@ -31,14 +39,14 @@ public class GeneratorAppTest
 
     @Test
     @Parameters(method = "testSort_Parameters")
-    public void testSort(List list, List expected) throws Exception {
-        List result = GeneratorApp.sort(list);
+    public <T extends Comparable<T>> void testSort(List<T> list, List<T> expected) throws Exception {
+        List<T> result = GeneratorApp.sort(list);
         Assert.assertEquals(expected, result);
     }
 
     @Test
     @Parameters(method = "testCountGeneric_Parameters")
-    public void testCountGeneric(List list, int expected) throws Exception {
+    public <T> void testCountGeneric(List<GeneratorApp.Pair<T>> list, int expected) throws Exception {
         int result = GeneratorApp.countGeneric(list);
         Assert.assertEquals(expected, result);
     }
@@ -50,33 +58,38 @@ public class GeneratorAppTest
         Assert.assertEquals(expected, result);
     }
 
-    private Object[] testMain_Parameters() throws Exception {
+    @SuppressWarnings("unused")
+    private static Object[] testMain_Parameters() throws Exception {
         return new Object[] {
-            new Object[]{ new String[]{} },
+            new Object[]{ new String[]{} }
         };
     }
 
-    private Object[] testConcat_Parameters() throws Exception {
+    @SuppressWarnings("unused")
+    private static Object[] testConcat_Parameters() throws Exception {
         return new Object[] {
-            new Object[]{ newStringList(Arrays.<String>asList("x", "y", "z")), "" },
+            new Object[]{ newStringList(Arrays.<String>asList("x", "y", "z")), "" }
         };
     }
 
-    private Object[] testSort_Parameters() throws Exception {
+    @SuppressWarnings("unused")
+    private static Object[] testSort_Parameters() throws Exception {
         return new Object[] {
-            new Object[]{ Arrays.asList("c", "b", "a"), Arrays.asList("a", "b", "c") },
+            new Object[]{ Arrays.asList("c", "b", "a"), Arrays.asList("a", "b", "c") }
         };
     }
 
-    private Object[] testCountGeneric_Parameters() throws Exception {
+    @SuppressWarnings("unused")
+    private static Object[] testCountGeneric_Parameters() throws Exception {
         return new Object[] {
-            new Object[]{ Arrays.asList(newPair("a", "b"), newPair("x", "y")), 0 },
+            new Object[]{ Arrays.asList(newPair("a", "b"), newPair("x", "y")), 0 }
         };
     }
 
-    private Object[] testCount_Parameters() throws Exception {
+    @SuppressWarnings({ "unused", "nls" })
+    private static Object[] testCount_Parameters() throws Exception {
         return new Object[] {
-            new Object[]{ Arrays.<GeneratorApp.Pair<String>>asList(newPair2("a", "b"), newPair2("x", "y")), "2" },
+            new Object[]{ Arrays.<GeneratorApp.Pair<String>>asList(newPair("a", "b"), newPair("x", "y")), "2" }
         };
     }
 
@@ -85,13 +98,8 @@ public class GeneratorAppTest
         return result;
     }
 
-    private static GeneratorApp.Pair newPair(String x, String y) {
-        GeneratorApp.Pair result = new GeneratorApp.Pair(x, y);
-        return result;
-    }
-
-    private static GeneratorApp.Pair<String> newPair2(String x, String y) {
-        GeneratorApp.Pair<String> result = new GeneratorApp.Pair<String>(x, y);
+    private static <T> GeneratorApp.Pair<T> newPair(T x, T y) {
+        GeneratorApp.Pair<T> result = new GeneratorApp.Pair<T>(x, y);
         return result;
     }
 

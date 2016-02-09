@@ -7,7 +7,10 @@
 
 package com.github.sdarioo.testgen.recorder.params.beans;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -32,7 +35,7 @@ public class BeanFactoryTest
         BeanFactory f = BeanFactory.getInstance();
         Bean bean = f.getBean(Empty.class);
         assertNotNull(bean);
-        assertTrue(bean.getConstructor().setters.isEmpty());
+        assertTrue(bean.getConstructor().fields.isEmpty());
         assertTrue(bean.getGetters().isEmpty());
         assertTrue(bean.getGetters().isEmpty());
     }
@@ -43,7 +46,7 @@ public class BeanFactoryTest
         BeanFactory f = BeanFactory.getInstance();
         Bean bean = f.getBean(Simple.class);
         assertNotNull(bean);
-        assertEquals(0, bean.getConstructor().setters.size());
+        assertEquals(0, bean.getConstructor().fields.size());
         assertEquals(2, bean.getSetters().size());
         assertEquals(2, bean.getGetters().size());
     }
@@ -54,7 +57,7 @@ public class BeanFactoryTest
         BeanFactory f = BeanFactory.getInstance();
         Bean bean = f.getBean(NoSetters.class);
         assertNotNull(bean);
-        assertEquals(2, bean.getConstructor().setters.size());
+        assertEquals(2, bean.getConstructor().fields.size());
         assertEquals(0, bean.getSetters().size());
         assertEquals(0, bean.getGetters().size());
     }
@@ -65,7 +68,7 @@ public class BeanFactoryTest
         BeanFactory f = BeanFactory.getInstance();
         Bean bean = f.getBean(Mixed.class);
         assertNotNull(bean);
-        assertEquals(1, bean.getConstructor().setters.size());
+        assertEquals(1, bean.getConstructor().fields.size());
         assertEquals(1, bean.getSetters().size());
         assertEquals(2, bean.getGetters().size());
     }
@@ -83,7 +86,7 @@ public class BeanFactoryTest
         BeanFactory f = BeanFactory.getInstance();
         Bean bean = f.getBean(NoSetter.class);
         assertNotNull(bean);
-        assertEquals(0, bean.getConstructor().setters.size());
+        assertEquals(0, bean.getConstructor().fields.size());
         assertEquals(0, bean.getSetters().size());
         assertEquals(0, bean.getGetters().size());
     }

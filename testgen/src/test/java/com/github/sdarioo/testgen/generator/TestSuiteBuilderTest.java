@@ -36,9 +36,8 @@ public class TestSuiteBuilderTest
         assertEquals("int[]", b.getTypeName(new int[0].getClass()));
         assertEquals("TestSuiteBuilderTest.Inner", b.getTypeName(Inner.class));
         
-        assertEquals(2, b.getImports().size());
+        assertEquals(1, b.getImports().size());
         assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest"));
-        assertTrue(b.getImports().contains("java.lang.String"));
         
         
         b = new TestSuiteBuilder();
@@ -47,9 +46,8 @@ public class TestSuiteBuilderTest
         assertEquals("int[]", b.getTypeName(new int[0].getClass().getName()));
         assertEquals("TestSuiteBuilderTest.Inner", b.getTypeName(Inner.class.getName()));
         
-        assertEquals(2, b.getImports().size());
+        assertEquals(1, b.getImports().size());
         assertTrue(b.getImports().contains("com.github.sdarioo.testgen.generator.TestSuiteBuilderTest"));
-        assertTrue(b.getImports().contains("java.lang.String"));
     }
     
     @SuppressWarnings("nls")
@@ -71,7 +69,6 @@ public class TestSuiteBuilderTest
     	TestSuiteBuilder b = new TestSuiteBuilder(true, null);
     	Method m = getClass().getMethod("foo", Object.class);
     	assertEquals("java.lang.Object", b.getTypeName(m.getParameterTypes()[0]));
-    	assertEquals(null, b.getGenericTypeName(m.getGenericParameterTypes()[0]));
     }
     
     @Test
@@ -79,7 +76,6 @@ public class TestSuiteBuilderTest
     {
     	TestSuiteBuilder b = new TestSuiteBuilder(true, null);
     	Method m = getClass().getMethod("foo2", List.class);
-    	assertEquals("java.util.List", b.getGenericTypeName(m.getGenericParameterTypes()[0]));
     }
     
     

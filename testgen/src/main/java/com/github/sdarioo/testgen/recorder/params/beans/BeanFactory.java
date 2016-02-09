@@ -9,6 +9,7 @@ package com.github.sdarioo.testgen.recorder.params.beans;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +57,7 @@ public final class BeanFactory
             is = readClass(clazz);
             if (is != null) {
                 ClassReader reader = new ClassReader(is);
-                BeanIntrospector introspector = new BeanIntrospector();
+                BeanIntrospector introspector = new BeanIntrospector(clazz);
                 reader.accept(introspector, 0);
                 bean = introspector.getBean();
             } else {

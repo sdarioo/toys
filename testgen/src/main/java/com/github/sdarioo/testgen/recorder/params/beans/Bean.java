@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params.beans;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 

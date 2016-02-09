@@ -14,8 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.objectweb.asm.Type;
-
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 
@@ -32,13 +30,7 @@ public final class Recorder
     private final Map<Method, Set<Call>> _unsupportedCalls = new HashMap<Method, Set<Call>>();
     
     private AtomicLong _timestamp = new AtomicLong(0L);
-    
-    public static final String TYPE_NAME = Type.getType(Recorder.class).getInternalName();
-    public static final String GET_DEFAULT_METHOD_NAME = "getDefault"; //$NON-NLS-1$
-    public static final String GET_DEFAULT_METHOD_DESC = "()Lcom/github/sdarioo/testgen/recorder/Recorder;"; //$NON-NLS-1$
-    public static final String RECORD_METHOD_NAME = "record"; //$NON-NLS-1$
-    public static final String RECORD_METHOD_DESC = "(Lcom/github/sdarioo/testgen/recorder/Call;)V"; //$NON-NLS-1$
-    
+
     private Recorder() {}
     
     public static Recorder getDefault()

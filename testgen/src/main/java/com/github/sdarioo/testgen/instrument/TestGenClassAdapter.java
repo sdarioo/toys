@@ -26,7 +26,7 @@ public class TestGenClassAdapter
         MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
         
         if ((mv != null) && isTransformMethod(name, access)) {
-            mv = new TestGenMethodAdapter2(_type, mv, access, name, desc);
+            mv = new TestGenMethodAdapter(_type, mv, access, name, desc);
         }
         return mv;
     }

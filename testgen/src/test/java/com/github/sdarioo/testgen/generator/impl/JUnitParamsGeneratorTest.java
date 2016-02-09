@@ -49,15 +49,15 @@ public class JUnitParamsGeneratorTest
 
         String text = gen.generateParamsProvider(method, calls, "testSayHello", new TestSuiteBuilder()).toSourceCode();
         assertNotNull(text);
-
+        
         String[] lines = new StrTokenizer(text, '\n').getTokenArray();
-        assertEquals(6, lines.length);
-        assertEquals("private Object[] testSayHello_Parameters() throws Exception {", lines[0].trim());
-        assertEquals("return new Object[] {", lines[1].trim());
-        assertEquals("new Object[]{ \"name1\", 1, null },", lines[2].trim());
-        assertEquals("new Object[]{ null, 2, null },", lines[3].trim());
-        assertEquals("};", lines[4].trim());
-        assertEquals("}", lines[5].trim());
+        assertEquals(7, lines.length);
+        assertEquals("private static Object[] testSayHello_Parameters() throws Exception {", lines[1].trim());
+        assertEquals("return new Object[] {", lines[2].trim());
+        assertEquals("new Object[]{ \"name1\", 1, null },", lines[3].trim());
+        assertEquals("new Object[]{ null, 2, null }", lines[4].trim());
+        assertEquals("};", lines[5].trim());
+        assertEquals("}", lines[6].trim());
     }
 
     @SuppressWarnings("nls")
@@ -77,16 +77,17 @@ public class JUnitParamsGeneratorTest
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
-        Set<String> set = toLines(src);
+        List<String> lines = toLines(src);
         
-        assertTrue(set.contains("public void testSayHello(String arg0, int arg1, String expected) throws Exception {"));
-        assertTrue(set.contains("String result = JUnitParamsGeneratorTest.sayHello(arg0, arg1);"));
-        assertTrue(set.contains("Assert.assertEquals(expected, result);"));
+        assertEquals(30, lines.size());
         
-        assertTrue(set.contains("public void testSayHello(String arg0, int arg1, String expected) throws Exception {"));
-        assertTrue(set.contains("String result = JUnitParamsGeneratorTest.sayHello(arg0, arg1);"));
-        assertTrue(set.contains("new Object[]{ \"name1\", 1, \"ret1\" },"));
-        assertTrue(set.contains("new Object[]{ null, 1, null },"));
+        assertEquals("public void testSayHello(String arg0, int arg1, String expected) throws Exception {", lines.get(16));
+        assertEquals("String result = JUnitParamsGeneratorTest.sayHello(arg0, arg1);", lines.get(17));
+        assertEquals("Assert.assertEquals(expected, result);", lines.get(18));
+                
+        assertEquals("private static Object[] testSayHello_Parameters() throws Exception {", lines.get(22));
+        assertEquals("new Object[]{ \"name1\", 1, \"ret1\" },", lines.get(24));
+        assertEquals("new Object[]{ null, 1, null }", lines.get(25));
     }
     
     @SuppressWarnings("nls")
@@ -110,10 +111,10 @@ public class JUnitParamsGeneratorTest
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
-        Set<String> set = toLines(src);
+        List<String> set = toLines(src);
         
         assertTrue(set.contains("@Parameters(method = \"testMethodWithProperties_Parameters\")"));
-        assertTrue(set.contains("private Object[] testMethodWithProperties_Parameters() throws Exception {"));
+        assertTrue(set.contains("private static Object[] testMethodWithProperties_Parameters() throws Exception {"));
     }
     
     @SuppressWarnings("nls")
@@ -126,7 +127,7 @@ public class JUnitParamsGeneratorTest
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
-        Set<String> set = toLines(src);
+        List<String> set = toLines(src);
         
         assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
         assertTrue(set.contains("JUnitParamsGeneratorTest.staticMethodWithProperties(null);"));
@@ -142,7 +143,7 @@ public class JUnitParamsGeneratorTest
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
-        Set<String> set = toLines(src);
+        List<String> set = toLines(src);
         
         assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
         assertTrue(set.contains("JUnitParamsGeneratorTest obj = new JUnitParamsGeneratorTest();"));
@@ -158,7 +159,7 @@ public class JUnitParamsGeneratorTest
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
-        Set<String> set = toLines(src);
+        List<String> set = toLines(src);
         
         assertTrue(set.contains("// WARNING - constructing JUnitParamsGeneratorTest.Inner with default parameters;"));
         assertTrue(set.contains("JUnitParamsGeneratorTest.Inner obj = new JUnitParamsGeneratorTest.Inner(null, false, 0L, JUnitParamsGeneratorTest.E.value);"));
@@ -191,10 +192,10 @@ public class JUnitParamsGeneratorTest
         return null;
     }
 
-    private static Set<String> toLines(String src)
+    private static List<String> toLines(String src)
     {
         String[] lines = src.split("\\n");
-        Set<String> set = new HashSet<String>();
+        List<String> set = new ArrayList<String>();
         for (String line : lines) {
             set.add(line.trim());
         }

@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.instrument.InstrumentUtil;
+import com.github.sdarioo.testgen.instrument.RecorderAPI;
 import com.github.sdarioo.testgen.recorder.Call.MethodRef;
 
 public class RecorderTest 
@@ -49,7 +50,7 @@ public class RecorderTest
     @Test
     public void testGetValidCallsFirst()
     {
-        Method m = InstrumentUtil.getMethod(RecorderTest.class, "testCall", "(Ljava/lang/Object;)I");
+        Method m = RecorderAPI.getMethod(RecorderTest.class, "testCall", "(Ljava/lang/Object;)I");
         assertNotNull(m);
         
         int max = Configuration.getDefault().getMaxCalls();
@@ -72,7 +73,7 @@ public class RecorderTest
     @Test
     public void testGetUnsupportedCalls()
     {
-        Method m = InstrumentUtil.getMethod(RecorderTest.class, "testCall", "(Ljava/lang/Object;)I");
+        Method m = RecorderAPI.getMethod(RecorderTest.class, "testCall", "(Ljava/lang/Object;)I");
         assertNotNull(m);
         
         Recorder r = Recorder.get("testGetCallsWithUnsupported");

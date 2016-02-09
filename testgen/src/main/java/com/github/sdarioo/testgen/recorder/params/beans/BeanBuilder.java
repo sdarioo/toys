@@ -7,6 +7,8 @@
 
 package com.github.sdarioo.testgen.recorder.params.beans;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import org.objectweb.asm.commons.Method;
@@ -15,6 +17,8 @@ import com.github.sdarioo.testgen.logging.Logger;
 
 public class BeanBuilder 
 {
+    private final Class<?> _clazz;
+    
     private final List<Field> _fields = new ArrayList<Field>(); 
     private final List<Constructor> _constructors = new ArrayList<Constructor>();
     
@@ -23,22 +27,31 @@ public class BeanBuilder
     
     private boolean _isAccessible = true;
     
+    BeanBuilder(Class<?> clazz)
+    {
+        _clazz = clazz;
+    }
     
     public void setAccessible(boolean isAccessible)
     {
         _isAccessible = isAccessible;
     }
     
-    public void addField(Field field)
+    public void addField(String name)
     {
-        _fields.add(field);
+        try {
+            Field field = _clazz.getDeclaredField(name);
+            _fields.add(field);
+        } catch (NoSuchFieldException | SecurityException e) {
+            Logger.error(e.toString());
+        }
     }
     
     public void addGetter(Field field, Method method)
     {
         Method getter = _getters.get(field);
         if (getter != null) {
-            getter = chooseMethod(field.name, getter, method);
+            getter = chooseMethod(field.getName(), getter, method);
         } else {
             getter = method;
         }
@@ -49,7 +62,7 @@ public class BeanBuilder
     {
         Method setter = _setters.get(field);
         if (setter != null) {
-            setter = chooseMethod(field.name, setter, method);
+            setter = chooseMethod(field.getName(), setter, method);
         } else {
             setter = method;
         }
@@ -62,14 +75,14 @@ public class BeanBuilder
         _constructors.add(constructor);
     }
     
-    public Field getField(String name, String desc)
+    public Field getField(String fieldName)
     {
         for (Field field : _fields) {
-            if (field.name.equals(name) && field.desc.equals(desc)) {
+            if (field.getName().equals(fieldName)) {
                 return field;
             }
         }
-        Logger.warn("Cannot find field: " + name + ' ' + desc); //$NON-NLS-1$
+        Logger.warn("Cannot find field: " + fieldName); //$NON-NLS-1$
         return null;
     }
     
@@ -88,7 +101,7 @@ public class BeanBuilder
             
             Set<Field> fieldsToSet = new HashSet<Field>(_fields);
             // Constructor
-            fieldsToSet.removeAll(constructor.setters);
+            fieldsToSet.removeAll(constructor.fields);
             
             // Setters + accessible fields
             List<Field> fieldsWithSetter = new ArrayList<Field>();
@@ -96,7 +109,7 @@ public class BeanBuilder
                 Method setter = _setters.get(field);
                 if (setter != null) {
                     fieldsWithSetter.add(field);
-                } else if (!field.isPrivate()) {
+                } else if (!Modifier.isPrivate(field.getModifiers())) {
                     fieldsWithSetter.add(field);
                 }
             }

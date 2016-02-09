@@ -13,7 +13,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.objectweb.asm.Type;
 
 import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
 import com.github.sdarioo.testgen.recorder.params.ParamsUtil;
@@ -183,11 +182,5 @@ public class Call implements Comparable<Call>
     }
     
     public static abstract class MethodRef {}
-    
-    
-    public static final String TYPE_NAME = Type.getType(Call.class).getInternalName();
-    public static final String NEW_CALL_METHOD_NAME = "newCall"; //$NON-NLS-1$
-    public static final String NEW_CALL_METHOD_DESC = "(Ljava/lang/reflect/Method;Ljava/lang/Object;[Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/Call;"; //$NON-NLS-1$
-    public static final String NEW_STATIC_CALL_METHOD_DESC = "(Ljava/lang/reflect/Method;[Ljava/lang/Object;)Lcom/github/sdarioo/testgen/recorder/Call;"; //$NON-NLS-1$
     
 }

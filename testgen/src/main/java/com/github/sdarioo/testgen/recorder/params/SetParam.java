@@ -9,9 +9,7 @@ package com.github.sdarioo.testgen.recorder.params;
 
 
 import java.lang.reflect.Type;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
@@ -41,17 +39,17 @@ public class SetParam
     @Override
     public String toSouceCode(TestSuiteBuilder builder) 
     {
+        String elements = getElementsSourceCode(builder);
+        if (elements.length() <= 0) {
+            builder.addImport(Collections.class.getName());
+            return fmt("Collections.{0}emptySet()", getElementTypeSpec(builder));
+        }
+        
         builder.addImport(Arrays.class.getName());
         builder.addImport(Set.class.getName());
-        builder.addImport(HashSet.class.getName());
         
-        String elements = getElementsSourceCode(builder);
-        if (elements.length() > 0) {
-           TestMethod asSet = builder.addHelperMethod(AS_SET_TEMPLATE, "asSet");
-            return fmt("{0}({1})", asSet.getName(), elements);
-        } else {
-            return fmt("new HashSet{0}()", getElementTypeSpec(builder));
-        }
+        TestMethod asSet = builder.addHelperMethod(AS_SET_TEMPLATE, "asSet");
+        return fmt("{0}({1})", asSet.getName(), elements);
     }
 
     @SuppressWarnings("nls")

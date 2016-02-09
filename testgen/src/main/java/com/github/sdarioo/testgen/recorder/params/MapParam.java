@@ -16,6 +16,7 @@ import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.util.TypeUtils;
 
 public class MapParam
     extends AbstractParam
@@ -149,8 +150,8 @@ public class MapParam
         Type keyType = getKeyType();
         Type valType = getValueType();
         
-        String keyTypeName = builder.getGenericTypeName(keyType);
-        String valTypeName = builder.getGenericTypeName(valType);
+        String keyTypeName = (keyType != null && !TypeUtils.containsTypeVariables(keyType)) ? TypeUtils.getName(keyType, builder) : null;
+        String valTypeName = (valType != null && !TypeUtils.containsTypeVariables(valType)) ? TypeUtils.getName(valType, builder) : null;
         
         String mapType = "";
         String castKey = "";

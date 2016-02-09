@@ -38,11 +38,11 @@ public class SetParamTest
         TestSuiteBuilder builder = new TestSuiteBuilder();
         
         SetParam p = new SetParam(new HashSet<String>());
-        assertEquals("new HashSet()", p.toSouceCode(builder));
+        assertEquals("Collections.emptySet()", p.toSouceCode(builder));
         
         Method m = getClass().getMethod("foo", Set.class);
         p = new SetParam(Collections.emptySet(), m.getGenericParameterTypes()[0]);
-        assertEquals("new HashSet<String>()", p.toSouceCode(new TestSuiteBuilder()));
+        assertEquals("Collections.<String>emptySet()", p.toSouceCode(new TestSuiteBuilder()));
     }
     
     @Test

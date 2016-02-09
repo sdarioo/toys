@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params.beans;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,17 +17,17 @@ import org.objectweb.asm.commons.Method;
 public final class Constructor
 {
     Method method;
-    List<Field> setters;
+    List<Field> fields;
     
     public Constructor(Method method, List<Field> fields)
     {
         this.method = method;
-        this.setters = new ArrayList<Field>(fields);
+        this.fields = new ArrayList<Field>(fields);
     }
     
     public List<Field> getFields()
     {
-        return setters;
+        return fields;
     }
     
     @Override

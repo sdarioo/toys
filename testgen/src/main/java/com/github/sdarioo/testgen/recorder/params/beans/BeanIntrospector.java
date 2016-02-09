@@ -1,5 +1,6 @@
 package com.github.sdarioo.testgen.recorder.params.beans;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,8 +15,12 @@ import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 public class BeanIntrospector
     extends AccessibleClassVisitor
 {
-    private final BeanBuilder _builder = new BeanBuilder();
+    private final BeanBuilder _builder;
     
+    public BeanIntrospector(Class<?> clazz) 
+    {
+        _builder = new BeanBuilder(clazz);
+    }
     
     public Bean getBean()
     {
@@ -27,7 +32,7 @@ public class BeanIntrospector
     public FieldVisitor visitField(int access, String name, String desc, String signature, Object value) 
     {
         if (!InstrumentUtil.isFlagSet(access, Opcodes.ACC_STATIC, Opcodes.ACC_SYNTHETIC)) {
-            _builder.addField(new Field(access, name, desc));
+            _builder.addField(name);
         }
         return super.visitField(access, name, desc, signature, value);
     }
@@ -156,14 +161,12 @@ public class BeanIntrospector
             if (Opcodes.PUTFIELD == opcode) {
                 if ((_set != null) && (_set.arg > 0)) {
                     _set.name = name;
-                    _set.desc = desc;
                     _setInsts.add(_set);
                 }
                 _set = null;
             } else if (Opcodes.GETFIELD == opcode) {
                 if (_get != null) {
                     _get.name = name;
-                    _get.desc = desc;
                 }
             }
         }
@@ -265,7 +268,7 @@ public class BeanIntrospector
             
             if (isGetter(_method) && (_getInsts.size() == 1) && _setInsts.isEmpty()) {
                 GetField get = _getInsts.get(0);
-                Field field = _builder.getField(get.name, get.desc);
+                Field field = _builder.getField(get.name);
                 if (field != null) {
                     _builder.addGetter(field, _method);
                 }
@@ -273,7 +276,7 @@ public class BeanIntrospector
             
             if (isSetter(_method) && (_setInsts.size() == 1) && _getInsts.isEmpty()) {
                 SetField set = _setInsts.get(0);
-                Field field = _builder.getField(set.name, set.desc);
+                Field field = _builder.getField(set.name);
                 if (field != null) {
                     _builder.addSetter(field, _method);
                 }
@@ -286,7 +289,7 @@ public class BeanIntrospector
             
             int index = 1;
             for (SetField set : setInsts) {
-                Field field = builder.getField(set.name, set.desc);
+                Field field = builder.getField(set.name);
                 if (field == null) {
                     return null;
                 }
@@ -302,14 +305,12 @@ public class BeanIntrospector
         private static class GetField
         {
             String name;
-            String desc;
         }
         
         private static class SetField implements Comparable<SetField>
         {
             int arg; // 1-indexed
             String name;
-            String desc;
             
             @Override
             public int compareTo(SetField set) 

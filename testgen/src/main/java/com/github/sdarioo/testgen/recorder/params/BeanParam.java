@@ -7,19 +7,19 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.*;
 
 import org.objectweb.asm.commons.Method;
 
+import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
-import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.beans.Bean;
-import com.github.sdarioo.testgen.recorder.params.beans.Field;
+import com.github.sdarioo.testgen.util.TypeUtils;
+
 
 public class BeanParam
     extends AbstractParam
@@ -45,7 +45,7 @@ public class BeanParam
         _params = new IParameter[length];
         
         for (int i = 0; i < length; i++) {
-            _fields[i] = bean.getFields().get(i);
+            _fields[i] = getField(obj, bean.getFields().get(i).getName());
             _params[i] = getFieldValue(obj, _fields[i]);
         }
     }
@@ -56,6 +56,12 @@ public class BeanParam
         if (!_bean.isAccessible()) {
             errors.add(fmt("Bean {0} is not accessible.", getRecordedType().getName())); //$NON-NLS-1$
             return false;
+        }
+        for (Field field : _fields) {
+            if (field == null) {
+                errors.add(fmt("Bean {0} is not supported.", getRecordedType().getName())); //$NON-NLS-1$
+                return false;
+            }
         }
         
         boolean bResult = true;
@@ -109,23 +115,34 @@ public class BeanParam
         return getRecordedType().hashCode() + 31 * ParamsUtil.hashCode(_params);
     }
     
+    private Field getField(Object obj, String name)
+    {
+        try {
+            return obj.getClass().getDeclaredField(name);
+        } catch (NoSuchFieldException | SecurityException e) {
+            Logger.error(e.getMessage());
+            return null;
+        }
+    }
+    
     private IParameter getFieldValue(Object obj, Field field)
     {
         TypeVariable<?>[] typeParams = obj.getClass().getTypeParameters();
         Type[] actualTypeParams = getActualTypeArguments();
-        
         try {
-            java.lang.reflect.Field refield = obj.getClass().getDeclaredField(field.getName());
-            boolean accessible = refield.isAccessible();
-            refield.setAccessible(true);
-            Object value = refield.get(obj);
-            Type fieldType = refield.getGenericType();
-            int index = Arrays.asList(typeParams).indexOf(fieldType);
-            if (index >= 0 && (typeParams.length == actualTypeParams.length)) {
-                fieldType = actualTypeParams[index];
+            boolean accessible = field.isAccessible();
+            field.setAccessible(true);
+            Object value = field.get(obj);
+            Type fieldType = field.getGenericType();
+            if (TypeUtils.containsTypeVariables(fieldType)) {
+                int index = Arrays.asList(typeParams).indexOf(fieldType);
+                if (index >= 0 && (typeParams.length == actualTypeParams.length)) {
+                    fieldType = actualTypeParams[index];
+                } else {
+                    fieldType = field.getType();
+                }
             }
-            
-            refield.setAccessible(accessible);
+            field.setAccessible(accessible);
             return ParamsFactory.newValue(value, fieldType);
         } catch (Throwable e) {
             Logger.error(e.toString());
@@ -146,83 +163,65 @@ public class BeanParam
     @SuppressWarnings("nls")
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
-        Type type = (getType() != null) ? getType() : getRecordedType();
+        Class<?> clazz = getRecordedType();
+        Type type = TypeUtils.parameterize(clazz);
+        String typeName = TypeUtils.getName(type, builder);
         
-        String template = builder.getTemplatesCache().get(type);
+        String template = builder.getTemplatesCache().get(typeName);
         if (template != null) {
             return template;
         }
         
-        // Method signature arguments
-        StringBuilder args = new StringBuilder();
-        for (int i = 0; i < _fields.length; i++) {
-            if (args.length() > 0) {
-                args.append(", ");
-            }
-            String fieldType = builder.getGenericTypeName(_params[i].getType());
-            if (fieldType == null) {
-                org.objectweb.asm.Type asmType = org.objectweb.asm.Type.getType(_fields[i].getDesc());
-                String className = InstrumentUtil.isPrimitive(asmType) ? 
-                        asmType.getClassName() : 
-                            asmType.getInternalName().replace('/', '.');
-                        
-                fieldType = builder.getTypeName(className);
-            }
-            args.append(fieldType).append(' ').append(paramName(_fields[i]));
+        MethodBuilder methodBuilder = new MethodBuilder(builder);
+        methodBuilder.name("###").
+            modifier(Modifier.PRIVATE | Modifier.STATIC).
+            typeParams(clazz.getTypeParameters()).
+            returnType(type);
+        
+        for (Field field : _fields) {
+            methodBuilder.arg(field.getGenericType(), paramName(field));
         }
         
         Set<Field> fieldsToSet = new HashSet<Field>(Arrays.asList(_fields));
         
-        // Constructor arg values
-        StringBuilder cvals = new StringBuilder();
+        // Constructor 
+        StringBuilder constructorArgs = new StringBuilder();
         for (Field field : _bean.getConstructor().getFields()) {
-            if (cvals.length() > 0) {
-                cvals.append(", ");
+            if (constructorArgs.length() > 0) {
+                constructorArgs.append(", ");
             }
-            cvals.append(paramName(field));
+            constructorArgs.append(paramName(field));
             fieldsToSet.remove(field);
         }
-        String returnType = builder.getGenericTypeName(type);
-        if (returnType == null) {
-            returnType = builder.getTypeName(getRecordedType());
-        }
+        methodBuilder.statement(fmt("{0} result = new {0}({1})", typeName, constructorArgs.toString()));
         
-        String instanceType = getRecordedType().equals(ParamsUtil.getRawType(type)) ? 
-                returnType : builder.getTypeName(getRecordedType()); 
-        
-        StringBuilder sb = new StringBuilder();
-        
-        // Signature
-        sb.append(fmt("private static {0} '{'0'}'({1}) <<\n", returnType, args.toString()));
-        
-        // Constructor call
-        sb.append(fmt("    {0} result = new {1}({2});\n", returnType, instanceType, cvals.toString()));
-        
-        // Setter calls + direct field set
+        // Setters + direct field set
         for (Field field : fieldsToSet) {
             Method method = _bean.getSetters().get(field);
             if (method != null) {
-                sb.append(fmt("    result.{0}({1});\n", method.getName(), paramName(field)));
+                methodBuilder.statement(fmt("result.{0}({1})", method.getName(), paramName(field)));
             } else {
-                sb.append(fmt("    result.{0} = {1};\n", field.getName(), paramName(field)));
+                methodBuilder.statement(fmt("result.{0} = {1}", field.getName(), paramName(field)));
             }
         }
         
-        sb.append("    return result;\n");
-        sb.append(">>");
+        methodBuilder.statement("return result");
+        template = methodBuilder.build();
+        template = template.replace("{", "'{'");
+        template = template.replace("}", "'}'");
+        template = template.replace("###", "{0}");
         
-        template = sb.toString().replace("<<", "'{'").replace(">>", "'}'");
-        builder.getTemplatesCache().put(type, template);
+        builder.getTemplatesCache().put(typeName, template);
         return template;
     }
     
     private static String paramName(Field field)
     {
-        String name = field.getName();
-        if (name.startsWith("_")) { //$NON-NLS-1$
-            name = name.substring(1);
+        String result = field.getName();
+        if (result.startsWith("_")) { //$NON-NLS-1$
+            result = result.substring(1);
         }
-        return name;
+        return result;
     }
     
 }
