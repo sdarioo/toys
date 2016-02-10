@@ -13,7 +13,7 @@ import java.util.Collection;
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
-import com.github.sdarioo.testgen.util.TypeUtils;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 public abstract class CollectionParam
     extends AbstractParam
@@ -22,10 +22,9 @@ public abstract class CollectionParam
     protected final Collection<IParameter> _elements;
     
     protected CollectionParam(Collection<?> collection, 
-            Collection<IParameter> elements, 
-            Type paramType)
+            Collection<IParameter> elements)
     {
-        super(collection.getClass(), paramType);
+        super(collection.getClass());
     
         _originalSize = collection.size();
         _elements = elements;
@@ -35,7 +34,7 @@ public abstract class CollectionParam
             return;
         }
         for (Object obj : collection) {
-            _elements.add(ParamsFactory.newValue(obj, getElementType()));
+            _elements.add(ParamsFactory.newValue(obj));
         }
     }
     
@@ -43,10 +42,9 @@ public abstract class CollectionParam
     
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
-        if (!ParamsUtil.isTypeCompatible(getType(), getGeneratedSourceCodeType())) {
-            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(getType())); //$NON-NLS-1$
+        if (!isAssignable(getGeneratedSourceCodeType(), targetType, errors)) {
             return false;
         }
         
@@ -56,21 +54,26 @@ public abstract class CollectionParam
                     maxSize, _originalSize));
             return false;
         }
-        return ParamsUtil.isSupported(_elements, errors);
+        boolean bResult = true;
+        Type elementType = getElementType(targetType);
+        for (IParameter element : _elements) {
+            bResult &= element.isSupported(elementType, errors); 
+        }
+        return bResult;
     }
     
     /**
      * @param builder
      * @return string representing comma separated list of all collection elements source code 
      */
-    protected String getElementsSourceCode(TestSuiteBuilder builder)
+    protected String getElementsSourceCode(Type elementTargetType, TestSuiteBuilder builder)
     {
         StringBuilder sb = new StringBuilder();
         for (IParameter param : _elements) {
             if (sb.length() > 0) {
                 sb.append(", "); //$NON-NLS-1$
             }
-            sb.append(param.toSouceCode(builder));
+            sb.append(param.toSouceCode(elementTargetType, builder));
         }
         return sb.toString();
     }
@@ -78,9 +81,9 @@ public abstract class CollectionParam
     /**
      * @return collection element generic type or null if collection is not parameterized type
      */
-    protected Type getElementType()
+    protected static Type getElementType(Type paramType)
     {
-        Type[] argTypes = getActualTypeArguments();
+        Type[] argTypes = TypeUtil.getActualTypeArguments(paramType);
         return argTypes.length == 1 ? argTypes[0] : null;
     }
     
@@ -89,13 +92,13 @@ public abstract class CollectionParam
      * @return string representing collection element specification e.g <String> 
      * or empty string in no generic element information available
      */
-    protected String getElementTypeSpec(TestSuiteBuilder builder)
+    protected static String getElementTypeSpec(Type paramType, TestSuiteBuilder builder)
     {
-        Type elementType = getElementType();
-        if ((elementType == null) || TypeUtils.containsTypeVariables(elementType)) {
+        Type elementType = getElementType(paramType);
+        if ((elementType == null) || TypeUtil.containsTypeVariables(elementType)) {
             return ""; //$NON-NLS-1$
         }
-        return '<' + TypeUtils.getName(elementType, builder) + '>';
+        return '<' + TypeUtil.getName(elementType, builder) + '>';
     }
     
     @Override

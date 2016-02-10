@@ -9,13 +9,13 @@ package com.github.sdarioo.testgen.recorder;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
-import com.github.sdarioo.testgen.recorder.params.ParamsUtil;
 
 public class Call implements Comparable<Call> 
 {
@@ -38,10 +38,9 @@ public class Call implements Comparable<Call>
     public static Call newCall(Method method, Object target, Object[] args)
     {
         List<IParameter> params = new ArrayList<IParameter>(args.length);
-        java.lang.reflect.Type[] paramTypes = method.getGenericParameterTypes();
         
         for (int i = 0; i < args.length; i++) {
-            params.add(ParamsFactory.newValue(args[i], paramTypes[i]));
+            params.add(ParamsFactory.newValue(args[i]));
         }
         
         return new Call(method, target, params);
@@ -102,14 +101,15 @@ public class Call implements Comparable<Call>
     
     public boolean isSupported(Set<String> errors)
     {
-        if (!ParamsUtil.isSupported(_args, errors)) {
-            return false;
+        boolean bResult = true;
+        Type[] paramTypes = _method.getGenericParameterTypes();
+        for (int i = 0; i < _args.size(); i++) {
+            bResult &= _args.get(i).isSupported(paramTypes[i], errors);
         }
-        if ((_result != null) && !_result.isSupported(errors)) {
-            return false;
+        if (_result != null) {
+            bResult &= _result.isSupported(_method.getGenericReturnType(), errors);
         }
-        
-        return true;
+        return bResult;
     }
     
     public Class<?> getTargetClass()

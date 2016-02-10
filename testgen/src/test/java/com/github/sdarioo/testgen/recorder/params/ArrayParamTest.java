@@ -18,7 +18,7 @@ public class ArrayParamTest
     {
         ArrayParam p = new ArrayParam(new Properties[0]);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("new Properties[]{}", p.toSouceCode(builder));
+        assertEquals("new Properties[]{}", p.toSouceCode(Properties[].class, builder));
     }
     
     @Test
@@ -26,7 +26,7 @@ public class ArrayParamTest
     {
         ArrayParam p = new ArrayParam(new int[] {1, 2, 3});
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("new int[]{1, 2, 3}", p.toSouceCode(builder));
+        assertEquals("new int[]{1, 2, 3}", p.toSouceCode(int[].class, builder));
     }
     
     @Test
@@ -34,7 +34,7 @@ public class ArrayParamTest
     {
         ArrayParam p = new ArrayParam(new String[] {"ala", "ma", "kota"});
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("new String[]{\"ala\", \"ma\", \"kota\"}", p.toSouceCode(builder));
+        assertEquals("new String[]{\"ala\", \"ma\", \"kota\"}", p.toSouceCode(String[].class, builder));
     }
     
     @Test
@@ -42,7 +42,8 @@ public class ArrayParamTest
     {
         ArrayParam p = new ArrayParam(new String[][] { new String[]{"ala"}, new String[]{"ma"}});
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("new String[][]{new String[]{\"ala\"}, new String[]{\"ma\"}}", p.toSouceCode(builder));
+        assertEquals("new String[][]{new String[]{\"ala\"}, new String[]{\"ma\"}}", 
+                p.toSouceCode(String[][].class, builder));
     }
     
     @Test
@@ -51,9 +52,9 @@ public class ArrayParamTest
         Method m = ArrayParamTest.class.getMethod("foo", List[].class);
         assertNotNull(m);
         
-        ArrayParam p = new ArrayParam(new ArrayList[0], m.getGenericParameterTypes()[0]);
+        ArrayParam p = new ArrayParam(new ArrayList[0]);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("new List[]{}", p.toSouceCode(builder));
+        assertEquals("new List[]{}", p.toSouceCode(m.getGenericParameterTypes()[0], builder));
     }
     
     @Test
@@ -64,9 +65,9 @@ public class ArrayParamTest
         Method m = ArrayParamTest.class.getMethod("foo", Object[].class);
         assertNotNull(m);
         
-        ArrayParam p = new ArrayParam(new String[] {"goo"}, m.getGenericParameterTypes()[0]);
+        ArrayParam p = new ArrayParam(new String[] {"goo"});
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("new String[]{\"goo\"}", p.toSouceCode(builder));
+        assertEquals("new String[]{\"goo\"}", p.toSouceCode(m.getGenericParameterTypes()[0], builder));
     }
     
     public static <T> int foo(T[] var)

@@ -26,7 +26,7 @@ public class TypeUtilsTest
     {
         Method m = getClass().getMethod("foo1", List.class);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("List<T>", TypeUtils.getName(m.getGenericParameterTypes()[0], builder));
+        assertEquals("List<T>", TypeUtil.getName(m.getGenericParameterTypes()[0], builder));
     }
     
     @Test
@@ -34,7 +34,7 @@ public class TypeUtilsTest
     {
         Method m = getClass().getMethod("foo2", List.class);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("List<? super Integer>", TypeUtils.getName(m.getGenericParameterTypes()[0], builder));
+        assertEquals("List<? super Integer>", TypeUtil.getName(m.getGenericParameterTypes()[0], builder));
     }
     
     @Test
@@ -42,7 +42,7 @@ public class TypeUtilsTest
     {
         Method m = getClass().getMethod("foo3", List.class);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("List<? extends Integer>", TypeUtils.getName(m.getGenericParameterTypes()[0], builder));
+        assertEquals("List<? extends Integer>", TypeUtil.getName(m.getGenericParameterTypes()[0], builder));
     }
     
     @Test
@@ -50,9 +50,9 @@ public class TypeUtilsTest
     {
         Method m = getClass().getMethod("foo4", Comparable[].class);
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("T[]", TypeUtils.getName(m.getGenericParameterTypes()[0], builder));
+        assertEquals("T[]", TypeUtil.getName(m.getGenericParameterTypes()[0], builder));
         
-        assertEquals("T extends Comparable<T>", TypeUtils.getNameWithBounds(m.getTypeParameters()[0], builder));
+        assertEquals("T extends Comparable<T>", TypeUtil.getNameWithBounds(m.getTypeParameters()[0], builder));
         
     }
     
@@ -66,11 +66,11 @@ public class TypeUtilsTest
         
         Field field = getClass().getDeclaredField("rawList");
         Type type = field.getGenericType();
-        assertEquals("List", TypeUtils.getName(type, builder));
+        assertEquals("List", TypeUtil.getName(type, builder));
         
         field = getClass().getDeclaredField("map");
         type = field.getGenericType();
-        assertEquals("List<List<Map<String, List<String>>>>", TypeUtils.getName(type, builder));
+        assertEquals("List<List<Map<String, List<String>>>>", TypeUtil.getName(type, builder));
     }
     
     public static <T extends Comparable<T>> void foo1(List<T> list)

@@ -23,10 +23,10 @@ public class ListParamTest
     public void testSupportedList()
     {
         ListParam p = new ListParam(new ArrayList());
-        assertTrue(p.isSupported(new HashSet<String>()));
+        assertTrue(p.isSupported(List.class, new HashSet<String>()));
         
-        p = new ListParam(new ArrayList(), LinkedList.class);
-        assertFalse(p.isSupported(new HashSet<String>()));
+        p = new ListParam(new ArrayList());
+        assertFalse(p.isSupported(LinkedList.class, new HashSet<String>()));
     }
     
     @SuppressWarnings("nls")
@@ -37,11 +37,11 @@ public class ListParamTest
         
         List<String> list = new ArrayList<String>();
         ListParam p = new ListParam(list);
-        assertEquals("Arrays.asList()", p.toSouceCode(builder));
+        assertEquals("Arrays.asList()", p.toSouceCode(List.class, builder));
         
         Method m = getClass().getMethod("foo1", List.class);
-        p = new ListParam(list, m.getGenericParameterTypes()[0]);
-        assertEquals("Arrays.<String>asList()", p.toSouceCode(builder));
+        p = new ListParam(list);
+        assertEquals("Arrays.<String>asList()", p.toSouceCode(m.getGenericParameterTypes()[0], builder));
     }
     
     @SuppressWarnings("nls")
@@ -53,12 +53,13 @@ public class ListParamTest
         List<List<String>> list = new ArrayList<List<String>>();
         list.add(Collections.<String>emptyList());
         
-        ListParam p = new ListParam(list, m.getGenericParameterTypes()[0]);
+        ListParam p = new ListParam(list);
         
         foo2(Arrays.<List<String>>asList(new ArrayList<String>()));
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.<List<String>>asList(Arrays.<String>asList())", p.toSouceCode(builder));
+        assertEquals("Arrays.<List<String>>asList(Arrays.<String>asList())", 
+                p.toSouceCode(m.getGenericParameterTypes()[0], builder));
         
         foo2(Arrays.<List<String>>asList(new ArrayList<String>()));
     }
@@ -71,10 +72,10 @@ public class ListParamTest
         
         List<String> list = new ArrayList<String>();
         
-        ListParam p = new ListParam(list, m.getGenericParameterTypes()[0]);
+        ListParam p = new ListParam(list);
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.asList()", p.toSouceCode(builder));
+        assertEquals("Arrays.asList()", p.toSouceCode(m.getGenericParameterTypes()[0], builder));
         
     }
     
@@ -84,9 +85,10 @@ public class ListParamTest
     {
         Method m = ListParamTest.class.getMethod("foo4", List.class);
         
-        ListParam p = new ListParam(Collections.singletonList(new String[]{"x"}), m.getGenericParameterTypes()[0]);
+        ListParam p = new ListParam(Collections.singletonList(new String[]{"x"}));
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("Arrays.<String[]>asList(new String[]{\"x\"})", p.toSouceCode(builder));
+        assertEquals("Arrays.<String[]>asList(new String[]{\"x\"})", 
+                p.toSouceCode(m.getGenericParameterTypes()[0], builder));
     }
 
  // DONT REMOVE - USED IN TEST

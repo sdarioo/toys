@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -18,18 +19,18 @@ public class PrimitiveParam
     
     PrimitiveParam(String sourceCode, Class<?> type)
     {
-        super(type, type);
+        super(type);
         _sourceCode = sourceCode;
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
         return true;
     }
         
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         return _sourceCode;
     }

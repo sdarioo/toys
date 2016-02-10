@@ -7,52 +7,42 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
+import java.util.Collection;
 
+import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 public abstract class AbstractParam
     implements IParameter
 {
-    private final Class<?> _class;
-    private final Type _paramType;
+    private final Class<?> _recordedType;
     
-    protected AbstractParam(Class<?> recordedType, Type paramType)
+    protected AbstractParam(Class<?> recordedType)
     {
-        _class = recordedType;
-        _paramType = paramType;
+        _recordedType = recordedType;
     }
     
     @Override
     public Class<?> getRecordedType() 
     {
-        return _class;
+        return _recordedType;
     }
-    
-    @Override
-    public Type getType() 
+
+    protected static boolean isAssignable(Type type, Type targetType, Collection<String> errors)
     {
-        return _paramType;
-    }
-    
-    /**
-     * If this parameter type represents parameterized generic type than return array
-     * of actual type arguments. Otheriwse returns empty array
-     * @return
-     */
-    protected Type[] getActualTypeArguments()
-    {
-        if (_paramType instanceof ParameterizedType) {
-            return ((ParameterizedType)_paramType).getActualTypeArguments();
+        if (!org.apache.commons.lang3.reflect.TypeUtils.isAssignable(type, targetType)) {
+            errors.add("Unsupported type: " + TypeUtil.getName(targetType, new TestSuiteBuilder())); //$NON-NLS-1$
+            return false;
         }
-        return new Type[0];
+        return true;
     }
-    
     
     protected static String fmt(String pattern, Object... args)
     {
         return MessageFormat.format(pattern, args);
     }
+    
 }

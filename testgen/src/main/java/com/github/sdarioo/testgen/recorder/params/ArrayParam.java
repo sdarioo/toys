@@ -8,33 +8,19 @@ import java.util.List;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class ArrayParam
     extends CollectionParam
 {
     private final Class<?> _arrayType;
-    private final Class<?> _componentType;
+    
     
     ArrayParam(Object array)
     {
-        this(array, null);
-    }
-    
-    ArrayParam(Object array, Type genericArrayType)
-    {
-        super(asList(array), new ArrayList<IParameter>(), genericArrayType);
+        super(asList(array), new ArrayList<IParameter>());
         
         _arrayType = array.getClass();
-        Class<?> componentType = null;
-        if (genericArrayType instanceof GenericArrayType) {
-            componentType = ParamsUtil.getRawType(((GenericArrayType)genericArrayType).getGenericComponentType());
-        } else if (genericArrayType instanceof Class<?>) {
-            componentType = ((Class<?>)genericArrayType).getComponentType();
-        }
-        if (componentType == null) {
-            componentType = _arrayType.getComponentType();
-        }
-        _componentType = componentType;
     }
     
     @Override
@@ -50,11 +36,27 @@ public class ArrayParam
     }
     
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
+        Class<?> componentType = getComponentType(targetType);
         return fmt(TEMPLATE, 
-                builder.getTypeName(_componentType),
-                getElementsSourceCode(builder));
+                builder.getTypeName(componentType),
+                getElementsSourceCode(componentType, builder));
+    }
+    
+    private Class<?> getComponentType(Type genericArrayType)
+    {
+        Class<?> componentType = null;
+        if (genericArrayType instanceof GenericArrayType) {
+            Type genericComponentType = ((GenericArrayType)genericArrayType).getGenericComponentType();
+            componentType = TypeUtil.getRawType(genericComponentType);
+        } else if (genericArrayType instanceof Class<?>) {
+            componentType = ((Class<?>)genericArrayType).getComponentType();
+        }
+        if (componentType == null) {
+            componentType = _arrayType.getComponentType();
+        }
+        return componentType;
     }
 
     private static List<?> asList(Object array)

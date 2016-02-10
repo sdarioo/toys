@@ -26,7 +26,7 @@ public class PropertiesParamTest
         
         PropertiesParam param = new PropertiesParam(p);
         
-        String text = param.toSouceCode(new TestSuiteBuilder());
+        String text = param.toSouceCode(Properties.class, new TestSuiteBuilder());
         
         assertEquals("asProps(asPair(\"key1\", \"value1\"))", text);
     }

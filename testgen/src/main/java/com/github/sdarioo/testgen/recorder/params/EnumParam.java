@@ -1,5 +1,6 @@
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -11,18 +12,18 @@ public class EnumParam
     
     EnumParam(Enum<?> e)
     {
-        super(e.getClass(), null);
+        super(e.getClass());
         _name = e.toString();
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
         return true;
     }
 
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         String enumClass = builder.getTypeName(getRecordedType());
         return enumClass + '.' + _name;

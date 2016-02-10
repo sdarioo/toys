@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -36,14 +37,14 @@ public class PropertiesParam
     
     @SuppressWarnings("nls")
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         builder.addImport(Properties.class.getName());
         
         TestMethod asProps = builder.addHelperMethod(AS_PROPS_TEMPLATE, "asProps"); //$NON-NLS-1$
         TestMethod asPair = builder.addHelperMethod(AS_PAIR_TEMPLATE, "asPair"); //$NON-NLS-1$
      
-        String elements = getElementsSourceCode(asPair, builder);
+        String elements = getElementsSourceCode(String.class, String.class, asPair, builder);
         return fmt("{0}({1})", asProps.getName(), elements);
     }
     

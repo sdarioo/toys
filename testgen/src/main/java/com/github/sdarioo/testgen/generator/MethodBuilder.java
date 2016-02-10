@@ -13,7 +13,7 @@ import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.sdarioo.testgen.util.TypeUtils;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class MethodBuilder 
 {
@@ -101,15 +101,22 @@ public class MethodBuilder
     public MethodBuilder returnType(Type type)
     {
         if ((type != null) && !Void.TYPE.equals(type)) {
-            _sReturnType = TypeUtils.getName(type, _testSuiteBuilder);
+            _sReturnType = TypeUtil.getName(type, _testSuiteBuilder);
         }
         return this;
     }
     
     public MethodBuilder arg(Type type, String name)
     {
-        String typeName = TypeUtils.getName(type, _testSuiteBuilder);
+        String typeName = TypeUtil.getName(type, _testSuiteBuilder);
         _args.add(typeName + ' ' + name);
+        return this;
+    }
+    
+    public MethodBuilder varg(Type type, String name)
+    {
+        String typeName = TypeUtil.getName(type, _testSuiteBuilder);
+        _args.add(typeName + "... " + name); //$NON-NLS-1$
         return this;
     }
     
@@ -179,7 +186,7 @@ public class MethodBuilder
             } else {
                 sb.append(", "); //$NON-NLS-1$
             }
-            sb.append(TypeUtils.getNameWithBounds(var, _testSuiteBuilder));
+            sb.append(TypeUtil.getNameWithBounds(var, _testSuiteBuilder));
         }
         if (sb.length() > 0) {
             sb.append('>');

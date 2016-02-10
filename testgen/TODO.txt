@@ -1,8 +1,5 @@
+1. TreeMap, SortedMap etc..
 
+2. Interfejse proxy params
 
-2. Factory should peek params based on param type
- - try to move parmaType to toSourceCode method
-
-3. Interfejse proxy params
-
-4. Zaznajomic sie z CodeModel: https://codemodel.java.net/
+3. Zaznajomic sie z CodeModel: https://codemodel.java.net/

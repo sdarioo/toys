@@ -18,7 +18,7 @@ import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.beans.Bean;
-import com.github.sdarioo.testgen.util.TypeUtils;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 
 public class BeanParam
@@ -26,47 +26,36 @@ public class BeanParam
 {
     private final Bean _bean;
     
-    private final Field[] _fields;
-    private final IParameter[] _params;
+    private final List<Field> _fields;
+    private final List<IParameter> _values;
+    
     
     public BeanParam(Object obj, Bean bean)
     {
-        this(obj, bean, null);
-    }
-    
-    public BeanParam(Object obj, Bean bean, java.lang.reflect.Type paramType)
-    {
-        super(obj.getClass(), paramType);
+        super(obj.getClass());
         _bean = bean;
     
-        int length = bean.getFields().size();
+        _fields = new ArrayList<Field>();
+        _values = new ArrayList<IParameter>();
         
-        _fields = new Field[length];
-        _params = new IParameter[length];
-        
-        for (int i = 0; i < length; i++) {
-            _fields[i] = getField(obj, bean.getFields().get(i).getName());
-            _params[i] = getFieldValue(obj, _fields[i]);
+        for (Field field : bean.getFields()) {
+            _fields.add(field);
+            _values.add(getFieldValue(obj, field));
         }
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
         if (!_bean.isAccessible()) {
             errors.add(fmt("Bean {0} is not accessible.", getRecordedType().getName())); //$NON-NLS-1$
             return false;
         }
-        for (Field field : _fields) {
-            if (field == null) {
-                errors.add(fmt("Bean {0} is not supported.", getRecordedType().getName())); //$NON-NLS-1$
-                return false;
-            }
-        }
         
         boolean bResult = true;
-        for (IParameter param : _params) {
-            if (!param.isSupported(errors)) {
+        for (int i = 0; i < _fields.size(); i++) {
+            Type fieldType = getFieldType(_fields.get(i), targetType);
+            if (!_values.get(i).isSupported(fieldType, errors)) {
                 bResult = false;
             }
         }
@@ -75,14 +64,15 @@ public class BeanParam
 
     @SuppressWarnings("nls")
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         StringBuilder sb = new StringBuilder();
-        for (IParameter param : _params) {
+        for (int i = 0; i < _fields.size(); i++) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append(param.toSouceCode(builder));
+            Type fieldType = getFieldType(_fields.get(i), targetType);
+            sb.append(_values.get(i).toSouceCode(fieldType, builder));
         }
         
         String factoryMethodName = getFactoryMethodName(builder);
@@ -106,48 +96,44 @@ public class BeanParam
         }
         BeanParam other = (BeanParam)obj;
         return getRecordedType().equals(other.getRecordedType()) &&
-                ParamsUtil.equals(_params, other._params);
+                _values.equals(other._values);
     }
     
     @Override
     public int hashCode() 
     {
-        return getRecordedType().hashCode() + 31 * ParamsUtil.hashCode(_params);
-    }
-    
-    private Field getField(Object obj, String name)
-    {
-        try {
-            return obj.getClass().getDeclaredField(name);
-        } catch (NoSuchFieldException | SecurityException e) {
-            Logger.error(e.getMessage());
-            return null;
-        }
+        return getRecordedType().hashCode() + (31 * _values.hashCode());
     }
     
     private IParameter getFieldValue(Object obj, Field field)
     {
-        TypeVariable<?>[] typeParams = obj.getClass().getTypeParameters();
-        Type[] actualTypeParams = getActualTypeArguments();
         try {
             boolean accessible = field.isAccessible();
             field.setAccessible(true);
             Object value = field.get(obj);
-            Type fieldType = field.getGenericType();
-            if (TypeUtils.containsTypeVariables(fieldType)) {
-                int index = Arrays.asList(typeParams).indexOf(fieldType);
-                if (index >= 0 && (typeParams.length == actualTypeParams.length)) {
-                    fieldType = actualTypeParams[index];
-                } else {
-                    fieldType = field.getType();
-                }
-            }
             field.setAccessible(accessible);
-            return ParamsFactory.newValue(value, fieldType);
+            return ParamsFactory.newValue(value);
         } catch (Throwable e) {
             Logger.error(e.toString());
         }
         return IParameter.NULL;
+    }
+    
+    private Type getFieldType(Field field, Type targetType)
+    {
+        TypeVariable<?>[] typeParams = getRecordedType().getTypeParameters();
+        Type[] actualTypeParams = TypeUtil.getActualTypeArguments(targetType);
+        
+        Type fieldType = field.getGenericType();
+        if (TypeUtil.containsTypeVariables(fieldType)) {
+            int index = Arrays.asList(typeParams).indexOf(fieldType);
+            if (index >= 0 && (typeParams.length == actualTypeParams.length)) {
+                fieldType = actualTypeParams[index];
+            } else {
+                fieldType = field.getType();
+            }
+        }
+        return fieldType;
     }
     
     private String getFactoryMethodName(TestSuiteBuilder builder)
@@ -164,8 +150,8 @@ public class BeanParam
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
         Class<?> clazz = getRecordedType();
-        Type type = TypeUtils.parameterize(clazz);
-        String typeName = TypeUtils.getName(type, builder);
+        Type type = TypeUtil.parameterize(clazz);
+        String typeName = TypeUtil.getName(type, builder);
         
         String template = builder.getTemplatesCache().get(typeName);
         if (template != null) {
@@ -182,7 +168,7 @@ public class BeanParam
             methodBuilder.arg(field.getGenericType(), paramName(field));
         }
         
-        Set<Field> fieldsToSet = new HashSet<Field>(Arrays.asList(_fields));
+        Set<Field> fieldsToSet = new HashSet<Field>(_fields);
         
         // Constructor 
         StringBuilder constructorArgs = new StringBuilder();

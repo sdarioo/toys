@@ -23,7 +23,7 @@ public class SerializableParamTest
     {
         SerializableParam p = new SerializableParam(new Inner1("x"));
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals("deserialize(\"res/SerializableParamTest.Inner1\")", p.toSouceCode(builder));
+        assertEquals("deserialize(\"res/SerializableParamTest.Inner1\")", p.toSouceCode(Inner1.class, builder));
     }
     
     

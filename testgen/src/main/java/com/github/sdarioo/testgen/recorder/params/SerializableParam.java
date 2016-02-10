@@ -11,7 +11,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
-import com.github.sdarioo.testgen.util.TypeUtils;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class SerializableParam
     extends AbstractParam
@@ -20,26 +20,21 @@ public class SerializableParam
     
     public SerializableParam(Serializable value)
     {
-        this(value, null);
-    }
-    
-    public SerializableParam(Serializable value, Type paramType)
-    {
-        super(value.getClass(), paramType);
+        super(value.getClass());
         _bytes = SerializationUtils.serialize(value);
     }
 
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
         return true;
     }
     
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         builder.addImport("java.io.*"); //$NON-NLS-1$
-        String template = getFactoryMethodTemplate(builder);
+        String template = getFactoryMethodTemplate(targetType, builder);
         
         String resName = ClassUtils.getShortCanonicalName(getRecordedType());
         
@@ -49,12 +44,9 @@ public class SerializableParam
         return deserialize.getName() + "(\"" + resFile.getFileName() + "\")"; //$NON-NLS-1$ //$NON-NLS-2$
     }
     
-    private String getFactoryMethodTemplate(TestSuiteBuilder builder)
+    private String getFactoryMethodTemplate(Type targetType, TestSuiteBuilder builder)
     {
-        Type genericType = getType();
-        String returnType = (genericType != null && !TypeUtils.containsTypeVariables(genericType)) ?
-                TypeUtils.getName(genericType, builder) :
-                builder.getTypeName(getRecordedType());
+        String returnType = TypeUtil.getName(targetType, builder);
         
         String template = builder.getTemplatesCache().get(returnType);
         if (template == null) {

@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -28,19 +29,19 @@ public class StringParam
      */
     public StringParam(String value)
     {
-        super(String.class, String.class);
+        super(String.class);
         _value = value;
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
         return true;
     }
     
     @SuppressWarnings("nls")
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         int maxLength = Configuration.getDefault().getMaxStringLength();
         if (_value.length() <= maxLength) {

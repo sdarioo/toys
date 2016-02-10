@@ -12,7 +12,7 @@ public class EnumParamTest
     public void testEnum()
     {
         EnumParam p = new EnumParam(E.A);
-        assertEquals("EnumParamTest.E.A", p.toSouceCode(new TestSuiteBuilder()));
+        assertEquals("EnumParamTest.E.A", p.toSouceCode(E.class, new TestSuiteBuilder()));
         
         assertEquals(p, new EnumParam(E.A));
         assertNotEquals(p, new EnumParam(E.C));

@@ -22,7 +22,7 @@ public class StringParamTest
     public void testSourceCode()
     {
         StringParam v = new StringParam("");
-        assertEquals("\"\"", v.toSouceCode(new TestSuiteBuilder()));
+        assertEquals("\"\"", v.toSouceCode(String.class, new TestSuiteBuilder()));
     }
     
     @SuppressWarnings("nls")
@@ -30,10 +30,10 @@ public class StringParamTest
     public void shouldEscapeText()
     {
         StringParam p = new StringParam("c:\\win\\path");
-        assertEquals("\"c:\\\\win\\\\path\"", p.toSouceCode(new TestSuiteBuilder()));
+        assertEquals("\"c:\\\\win\\\\path\"", p.toSouceCode(String.class, new TestSuiteBuilder()));
         
         p = new StringParam("line1\n\rline2");
-        assertEquals("\"line1\\n\\rline2\"", p.toSouceCode(new TestSuiteBuilder()));
+        assertEquals("\"line1\\n\\rline2\"", p.toSouceCode(String.class, new TestSuiteBuilder()));
     }
     
     @Test
@@ -56,7 +56,7 @@ public class StringParamTest
         }
         StringParam p = new StringParam(sb.toString());
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        String code = p.toSouceCode(builder);
+        String code = p.toSouceCode(String.class, builder);
         assertTrue(code.length() < maxStringLength);
         
         TestClass test = builder.buildTestClass();

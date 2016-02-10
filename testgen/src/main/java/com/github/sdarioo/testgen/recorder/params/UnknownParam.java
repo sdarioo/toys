@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Type;
 import java.util.Collection;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -18,20 +19,20 @@ public class UnknownParam
     
     public UnknownParam(Class<?> clazz)
     {
-        super(clazz, null);
+        super(clazz);
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
         errors.add("Unsupported type: " + getRecordedType().getName()); //$NON-NLS-1$
         return false;
     }
 
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        return IParameter.NULL.toSouceCode(builder);
+        return IParameter.NULL.toSouceCode(targetType, builder);
     }
 
     @Override

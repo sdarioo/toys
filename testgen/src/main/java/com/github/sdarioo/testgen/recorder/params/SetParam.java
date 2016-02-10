@@ -19,14 +19,9 @@ public class SetParam
     extends CollectionParam
 {
     
-    public SetParam(Set<?> set) 
+    public SetParam(Set<?> set)
     {
-        this(set, null);
-    }
-    
-    public SetParam(Set<?> set, Type setGenericType)
-    {
-        super(set, new HashSet<IParameter>(), setGenericType);
+        super(set, new HashSet<IParameter>());
     }
     
     @Override
@@ -37,12 +32,13 @@ public class SetParam
     
     @SuppressWarnings("nls")
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        String elements = getElementsSourceCode(builder);
+        Type elementType = getElementType(targetType);
+        String elements = getElementsSourceCode(elementType, builder);
         if (elements.length() <= 0) {
             builder.addImport(Collections.class.getName());
-            return fmt("Collections.{0}emptySet()", getElementTypeSpec(builder));
+            return fmt("Collections.{0}emptySet()", getElementTypeSpec(targetType, builder));
         }
         
         builder.addImport(Arrays.class.getName());

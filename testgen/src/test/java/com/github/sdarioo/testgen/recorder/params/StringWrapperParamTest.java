@@ -37,8 +37,8 @@ public class StringWrapperParamTest
         StringWrapperParam p2 = new StringWrapperParam(Wrapper2.fromString("x"), "fromString");
         TestSuiteBuilder builder = new TestSuiteBuilder();
         
-        assertEquals("StringWrapperParamTest.Wrapper3.valueOf(\"x\")", p1.toSouceCode(builder));
-        assertEquals("StringWrapperParamTest.Wrapper2.fromString(\"x\")", p2.toSouceCode(builder));
+        assertEquals("StringWrapperParamTest.Wrapper3.valueOf(\"x\")", p1.toSouceCode(Wrapper3.class, builder));
+        assertEquals("StringWrapperParamTest.Wrapper2.fromString(\"x\")", p2.toSouceCode(Wrapper2.class, builder));
     }
     
     public static class Wrapper1

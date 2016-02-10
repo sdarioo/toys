@@ -86,7 +86,7 @@ public class GeneratorAppTest
         };
     }
 
-    @SuppressWarnings({ "unused", "nls" })
+    @SuppressWarnings("unused")
     private static Object[] testCount_Parameters() throws Exception {
         return new Object[] {
             new Object[]{ Arrays.<GeneratorApp.Pair<String>>asList(newPair("a", "b"), newPair("x", "y")), "2" }

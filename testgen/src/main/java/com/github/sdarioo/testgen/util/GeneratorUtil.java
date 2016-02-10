@@ -46,7 +46,7 @@ public final class GeneratorUtil
         String[] result = new String[paramTypes.length];
         for (int i = 0; i < result.length; i++) {
             Object defaultValue = Defaults.getDefaultValue(paramTypes[i]);
-            result[i] = ParamsFactory.newValue(defaultValue).toSouceCode(builder);
+            result[i] = ParamsFactory.newValue(defaultValue).toSouceCode(paramTypes[i], builder);
         }
         return result;
     }

@@ -6,7 +6,6 @@ import java.awt.event.KeyEvent;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.Properties;
 
 import org.apache.commons.lang3.ClassUtils;
@@ -20,13 +19,8 @@ public final class ParamsFactory
 {
     private ParamsFactory() {}
 
-    
-    public static IParameter newValue(Object value)
-    {
-        return newValue(value, null);
-    }
 
-    public static IParameter newValue(Object value, Type paramType)
+    public static IParameter newValue(Object value)
     {
         if (value == null) {
             return IParameter.NULL;
@@ -37,13 +31,13 @@ public final class ParamsFactory
             return new StringParam((String)value);
         }
         if (clazz.isArray()) {
-            return new ArrayParam(value, paramType);
+            return new ArrayParam(value);
         }
         if (clazz.isEnum()) {
             return new EnumParam((Enum<?>)value);
         }
         if (ClassUtils.isPrimitiveWrapper(value.getClass())) {
-            return toPrimitiveValue(value, paramType);
+            return toPrimitiveValue(value);
         }
         
         // Collections
@@ -51,33 +45,33 @@ public final class ParamsFactory
             return new PropertiesParam((Properties)value);
         }
         if (value instanceof java.util.List<?>) {
-            return new ListParam((java.util.List<?>)value, paramType);
+            return new ListParam((java.util.List<?>)value);
         }
         if (value instanceof java.util.Set<?>) {
-            return new SetParam((java.util.Set<?>)value, paramType);
+            return new SetParam((java.util.Set<?>)value);
         }
         if (value instanceof java.util.Map<?,?>) {
-            return new MapParam((java.util.Map<?,?>)value, paramType);
+            return new MapParam((java.util.Map<?,?>)value);
         }
         // Class with fromString or valueOf factory methods
         String factoryMethod = getStaticFactoryMethodName(value);
         if (factoryMethod != null) {
-            return new StringWrapperParam(value, factoryMethod, paramType);
+            return new StringWrapperParam(value, factoryMethod);
         }
         // Java Bean
         Bean bean = BeanFactory.getInstance().getBean(clazz);
         if (bean != null) {
-            return new BeanParam(value, bean, paramType);
+            return new BeanParam(value, bean);
         }
         // Serializable class
         if (value instanceof Serializable) {
-            return new SerializableParam((Serializable)value, paramType);
+            return new SerializableParam((Serializable)value);
         }
         
         return new UnknownParam(value.getClass());
     }
         
-    private static IParameter toPrimitiveValue(Object value, Type paramType)
+    private static IParameter toPrimitiveValue(Object value)
     {
         String str = null;
         if (value instanceof Boolean) {
@@ -98,10 +92,9 @@ public final class ParamsFactory
         } else if (value instanceof Float) {
             str = value.toString() + 'f';
         }
-        Class<?> type = ParamsUtil.getRawType(paramType);
-        return (str != null) ? new PrimitiveParam(str, type) : new UnknownParam(value.getClass());
-    }
-    
+        Class<?> type = value.getClass();
+        return (str != null) ? new PrimitiveParam(str, type) : new UnknownParam(type);
+    }    
     
     public static boolean isPrintableChar(char c)
     {

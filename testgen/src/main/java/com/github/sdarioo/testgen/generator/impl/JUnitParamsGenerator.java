@@ -17,7 +17,7 @@ import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.util.GeneratorUtil;
-import com.github.sdarioo.testgen.util.TypeUtils;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class JUnitParamsGenerator
     extends AbstractTestSuiteGenerator
@@ -67,13 +67,18 @@ public class JUnitParamsGenerator
             if (!call.isSupported(new HashSet<String>())) {
                 continue;
             }
+            Class<?>[] paramTypes = method.getParameterTypes();
+            Type[] paramGenericTypes = method.getGenericParameterTypes();
             
-            List<String> args = new ArrayList<String>();
-            for (IParameter param : call.args()) {
-                args.add(param.toSouceCode(builder));
+            List<IParameter> callArgs = call.args();
+            List<String> callArgsCode = new ArrayList<String>();
+            
+            for (int i = 0; i < callArgs.size(); i++) {
+                Type type = getTypeWithoutVariables(paramTypes[i], paramGenericTypes[i]);
+                callArgsCode.add(callArgs.get(i).toSouceCode(type, builder));
             }
             // Tested method invocation - should throw exception
-            List<String> body = getCall(targetClass, method, toArray(args), null, builder);
+            List<String> body = getCall(targetClass, method, toArray(callArgsCode), null, builder);
             
             String name = getTestCaseName(method, builder);
             String exception = builder.getTypeName(call.getExceptionInfo().getClassName());
@@ -146,14 +151,21 @@ public class JUnitParamsGenerator
             if (stmt.length() > 0) {
                 stmt.append(",\n"); //$NON-NLS-1$
             }
-            List<String> args = new ArrayList<String>();
-            for (IParameter param : call.args()) {
-                args.add(param.toSouceCode(builder));
+            Class<?>[] paramTypes = method.getParameterTypes();
+            Type[] paramGenericTypes = method.getGenericParameterTypes();
+            
+            List<IParameter> callArgs = call.args();
+            List<String> callArgsCode = new ArrayList<String>();
+            for (int i = 0; i < callArgs.size(); i++) {
+                Type type = getTypeWithoutVariables(paramTypes[i], paramGenericTypes[i]);
+                callArgsCode.add(callArgs.get(i).toSouceCode(type, builder));
             }
+            
             if (hasReturn(method)) {
-                args.add(call.getResult() != null ? call.getResult().toSouceCode(builder) : "null"); //$NON-NLS-1$
+                Type type = getTypeWithoutVariables(method.getReturnType(), method.getGenericReturnType());
+                callArgsCode.add(call.getResult() != null ? call.getResult().toSouceCode(type, builder) : "null"); //$NON-NLS-1$
             }
-            stmt.append(fmt("new Object[]'{' {0} '}'", join(toArray(args)))); //$NON-NLS-1$
+            stmt.append(fmt("new Object[]'{' {0} '}'", join(toArray(callArgsCode)))); //$NON-NLS-1$
         }
         
         methodBuilder.statement(fmt("return new Object[] '{'\n{0}\n'}'", stmt.toString())); //$NON-NLS-1$
@@ -195,7 +207,7 @@ public class JUnitParamsGenerator
         
         if (hasReturn(method) && (variable != null)) {
             lines.add(fmt("{0} {1} = {2}.{3}({4})",  //$NON-NLS-1$
-                    TypeUtils.getName(method.getGenericReturnType(), builder), variable, 
+                    TypeUtil.getName(method.getGenericReturnType(), builder), variable, 
                     callTarget, method.getName(), join(args)));
         } else {
             lines.add(fmt("{0}.{1}({2})", callTarget, method.getName(), join(args))); //$NON-NLS-1$
@@ -207,6 +219,14 @@ public class JUnitParamsGenerator
     {
         // TestCase name is unique and it guarantees provider name uniqueness
         return testCaseName + "_Parameters"; //$NON-NLS-1$
+    }
+    
+    private static Type getTypeWithoutVariables(Class<?> rawParamType, Type genericParamType)
+    {
+        if (TypeUtil.containsTypeVariables(genericParamType)) {
+            return rawParamType;
+        }
+        return genericParamType;
     }
     
     private static String join(String[] args)

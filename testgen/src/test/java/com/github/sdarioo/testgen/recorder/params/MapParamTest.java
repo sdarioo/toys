@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import org.junit.Test;
@@ -19,12 +20,12 @@ public class MapParamTest
     public void testIsMapSupported() throws Exception
     {
         Method m = MapParamTest.class.getMethod("foo1", Map.class);
-        MapParam p = new MapParam(new HashMap(), m.getGenericParameterTypes()[0]);
-        assertTrue(p.isSupported(new HashSet<String>()));
+        MapParam p = new MapParam(new HashMap());
+        assertTrue(p.isSupported(m.getGenericParameterTypes()[0], new HashSet<String>()));
         
         m = MapParamTest.class.getMethod("foo2", TreeMap.class);
-        p = new MapParam(new HashMap(), m.getGenericParameterTypes()[0]);
-        assertFalse(p.isSupported(new HashSet<String>()));
+        p = new MapParam(new HashMap());
+        assertFalse(p.isSupported(m.getGenericParameterTypes()[0], new HashSet<String>()));
     }
     
     @SuppressWarnings("nls")
@@ -43,41 +44,44 @@ public class MapParamTest
     @Test
     public void testRawMap() throws Exception
     {
-        MapParam p = new MapParam(Collections.emptyMap(), null);
-        testMap(p, "asMap()", "private static Map asMap(Object[]... pairs) {");
+        MapParam p = new MapParam(Collections.emptyMap());
+        testMap(p, Map.class, "asMap()", "private static Map asMap(Object[]... pairs) {");
     }
     
     @Test
     public void testGenericMap() throws Exception
     {
         Method m = MapParamTest.class.getMethod("foo1", Map.class);
-        MapParam p = new MapParam(Collections.emptyMap(), m.getGenericParameterTypes()[0]);
+        MapParam p = new MapParam(Collections.emptyMap());
         
-        testMap(p, "asMap()", "private static Map<Integer, String> asMap(Object[]... pairs) {");
+        testMap(p, m.getGenericParameterTypes()[0], 
+                "asMap()", "private static Map<Integer, String> asMap(Object[]... pairs) {");
     }
     
     @Test
     public void testWildcardMap() throws Exception
     {
         Method m = MapParamTest.class.getMethod("foo3", Map.class);
-        MapParam p = new MapParam(Collections.<Integer, String>emptyMap(), m.getGenericParameterTypes()[0]);
+        MapParam p = new MapParam(Collections.<Integer, String>emptyMap());
         
-        testMap(p, "asMap()", "private static Map asMap(Object[]... pairs) {");
+        testMap(p, m.getGenericParameterTypes()[0], 
+                "asMap()", "private static Map asMap(Object[]... pairs) {");
     }
     
     @Test
     public void testMapOfLists() throws Exception
     {
         Method m = MapParamTest.class.getMethod("foo4", Map.class);
-        MapParam p = new MapParam(Collections.<Integer, String>emptyMap(), m.getGenericParameterTypes()[0]);
+        MapParam p = new MapParam(Collections.<Integer, String>emptyMap());
         
-        testMap(p, "asMap()", "private static Map<Integer, List<String>> asMap(Object[]... pairs) {");
+        testMap(p, m.getGenericParameterTypes()[0],
+                "asMap()", "private static Map<Integer, List<String>> asMap(Object[]... pairs) {");
     }
     
-    private void testMap(MapParam p, String sourceCode, String expectedSignature)
+    private void testMap(MapParam p, Type targetType, String sourceCode, String expectedSignature)
     {
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        assertEquals(sourceCode, p.toSouceCode(builder));
+        assertEquals(sourceCode, p.toSouceCode(targetType, builder));
         
         List<TestMethod> helperMethods = builder.getHelperMethods();
         assertEquals(2, helperMethods.size());

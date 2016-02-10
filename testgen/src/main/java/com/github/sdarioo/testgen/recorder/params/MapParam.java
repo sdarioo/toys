@@ -16,7 +16,7 @@ import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.IParameter;
-import com.github.sdarioo.testgen.util.TypeUtils;
+import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class MapParam
     extends AbstractParam
@@ -25,14 +25,10 @@ public class MapParam
     
     private final Map<IParameter, IParameter> _elements;
 
+    
     public MapParam(Map<?,?> map)
     {
-        this(map, null);
-    }
-    
-    public MapParam(Map<?,?> map, Type genericType)
-    {
-        super(map.getClass(), genericType);
+        super(map.getClass());
         
         _originalSize = map.size();
         _elements = new HashMap<IParameter, IParameter>();
@@ -43,28 +39,31 @@ public class MapParam
         }
         
         for (Map.Entry<?, ?> entry : map.entrySet()) {
-            IParameter key = ParamsFactory.newValue(entry.getKey(), getKeyType());
-            IParameter value = ParamsFactory.newValue(entry.getValue(), getValueType());
+            IParameter key = ParamsFactory.newValue(entry.getKey());
+            IParameter value = ParamsFactory.newValue(entry.getValue());
             _elements.put(key, value);
         }
     }
     
     @Override
-    public boolean isSupported(Collection<String> errors) 
+    public boolean isSupported(Type targetType, Collection<String> errors) 
     {
-        if (!ParamsUtil.isTypeCompatible(getType(), getGeneratedSourceCodeType())) {
-            errors.add("Unsupported type: " + ParamsUtil.getRawTypeName(getType())); //$NON-NLS-1$
+        if (!isAssignable(getGeneratedSourceCodeType(), targetType, errors)) {
             return false;
         }
+        
         int maxSize = Configuration.getDefault().getMaxCollectionSize();
         if (_originalSize > maxSize) {
             errors.add(fmt("Map size exceeds maximum permitted size. Max={0}, current={1}.", //$NON-NLS-1$
                     maxSize, _originalSize));
             return false;
         }
+        
         boolean isSupported = true;
         for (Map.Entry<IParameter, IParameter> entry : _elements.entrySet()) {
-            isSupported = isSupported & entry.getKey().isSupported(errors) && entry.getValue().isSupported(errors);
+            isSupported = isSupported & 
+                    (entry.getKey().isSupported(getKeyType(targetType), errors) && 
+                     entry.getValue().isSupported(getValueType(targetType), errors));
         }
         return isSupported;
     }
@@ -76,29 +75,29 @@ public class MapParam
     
     @SuppressWarnings("nls")
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         builder.addImport(Map.class.getName());
         builder.addImport(HashMap.class.getName());
         
-        String asMapTemplate = getAsMapTemplate(builder);
+        String asMapTemplate = getAsMapTemplate(targetType, builder);
         TestMethod asMap = builder.addHelperMethod(asMapTemplate, "asMap"); //$NON-NLS-1$
         TestMethod asPair = builder.addHelperMethod(AS_PAIR_TEMPLATE, "asPair"); //$NON-NLS-1$
 
-        String elements = getElementsSourceCode(asPair, builder);
+        String elements = getElementsSourceCode(getKeyType(targetType), getValueType(targetType), asPair, builder);
         
         return fmt("{0}({1})", asMap.getName(), elements);
     }
 
-    private Type getKeyType()
+    private static Type getKeyType(Type targetType)
     {
-        Type[] argTypes = getActualTypeArguments();
+        Type[] argTypes = TypeUtil.getActualTypeArguments(targetType);
         return argTypes.length == 2 ? argTypes[0] : null;
     }
     
-    private Type getValueType()
+    private static Type getValueType(Type targetType)
     {
-        Type[] argTypes = getActualTypeArguments();
+        Type[] argTypes = TypeUtil.getActualTypeArguments(targetType);
         return argTypes.length == 2 ? argTypes[1] : null;
     }
     
@@ -127,7 +126,7 @@ public class MapParam
         return _elements.hashCode();
     }
     
-    protected String getElementsSourceCode(TestMethod asPair, TestSuiteBuilder builder)
+    protected String getElementsSourceCode(Type keyType, Type valType, TestMethod asPair, TestSuiteBuilder builder)
     {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<IParameter, IParameter> entry : _elements.entrySet()) {
@@ -136,22 +135,22 @@ public class MapParam
             }
             sb.append(asPair.getName());
             sb.append('(');
-            sb.append(entry.getKey().toSouceCode(builder));
+            sb.append(entry.getKey().toSouceCode(keyType, builder));
             sb.append(", "); //$NON-NLS-1$
-            sb.append(entry.getValue().toSouceCode(builder));
+            sb.append(entry.getValue().toSouceCode(valType, builder));
             sb.append(')');
         }
         return sb.toString();
     }
     
     @SuppressWarnings("nls")
-    private String getAsMapTemplate(TestSuiteBuilder builder)
+    private String getAsMapTemplate(Type targetType, TestSuiteBuilder builder)
     {
-        Type keyType = getKeyType();
-        Type valType = getValueType();
+        Type keyType = getKeyType(targetType);
+        Type valType = getValueType(targetType);
         
-        String keyTypeName = (keyType != null && !TypeUtils.containsTypeVariables(keyType)) ? TypeUtils.getName(keyType, builder) : null;
-        String valTypeName = (valType != null && !TypeUtils.containsTypeVariables(valType)) ? TypeUtils.getName(valType, builder) : null;
+        String keyTypeName = (keyType != null && !TypeUtil.containsTypeVariables(keyType)) ? TypeUtil.getName(keyType, builder) : null;
+        String valTypeName = (valType != null && !TypeUtil.containsTypeVariables(valType)) ? TypeUtil.getName(valType, builder) : null;
         
         String mapType = "";
         String castKey = "";

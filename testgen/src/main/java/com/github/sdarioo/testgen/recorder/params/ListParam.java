@@ -18,14 +18,10 @@ import com.github.sdarioo.testgen.recorder.IParameter;
 public class ListParam
     extends CollectionParam
 {
+    
     public ListParam(List<?> list)
     {
-        this(list, null);
-    }
-    
-    public ListParam(List<?> list, Type paramType)
-    {
-        super(list, new ArrayList<IParameter>(), paramType);
+        super(list, new ArrayList<IParameter>());
     }
     
     @Override
@@ -36,11 +32,12 @@ public class ListParam
 
     @SuppressWarnings("nls")
     @Override
-    public String toSouceCode(TestSuiteBuilder builder) 
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        String elements = getElementsSourceCode(builder);
+        Type elementType = getElementType(targetType);
+        String elements = getElementsSourceCode(elementType, builder);
         builder.addImport(Arrays.class.getName());
-        return fmt("Arrays.{0}asList({1})", getElementTypeSpec(builder), elements);
+        return fmt("Arrays.{0}asList({1})", getElementTypeSpec(targetType, builder), elements);
     }
 
 }

@@ -20,30 +20,25 @@ public class StringWrapperParam
     
     public StringWrapperParam(Object value, String factoryMethod)
     {
-        this(value, factoryMethod, null);
-    }
-    
-    public StringWrapperParam(Object value, String factoryMethod, Type paramType)
-    {
-        super(value.getClass(), paramType);
+        super(value.getClass());
         
         _factoryMethod = factoryMethod;
         _stringParam = new StringParam(value.toString());
     }
 
     @Override
-    public boolean isSupported(Collection<String> errors)
+    public boolean isSupported(Type targetType, Collection<String> errors)
     {
-        return _stringParam.isSupported(errors);
+        return _stringParam.isSupported(String.class, errors);
     }
 
     @Override
-    public String toSouceCode(TestSuiteBuilder builder)
+    public String toSouceCode(Type targetType, TestSuiteBuilder builder)
     {
         Class<?> clazz = getRecordedType();
         
         String typeName = builder.getTypeName(clazz);
-        String str = _stringParam.toSouceCode(builder);
+        String str = _stringParam.toSouceCode(String.class, builder);
         
         
         return fmt("{0}.{1}({2})", typeName, _factoryMethod, str); //$NON-NLS-1$
