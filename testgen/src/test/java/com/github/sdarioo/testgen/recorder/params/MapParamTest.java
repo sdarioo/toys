@@ -25,7 +25,11 @@ public class MapParamTest
         
         m = MapParamTest.class.getMethod("foo2", TreeMap.class);
         p = new MapParam(new HashMap());
-        assertFalse(p.isSupported(m.getGenericParameterTypes()[0], new HashSet<String>()));
+        assertTrue(p.isSupported(m.getGenericParameterTypes()[0], new HashSet<String>()));
+        
+        m = MapParamTest.class.getMethod("foo5", SortedMap.class);
+        p = new MapParam(new HashMap());
+        assertTrue(p.isSupported(m.getGenericParameterTypes()[0], new HashSet<String>()));
     }
     
     @SuppressWarnings("nls")
@@ -107,6 +111,7 @@ public class MapParamTest
     public void foo2(TreeMap map)                {}
     public static <K,V> void foo3(Map<K,V> map)  {}
     public void foo4(Map<Integer, List<String>> map)   {}
+    public void foo5(SortedMap map)                {}
     // DONT REMOVE - USED IN TEST
     
     

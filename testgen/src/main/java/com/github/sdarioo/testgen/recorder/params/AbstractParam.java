@@ -33,11 +33,30 @@ public abstract class AbstractParam
 
     protected static boolean isAssignable(Type type, Type targetType, Collection<String> errors)
     {
-        if (!org.apache.commons.lang3.reflect.TypeUtils.isAssignable(type, targetType)) {
-            errors.add("Unsupported type: " + TypeUtil.getName(targetType, new TestSuiteBuilder())); //$NON-NLS-1$
-            return false;
+        if (org.apache.commons.lang3.reflect.TypeUtils.isAssignable(type, targetType)) {
+            return true;
         }
-        return true;
+        errors.add("Unsupported type: " + TypeUtil.getName(targetType, new TestSuiteBuilder())); //$NON-NLS-1$
+        return false;
+    }
+    
+    protected static boolean isAnyOfAssignable(Type[] types, Type targetType, Collection<String> errors)
+    {
+        if (getAssignable(types, targetType) != null) {
+            return true;
+        }
+        errors.add("Unsupported type: " + TypeUtil.getName(targetType, new TestSuiteBuilder())); //$NON-NLS-1$
+        return false;
+    }
+
+    protected static Type getAssignable(Type[] types, Type targetType)
+    {
+        for (Type type : types) {
+            if (org.apache.commons.lang3.reflect.TypeUtils.isAssignable(type, targetType)) {
+                return type;
+            }
+        }
+        return null;
     }
     
     protected static String fmt(String pattern, Object... args)

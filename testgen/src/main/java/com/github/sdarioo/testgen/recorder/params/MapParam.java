@@ -7,12 +7,12 @@
 
 package com.github.sdarioo.testgen.recorder.params;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import com.github.sdarioo.testgen.Configuration;
+import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.IParameter;
@@ -48,7 +48,7 @@ public class MapParam
     @Override
     public boolean isSupported(Type targetType, Collection<String> errors) 
     {
-        if (!isAssignable(getGeneratedSourceCodeType(), targetType, errors)) {
+        if (!isAnyOfAssignable(getGeneratedTypes(), targetType, errors)) {
             return false;
         }
         
@@ -67,18 +67,17 @@ public class MapParam
         }
         return isSupported;
     }
-    
-    protected Class<?> getGeneratedSourceCodeType() 
-    {
-        return Map.class;
-    }
-    
+
     @SuppressWarnings("nls")
     @Override
     public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        builder.addImport(Map.class.getName());
-        builder.addImport(HashMap.class.getName());
+        if (TypeUtil.containsTypeVariables(targetType)) {
+            targetType = TypeUtil.getRawType(targetType);
+            if (targetType == null) {
+                targetType = Object.class;
+            }
+        }
         
         String asMapTemplate = getAsMapTemplate(targetType, builder);
         TestMethod asMap = builder.addHelperMethod(asMapTemplate, "asMap"); //$NON-NLS-1$
@@ -87,18 +86,6 @@ public class MapParam
         String elements = getElementsSourceCode(getKeyType(targetType), getValueType(targetType), asPair, builder);
         
         return fmt("{0}({1})", asMap.getName(), elements);
-    }
-
-    private static Type getKeyType(Type targetType)
-    {
-        Type[] argTypes = TypeUtil.getActualTypeArguments(targetType);
-        return argTypes.length == 2 ? argTypes[0] : null;
-    }
-    
-    private static Type getValueType(Type targetType)
-    {
-        Type[] argTypes = TypeUtil.getActualTypeArguments(targetType);
-        return argTypes.length == 2 ? argTypes[1] : null;
     }
     
     @Override
@@ -126,6 +113,11 @@ public class MapParam
         return _elements.hashCode();
     }
     
+    protected Class<?>[] getGeneratedTypes() 
+    {
+        return new Class<?>[]{HashMap.class, TreeMap.class};
+    }
+    
     protected String getElementsSourceCode(Type keyType, Type valType, TestMethod asPair, TestSuiteBuilder builder)
     {
         StringBuilder sb = new StringBuilder();
@@ -143,43 +135,63 @@ public class MapParam
         return sb.toString();
     }
     
+    private static Type getKeyType(Type targetType)
+    {
+        Type[] argTypes = TypeUtil.getActualTypeArguments(targetType);
+        return argTypes.length == 2 ? argTypes[0] : null;
+    }
+    
+    private static Type getValueType(Type targetType)
+    {
+        Type[] argTypes = TypeUtil.getActualTypeArguments(targetType);
+        return argTypes.length == 2 ? argTypes[1] : null;
+    }
+    
     @SuppressWarnings("nls")
     private String getAsMapTemplate(Type targetType, TestSuiteBuilder builder)
     {
+        Type mapType = getAssignable(getGeneratedTypes(), targetType);
+        
         Type keyType = getKeyType(targetType);
         Type valType = getValueType(targetType);
         
-        String keyTypeName = (keyType != null && !TypeUtil.containsTypeVariables(keyType)) ? TypeUtil.getName(keyType, builder) : null;
-        String valTypeName = (valType != null && !TypeUtil.containsTypeVariables(valType)) ? TypeUtil.getName(valType, builder) : null;
+        String keyCast = "";
+        String valCast = "";
         
-        String mapType = "";
-        String castKey = "";
-        String castVal = "";
-        if ((keyTypeName != null) && (valTypeName != null)) {
-            mapType = fmt("<{0}, {1}>", keyTypeName, valTypeName);
-            castKey = '(' + keyTypeName + ')';
-            castVal = '(' + valTypeName + ')';
+        if ((keyType != null) && (valType != null)) {
+            mapType = TypeUtil.parameterize((Class<?>)mapType, keyType, valType);
+            keyCast = '(' + TypeUtil.getName(keyType, builder) + ')';
+            valCast = '(' + TypeUtil.getName(valType, builder) + ')';
         }
-        String template = AS_MAP_TEMPLATE_TEMPLATE.replace("#1#", mapType);
-        template = template.replace("#2#", castKey);
-        template = template.replace("#3#", castVal);
+    
+        MethodBuilder methodBuilder = new MethodBuilder(builder);
+        methodBuilder.modifier(Modifier.PRIVATE | Modifier.STATIC);
+        methodBuilder.name("###");
+        methodBuilder.returnType(targetType);
+        methodBuilder.varg(Object[].class, "pairs");
+    
+        
+        methodBuilder.statement(fmt("{0} map = new {0}()", TypeUtil.getName(mapType, builder)));
+        
+        String forLoop = 
+            "for (Object[] pair : pairs) {\n" +
+            fmt("map.put({0}pair[0], {1}pair[1]);\n", keyCast, valCast) +
+            "}";
+        
+        methodBuilder.statement(forLoop, false);
+        methodBuilder.statement("return map");
+        
+        String template = methodBuilder.build();
+        template = template.replace("{", "'{'");
+        template = template.replace("}", "'}'");
+        template = template.replace("###", "{0}");
         return template;
     }
-    
     
     @SuppressWarnings("nls")
     private static final String AS_PAIR_TEMPLATE =
         "private static Object[] {0}(Object key, Object value) '{'\n" +
         "    return new Object[] '{' key, value'}';\n" +
         "'}'";
-    
-    @SuppressWarnings("nls")
-    private static final String AS_MAP_TEMPLATE_TEMPLATE = 
-            "private static Map#1# {0}(Object[]... pairs) '{'\n" +
-            "    Map#1# map = new HashMap#1#();\n" +
-            "    for (Object[] pair : pairs) '{'\n" +
-            "        map.put(#2#pair[0], #3#pair[1]);\n" +
-            "    '}'\n" +
-            "    return map;\n" +
-            "}";
+
 }

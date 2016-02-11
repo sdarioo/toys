@@ -140,8 +140,13 @@ public class MethodBuilder
         return this;
     }
     
-    @SuppressWarnings("nls")
     public MethodBuilder statement(String statement)
+    {
+        return statement(statement, true);
+    }
+    
+    @SuppressWarnings("nls")
+    public MethodBuilder statement(String statement, boolean bTerminate)
     {
         // Support multiline statement
         String[] lines = statement.split("\\n");
@@ -150,7 +155,7 @@ public class MethodBuilder
             String line = ((i == 0) || (i == (lines.length - 1))) ? 
                     "    " + lines[i] : 
                     "        " + lines[i];
-            if (i == lines.length - 1) {
+            if (bTerminate && (i == lines.length - 1)) {
                 line += ';';
             }
             _lines.add(line);

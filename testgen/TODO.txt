@@ -1,5 +1,4 @@
-1. TreeMap, SortedMap etc..
 
-2. Interfejse proxy params
+1. Interfejse proxy params
 
-3. Zaznajomic sie z CodeModel: https://codemodel.java.net/
+2. Zaznajomic sie z CodeModel: https://codemodel.java.net/

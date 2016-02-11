@@ -30,9 +30,9 @@ public class PropertiesParam
     }
     
     @Override
-    protected Class<?> getGeneratedSourceCodeType() 
+    protected Class<?>[] getGeneratedTypes() 
     {
-        return Properties.class;
+        return new Class<?>[]{Properties.class};
     }
     
     @SuppressWarnings("nls")

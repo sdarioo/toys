@@ -196,7 +196,11 @@ public final class Recorder
         for (String msg : errors) {
             sb.append("\n   " + msg); //$NON-NLS-1$
         }
-        Logger.info(sb.toString());
+        if (isSupported) {
+            Logger.info(sb.toString());
+        } else {
+            Logger.warn(sb.toString());
+        }
     }
    
 }
