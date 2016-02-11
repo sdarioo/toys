@@ -7,9 +7,7 @@
 
 package com.github.sdarioo.testgen.generator.impl;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class GeneratorApp 
 {
@@ -22,6 +20,7 @@ public class GeneratorApp
         List<Pair<String>> pairList = Arrays.asList(p1, p2);
         count(pairList);
         countGeneric(pairList);
+        groupByKey(pairList);
         
         StringList stringList = new StringList(Arrays.asList("x", "y", "z"));
         concat(stringList);
@@ -56,6 +55,15 @@ public class GeneratorApp
         return list;
     }
     
+    public static Map<String, Pair<String>> groupByKey(List<Pair<String>> pairs)
+    {
+        Map<String, Pair<String>> result = new HashMap<String, GeneratorApp.Pair<String>>();
+        for (Pair<String> pair : pairs) {
+            result.put(pair.getX(), pair);
+        }
+        return result;
+    }
+    
     public static void checkedException(String str)
     {
         if (str == null) {
@@ -79,6 +87,15 @@ public class GeneratorApp
         
         T getX() { return _x; }
         T getY() { return _y; }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof Pair) {
+                Pair other = (Pair)obj;
+                return _x.equals(other._x) && _y.equals(other._y);
+            }
+            return false;
+        }
     }
     
     static class StringList

@@ -3,7 +3,9 @@ package com.github.sdarioo.testgen.generator.impl;
 
 import com.github.sdarioo.testgen.generator.impl.GeneratorApp;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -14,6 +16,13 @@ import org.junit.runner.RunWith;
 @RunWith(JUnitParamsRunner.class)
 public class GeneratorAppTest
 {
+    @Test
+    @Parameters(method = "testGroupByKey_Parameters")
+    public void testGroupByKey(List<GeneratorApp.Pair<String>> pairs, Map<String, GeneratorApp.Pair<String>> expected) throws Exception {
+        Map<String, GeneratorApp.Pair<String>> result = GeneratorApp.groupByKey(pairs);
+        Assert.assertEquals(expected, result);
+    }
+
     @Test(expected=NullPointerException.class)
     public void testRuntimeException() throws NullPointerException {
         GeneratorApp.runtimeException(null);
@@ -59,6 +68,13 @@ public class GeneratorAppTest
     }
 
     @SuppressWarnings("unused")
+    private static Object[] testGroupByKey_Parameters() throws Exception {
+        return new Object[] {
+            new Object[]{ Arrays.<GeneratorApp.Pair<String>>asList(newPair("a", "b"), newPair("x", "y")), asMap(asPair("a", newPair("a", "b")), asPair("x", newPair("x", "y"))) }
+        };
+    }
+
+    @SuppressWarnings("unused")
     private static Object[] testMain_Parameters() throws Exception {
         return new Object[] {
             new Object[]{ new String[]{} }
@@ -93,13 +109,25 @@ public class GeneratorAppTest
         };
     }
 
-    private static GeneratorApp.StringList newStringList(List<String> list) {
-        GeneratorApp.StringList result = new GeneratorApp.StringList(list);
+    private static <T> GeneratorApp.Pair<T> newPair(T x, T y) {
+        GeneratorApp.Pair<T> result = new GeneratorApp.Pair<T>(x, y);
         return result;
     }
 
-    private static <T> GeneratorApp.Pair<T> newPair(T x, T y) {
-        GeneratorApp.Pair<T> result = new GeneratorApp.Pair<T>(x, y);
+    private static Map<String, GeneratorApp.Pair<String>> asMap(Object[]... pairs) {
+        HashMap<String, GeneratorApp.Pair<String>> map = new HashMap<String, GeneratorApp.Pair<String>>();
+        for (Object[] pair : pairs) {
+            map.put((String)pair[0], (GeneratorApp.Pair<String>)pair[1]);
+        }
+        return map;
+    }
+
+    private static Object[] asPair(Object key, Object value) {
+        return new Object[] { key, value};
+    }
+
+    private static GeneratorApp.StringList newStringList(List<String> list) {
+        GeneratorApp.StringList result = new GeneratorApp.StringList(list);
         return result;
     }
 
