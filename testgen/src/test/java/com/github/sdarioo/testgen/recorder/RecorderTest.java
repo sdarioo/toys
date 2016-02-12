@@ -20,7 +20,6 @@ import java.util.List;
 import org.junit.Test;
 
 import com.github.sdarioo.testgen.Configuration;
-import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 import com.github.sdarioo.testgen.instrument.RecorderAPI;
 import com.github.sdarioo.testgen.recorder.Call.MethodRef;
 

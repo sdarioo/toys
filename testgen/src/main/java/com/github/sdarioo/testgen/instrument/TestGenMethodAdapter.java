@@ -65,6 +65,7 @@ public class TestGenMethodAdapter
     {
     	super.visitLabel(startFinallyLabel);
 
+    	proxyArguments();
     	int argIndex = generateArgumentsArray();
     	
     	 mv.visitLdcInsn(_owner);
@@ -111,7 +112,7 @@ public class TestGenMethodAdapter
             } else {
                 super.visitInsn(DUP);
             }
-            
+            // TODO - valueOf?
             box(Type.getReturnType(methodDesc));
 
             super.visitMethodInsn(
@@ -151,6 +152,30 @@ public class TestGenMethodAdapter
         mv.visitVarInsn(ASTORE, argIndex);
         return argIndex;
     }
+    
+    @SuppressWarnings("nls")
+    private void proxyArguments()
+    {
+        Type[] argumentTypes = Type.getArgumentTypes(methodDesc);
+        int argIndex = _isStatic ? 0 : 1;
+        for (int i = 0; i < argumentTypes.length; i++) {
+            Type argumentType = argumentTypes[i];
+            if (argumentType.getSort() == Type.OBJECT) {
+                mv.visitVarInsn(ALOAD, argIndex);
+                mv.visitMethodInsn(INVOKEVIRTUAL, 
+                        "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+                                
+                mv.visitVarInsn(ALOAD, argIndex);
+                mv.visitMethodInsn(INVOKESTATIC, 
+                        RecorderAPI.TYPE_NAME, "proxy", "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                
+                mv.visitTypeInsn(CHECKCAST, argumentType.getInternalName());
+                mv.visitVarInsn(ASTORE, argIndex);
+            }
+            argIndex += argumentType.getSize();
+        }
+    }
+    
     
     @SuppressWarnings("nls")
     private void boxIfNeeded(Type type)

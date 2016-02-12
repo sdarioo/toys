@@ -58,6 +58,20 @@ public final class RecorderAPI
         return null;
     }
 	
+    public static Object proxy(Class<?> argumentClass, Object actualValue)
+    {
+        if (actualValue == null) {
+            return actualValue;
+        }
+        
+        if ((argumentClass == null) || !argumentClass.isInterface()) {
+            return actualValue;
+        }
+        
+        System.err.println("NEW PROXY: " + argumentClass.getName());
+        return actualValue;
+    }
+    
 	private static class ThreadLocalRecorder
 	{
 		private final LinkedList<Call> _callQueue = new LinkedList<Call>();

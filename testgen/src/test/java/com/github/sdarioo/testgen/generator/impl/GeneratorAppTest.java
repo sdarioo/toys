@@ -24,19 +24,8 @@ public class GeneratorAppTest
     }
 
     @Test(expected=NullPointerException.class)
-    public void testRuntimeException() throws NullPointerException {
-        GeneratorApp.runtimeException(null);
-    }
-
-    @Test(expected=NullPointerException.class)
-    public void testCheckedException() throws NullPointerException {
-        GeneratorApp.checkedException(null);
-    }
-
-    @Test
-    @Parameters(method = "testMain_Parameters")
-    public void testMain(String[] args) throws Exception {
-        GeneratorApp.main(args);
+    public void testMain() throws NullPointerException {
+        GeneratorApp.main(new String[]{});
     }
 
     @Test
@@ -71,13 +60,6 @@ public class GeneratorAppTest
     private static Object[] testGroupByKey_Parameters() throws Exception {
         return new Object[] {
             new Object[]{ Arrays.<GeneratorApp.Pair<String>>asList(newPair("a", "b"), newPair("x", "y")), asMap(asPair("a", newPair("a", "b")), asPair("x", newPair("x", "y"))) }
-        };
-    }
-
-    @SuppressWarnings("unused")
-    private static Object[] testMain_Parameters() throws Exception {
-        return new Object[] {
-            new Object[]{ new String[]{} }
         };
     }
 
