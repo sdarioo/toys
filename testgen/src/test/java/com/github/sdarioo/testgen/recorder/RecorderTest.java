@@ -25,13 +25,6 @@ import com.github.sdarioo.testgen.recorder.Call.MethodRef;
 
 public class RecorderTest 
 {
-    
-    @Test
-    public void testGet()
-    {
-        assertSame(Recorder.get("key"), Recorder.get("key"));
-        assertNotSame(Recorder.get("key"), Recorder.get("other"));
-    }
  
     @SuppressWarnings("nls")
     @Test
@@ -53,7 +46,7 @@ public class RecorderTest
         assertNotNull(m);
         
         int max = Configuration.getDefault().getMaxCalls();
-        Recorder r = Recorder.get("testGetCallsWithUnsupported");
+        Recorder r = Recorder.newRecorder();
         for (int i = 0; i < max; i++) {
             Call c = Call.newCall(m, this, new Object[]{"param"+i});
             c.end();
@@ -75,7 +68,7 @@ public class RecorderTest
         Method m = RecorderAPI.getMethod(RecorderTest.class, "testCall", "(Ljava/lang/Object;)I");
         assertNotNull(m);
         
-        Recorder r = Recorder.get("testGetCallsWithUnsupported");
+        Recorder r = Recorder.newRecorder();
         
         Call c = Call.newCall(m, this, new Object[]{"param"});
         c.end();

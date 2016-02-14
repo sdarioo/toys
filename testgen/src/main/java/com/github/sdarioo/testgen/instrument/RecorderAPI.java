@@ -8,6 +8,7 @@ import org.objectweb.asm.Type;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.Recorder;
+import com.github.sdarioo.testgen.recorder.params.proxy.ProxyFactory;
 
 public final class RecorderAPI
 {
@@ -81,18 +82,14 @@ public final class RecorderAPI
 	
     public static Object proxy(Method method, int argIndex, Object argValue)
     {
-        return argValue;
-        
-//        if (actualValue == null) {
-//            return actualValue;
-//        }
-//        
-//        if ((argumentClass == null) || !argumentClass.isInterface()) {
-//            return actualValue;
-//        }
-//        
-//        System.err.println("NEW PROXY: " + argumentClass.getName());
-//        return actualValue;
+        if (argValue == null) {
+            return argValue;
+        }
+        Class<?> argType = method.getParameterTypes()[argIndex];
+        if (!argType.isInterface()) {
+            return argValue;
+        }
+        return ProxyFactory.newProxy(argType, argValue);
     }
     
 	private static class ThreadLocalRecorder

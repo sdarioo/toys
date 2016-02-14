@@ -10,8 +10,6 @@ package com.github.sdarioo.testgen.recorder;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.github.sdarioo.testgen.Configuration;
@@ -22,7 +20,6 @@ public final class Recorder
     implements IArgNamesProvider
 {
     private static final Recorder DEFAULT = new Recorder();
-    private static final ConcurrentMap<String, Recorder> RECORDERS = new ConcurrentHashMap<String, Recorder>();
     
     private static final Map<String, String[]> ARG_NAMES = new HashMap<String, String[]>();
     
@@ -38,17 +35,9 @@ public final class Recorder
         return DEFAULT;
     }
     
-    public static Recorder get(String key)
+    public static Recorder newRecorder()
     {
-        Recorder recorder = RECORDERS.get(key);
-        if (recorder == null) {
-            Recorder newRecorder = new Recorder();
-            recorder = RECORDERS.putIfAbsent(key, newRecorder);
-            if (recorder == null) {
-                recorder = newRecorder;
-            }
-        }
-        return recorder;
+        return new Recorder();
     }
     
     public void record(Call call)

@@ -5,7 +5,7 @@
  * actual or intended publication of such source code.
  */
 
-package com.github.sdarioo.testgen.recorder.params;
+package com.github.sdarioo.testgen.recorder.params.beans;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -17,7 +17,8 @@ import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
-import com.github.sdarioo.testgen.recorder.params.beans.Bean;
+import com.github.sdarioo.testgen.recorder.params.AbstractParam;
+import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
 

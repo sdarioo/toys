@@ -13,6 +13,9 @@ import org.apache.commons.lang3.ClassUtils;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.beans.Bean;
 import com.github.sdarioo.testgen.recorder.params.beans.BeanFactory;
+import com.github.sdarioo.testgen.recorder.params.beans.BeanParam;
+import com.github.sdarioo.testgen.recorder.params.proxy.ProxyFactory;
+import com.github.sdarioo.testgen.recorder.params.proxy.ProxyParam;
 
 
 public final class ParamsFactory 
@@ -40,6 +43,11 @@ public final class ParamsFactory
             return toPrimitiveValue(value);
         }
         
+        // Proxy
+        if (ProxyFactory.isProxy(value)) {
+            return new ProxyParam(value);
+        }
+
         // Collections
         if (value instanceof Properties) {
             return new PropertiesParam((Properties)value);

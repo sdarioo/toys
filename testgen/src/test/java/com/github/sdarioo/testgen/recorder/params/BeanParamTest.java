@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.params.beans.BeanFactory;
+import com.github.sdarioo.testgen.recorder.params.beans.BeanParam;
 
 public class BeanParamTest 
 {
