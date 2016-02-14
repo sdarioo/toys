@@ -17,15 +17,30 @@ import org.junit.runner.RunWith;
 public class GeneratorAppTest
 {
     @Test
+    @Parameters(method = "testMain_Parameters")
+    public void testMain(String[] args) throws Exception {
+        GeneratorApp.main(args);
+    }
+
+    @Test
+    @Parameters(method = "testCount_Parameters")
+    public void testCount(List<GeneratorApp.Pair<String>> list, String expected) throws Exception {
+        String result = GeneratorApp.count(list);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    @Parameters(method = "testCountGeneric_Parameters")
+    public <T> void testCountGeneric(List<GeneratorApp.Pair<T>> list, int expected) throws Exception {
+        int result = GeneratorApp.countGeneric(list);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
     @Parameters(method = "testGroupByKey_Parameters")
     public void testGroupByKey(List<GeneratorApp.Pair<String>> pairs, Map<String, GeneratorApp.Pair<String>> expected) throws Exception {
         Map<String, GeneratorApp.Pair<String>> result = GeneratorApp.groupByKey(pairs);
         Assert.assertEquals(expected, result);
-    }
-
-    @Test(expected=NullPointerException.class)
-    public void testMain() throws NullPointerException {
-        GeneratorApp.main(new String[]{});
     }
 
     @Test
@@ -42,18 +57,35 @@ public class GeneratorAppTest
         Assert.assertEquals(expected, result);
     }
 
-    @Test
-    @Parameters(method = "testCountGeneric_Parameters")
-    public <T> void testCountGeneric(List<GeneratorApp.Pair<T>> list, int expected) throws Exception {
-        int result = GeneratorApp.countGeneric(list);
-        Assert.assertEquals(expected, result);
+    @Test(expected=NullPointerException.class)
+    public void testCheckedException() throws NullPointerException {
+        GeneratorApp.checkedException(null);
     }
 
-    @Test
-    @Parameters(method = "testCount_Parameters")
-    public void testCount(List<GeneratorApp.Pair<String>> list, String expected) throws Exception {
-        String result = GeneratorApp.count(list);
-        Assert.assertEquals(expected, result);
+    @Test(expected=NullPointerException.class)
+    public void testRuntimeException() throws NullPointerException {
+        GeneratorApp.runtimeException(null);
+    }
+
+    @SuppressWarnings("unused")
+    private static Object[] testMain_Parameters() throws Exception {
+        return new Object[] {
+            new Object[]{ new String[]{} }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    private static Object[] testCount_Parameters() throws Exception {
+        return new Object[] {
+            new Object[]{ Arrays.<GeneratorApp.Pair<String>>asList(newPair("a", "b"), newPair("x", "y")), "2" }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    private static Object[] testCountGeneric_Parameters() throws Exception {
+        return new Object[] {
+            new Object[]{ Arrays.asList(newPair("a", "b"), newPair("x", "y")), 0 }
+        };
     }
 
     @SuppressWarnings("unused")
@@ -74,20 +106,6 @@ public class GeneratorAppTest
     private static Object[] testSort_Parameters() throws Exception {
         return new Object[] {
             new Object[]{ Arrays.asList("c", "b", "a"), Arrays.asList("a", "b", "c") }
-        };
-    }
-
-    @SuppressWarnings("unused")
-    private static Object[] testCountGeneric_Parameters() throws Exception {
-        return new Object[] {
-            new Object[]{ Arrays.asList(newPair("a", "b"), newPair("x", "y")), 0 }
-        };
-    }
-
-    @SuppressWarnings("unused")
-    private static Object[] testCount_Parameters() throws Exception {
-        return new Object[] {
-            new Object[]{ Arrays.<GeneratorApp.Pair<String>>asList(newPair("a", "b"), newPair("x", "y")), "2" }
         };
     }
 

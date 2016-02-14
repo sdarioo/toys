@@ -28,8 +28,8 @@ public class GeneratorApp
         List<String> listOfString = Arrays.asList("c", "b", "a");
         sort(listOfString);
         
-        try { checkedException(null); } catch (NullPointerException e) {}
-        try { runtimeException(null); } catch (NullPointerException e) {}
+        try { checkedException(null); } catch (NullPointerException e) { }
+        try { runtimeException(null); } catch (NullPointerException e) { }
         
         System.out.println("OK");
     }
@@ -66,7 +66,7 @@ public class GeneratorApp
     
     public static void checkedException(String str)
     {
-        if (str == null) {
+        if ("text".length() == 4) {
             throw new NullPointerException();
         }
     }

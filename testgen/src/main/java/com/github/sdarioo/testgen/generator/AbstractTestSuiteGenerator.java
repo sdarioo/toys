@@ -120,7 +120,7 @@ public abstract class AbstractTestSuiteGenerator
     
     private static Map<Method, List<Call>> groupByMethod(List<Call> clazzCalls)
     {
-        Map<Method, List<Call>> result = new HashMap<Method, List<Call>>();
+        Map<Method, List<Call>> result = new LinkedHashMap<Method, List<Call>>();
         for (Call call : clazzCalls) {
             Method method = call.getMethod();
             List<Call> methodCalls = result.get(method);

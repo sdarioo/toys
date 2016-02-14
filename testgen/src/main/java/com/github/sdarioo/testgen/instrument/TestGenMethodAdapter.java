@@ -66,13 +66,10 @@ public class TestGenMethodAdapter
     	super.visitLabel(startFinallyLabel);
 
     	proxyArguments();
+    	
     	int argIndex = generateArgumentsArray();
     	
-    	 mv.visitLdcInsn(_owner);
-         mv.visitLdcInsn(_method.getName());
-         mv.visitLdcInsn(_method.getDescriptor());
-         mv.visitMethodInsn(INVOKESTATIC, RecorderAPI.TYPE_NAME, "getMethod", 
-        		 "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/reflect/Method;", false);
+    	getMethod();
     	
         if (_isStatic) {
         	super.visitInsn(ACONST_NULL);
@@ -126,6 +123,17 @@ public class TestGenMethodAdapter
         super.visitEnd();
         Recorder.getDefault().setArgumentNames(_owner, _method, _paramNames);
     }
+    
+    // -> java.lang.reflect.Method
+    private void getMethod()
+    {
+        mv.visitLdcInsn(_owner);
+        mv.visitLdcInsn(_method.getName());
+        mv.visitLdcInsn(_method.getDescriptor());
+        mv.visitMethodInsn(INVOKESTATIC, RecorderAPI.TYPE_NAME, "getMethod", 
+                "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/reflect/Method;", false);
+    }
+    
   
     @SuppressWarnings("nls")
     private int generateArgumentsArray()
@@ -161,13 +169,13 @@ public class TestGenMethodAdapter
         for (int i = 0; i < argumentTypes.length; i++) {
             Type argumentType = argumentTypes[i];
             if (argumentType.getSort() == Type.OBJECT) {
+                
+                getMethod();
+                mv.visitLdcInsn(i);
                 mv.visitVarInsn(ALOAD, argIndex);
-                mv.visitMethodInsn(INVOKEVIRTUAL, 
-                        "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-                                
-                mv.visitVarInsn(ALOAD, argIndex);
+                
                 mv.visitMethodInsn(INVOKESTATIC, 
-                        RecorderAPI.TYPE_NAME, "proxy", "(Ljava/lang/Class;Ljava/lang/Object;)Ljava/lang/Object;", false);
+                        RecorderAPI.TYPE_NAME, "proxy", "(Ljava/lang/reflect/Method;ILjava/lang/Object;)Ljava/lang/Object;", false);
                 
                 mv.visitTypeInsn(CHECKCAST, argumentType.getInternalName());
                 mv.visitVarInsn(ASTORE, argIndex);

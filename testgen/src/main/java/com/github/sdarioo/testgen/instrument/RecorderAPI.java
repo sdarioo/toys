@@ -26,50 +26,73 @@ public final class RecorderAPI
 	
 	public static void methodBegin(Method method, Object target, Object[] args)
 	{
-		threadLocalRecorders.get().methodBegin(method, target, args);
+	    try {
+	        threadLocalRecorders.get().methodBegin(method, target, args);
+	    } catch (Throwable t) {
+	        Logger.error(t.getMessage(), t);
+	    }
 	}
 	
 	public static void methodEnd()
 	{
-		threadLocalRecorders.get().methodEnd(true, null, null);
+	    try {
+	        threadLocalRecorders.get().methodEnd(true, null, null);
+	    } catch (Throwable t) {
+	        Logger.error(t.getMessage(), t);
+	    }
 	}
 	
 	public static void methodEndWithResult(Object object)
 	{
-		threadLocalRecorders.get().methodEnd(false, object, null);
+	    try {
+	        threadLocalRecorders.get().methodEnd(false, object, null);
+	    } catch (Throwable t) {
+	        Logger.error(t.getMessage(), t);
+	    }
 	}
 	
 	public static void methodEndWithException(Throwable throwable)
 	{
-		threadLocalRecorders.get().methodEnd(false, null, throwable);
+	    try {
+	        threadLocalRecorders.get().methodEnd(false, null, throwable);
+	    } catch (Throwable t) {
+	        Logger.error(t.getMessage(), t);
+	    }
 	}
 	
     public static java.lang.reflect.Method getMethod(Class<?> owner, String name, String descriptor)
     {
-        Method[] declaredMethods = owner.getDeclaredMethods();
-        for (Method method : declaredMethods) {
-            if (name.equals(method.getName())) {
-                String desc = org.objectweb.asm.commons.Method.getMethod(method).getDescriptor();
-                if (descriptor.equals(desc)) {
-                    return method;
+        try {
+            Method[] declaredMethods = owner.getDeclaredMethods();
+            for (Method method : declaredMethods) {
+                if (name.equals(method.getName())) {
+                    String desc = org.objectweb.asm.commons.Method.getMethod(method).getDescriptor();
+                    if (descriptor.equals(desc)) {
+                        return method;
+                    }
                 }
             }
+        } catch (Throwable t) {
+            Logger.error(t.getMessage(), t);
         }
+        Logger.error("Null method for: " + owner.getName() + " name: " + name + " desc: " + descriptor);
         return null;
     }
 	
-    public static Object proxy(Class<?> argumentClass, Object actualValue)
+    public static Object proxy(Method method, int argIndex, Object argValue)
     {
-        if (actualValue == null) {
-            return actualValue;
-        }
+        return argValue;
         
-        if ((argumentClass == null) || !argumentClass.isInterface()) {
-            return actualValue;
-        }
-        
-        System.err.println("NEW PROXY: " + argumentClass.getName());
-        return actualValue;
+//        if (actualValue == null) {
+//            return actualValue;
+//        }
+//        
+//        if ((argumentClass == null) || !argumentClass.isInterface()) {
+//            return actualValue;
+//        }
+//        
+//        System.err.println("NEW PROXY: " + argumentClass.getName());
+//        return actualValue;
     }
     
 	private static class ThreadLocalRecorder

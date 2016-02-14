@@ -192,6 +192,9 @@ public final class Recorder
         
         StringBuilder sb = new StringBuilder();
         sb.append(MessageFormat.format("Recording {0} call: {1}", (isSupported ? "supported" : "unsupported"), call));
+        if (call.getExceptionInfo() != null) {
+            sb.append("\n   Expected exception=").append(call.getExceptionInfo().getClassName());
+        }
         
         for (String msg : errors) {
             sb.append("\n   " + msg); //$NON-NLS-1$
