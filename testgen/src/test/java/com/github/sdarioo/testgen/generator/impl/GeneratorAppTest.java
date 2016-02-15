@@ -11,6 +11,7 @@ import junitparams.Parameters;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 
 
 @RunWith(JUnitParamsRunner.class)
@@ -54,6 +55,13 @@ public class GeneratorAppTest
     @Parameters(method = "testSort_Parameters")
     public <T extends Comparable<T>> void testSort(List<T> list, List<T> expected) throws Exception {
         List<T> result = GeneratorApp.sort(list);
+        Assert.assertEquals(expected, result);
+    }
+
+    @Test
+    @Parameters(method = "testProxy_Parameters")
+    public void testProxy(GeneratorApp.IListProvider provider, String[] args, List<String> expected) throws Exception {
+        List<String> result = GeneratorApp.proxy(provider, args);
         Assert.assertEquals(expected, result);
     }
 
@@ -109,6 +117,13 @@ public class GeneratorAppTest
         };
     }
 
+    @SuppressWarnings("unused")
+    private static Object[] testProxy_Parameters() throws Exception {
+        return new Object[] {
+            new Object[]{ newIListProviderMock(), new String[]{"a", "b", "c"}, Arrays.<String>asList("a", "b", "c") }
+        };
+    }
+
     private static <T> GeneratorApp.Pair<T> newPair(T x, T y) {
         GeneratorApp.Pair<T> result = new GeneratorApp.Pair<T>(x, y);
         return result;
@@ -129,6 +144,12 @@ public class GeneratorAppTest
     private static GeneratorApp.StringList newStringList(List<String> list) {
         GeneratorApp.StringList result = new GeneratorApp.StringList(list);
         return result;
+    }
+
+    private static GeneratorApp.IListProvider newIListProviderMock() {
+        GeneratorApp.IListProvider mock = Mockito.mock(GeneratorApp.IListProvider.class);
+        Mockito.when(mock.toList(new String[]{"a", "b", "c"})).thenReturn(Arrays.asList("a", "b", "c"));
+        return mock;
     }
 
 }

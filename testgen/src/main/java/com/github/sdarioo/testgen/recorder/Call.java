@@ -99,7 +99,7 @@ public class Call implements Comparable<Call>
         return Modifier.isStatic(_method.getModifiers());
     }
     
-    public boolean isSupported(Set<String> errors)
+    public boolean isSupported(Collection<String> errors)
     {
         boolean bResult = true;
         Type[] paramTypes = _method.getGenericParameterTypes();

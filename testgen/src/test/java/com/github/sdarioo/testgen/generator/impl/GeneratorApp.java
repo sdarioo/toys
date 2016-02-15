@@ -28,6 +28,13 @@ public class GeneratorApp
         List<String> listOfString = Arrays.asList("c", "b", "a");
         sort(listOfString);
         
+        proxy(new IListProvider() {
+            @Override
+            public List<String> toList(String... args) {
+                return Arrays.asList(args);
+            }
+        }, "a", "b", "c");
+
         try { checkedException(null); } catch (NullPointerException e) { }
         try { runtimeException(null); } catch (NullPointerException e) { }
         
@@ -47,6 +54,11 @@ public class GeneratorApp
     public static String concat(StringList list)
     {
         return "";
+    }
+    
+    public static List<String> proxy(IListProvider provider, String... args)
+    {
+        return provider.toList(args);
     }
     
     public static <T extends Comparable<T>> List<T> sort(List<T> list)
@@ -107,4 +119,10 @@ public class GeneratorApp
             this.list = list;
         }
     }
+    
+    public static interface IListProvider
+    {
+        List<String> toList(String... args);
+    }
+
 }

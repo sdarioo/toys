@@ -1,4 +1,4 @@
-package com.github.sdarioo.testgen.recorder.params;
+package com.github.sdarioo.testgen.recorder.params.beans;
 
 import static org.junit.Assert.*;
 

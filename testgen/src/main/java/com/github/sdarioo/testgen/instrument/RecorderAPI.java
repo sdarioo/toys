@@ -82,13 +82,11 @@ public final class RecorderAPI
 	
     public static Object proxy(Method method, int argIndex, Object argValue)
     {
-        if (argValue == null) {
-            return argValue;
-        }
         Class<?> argType = method.getParameterTypes()[argIndex];
-        if (!argType.isInterface()) {
+        if (!ProxyFactory.canProxy(argType, argValue)) {
             return argValue;
         }
+        
         return ProxyFactory.newProxy(argType, argValue);
     }
     

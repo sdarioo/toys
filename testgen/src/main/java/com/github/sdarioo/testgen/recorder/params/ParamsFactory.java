@@ -42,11 +42,6 @@ public final class ParamsFactory
         if (ClassUtils.isPrimitiveWrapper(value.getClass())) {
             return toPrimitiveValue(value);
         }
-        
-        // Proxy
-        if (ProxyFactory.isProxy(value)) {
-            return new ProxyParam(value);
-        }
 
         // Collections
         if (value instanceof Properties) {
@@ -66,6 +61,11 @@ public final class ParamsFactory
         if (factoryMethod != null) {
             return new StringWrapperParam(value, factoryMethod);
         }
+        // Proxy
+        if (ProxyFactory.isProxy(value)) {
+            return new ProxyParam(value);
+        }
+        
         // Java Bean
         Bean bean = BeanFactory.getInstance().getBean(clazz);
         if (bean != null) {
