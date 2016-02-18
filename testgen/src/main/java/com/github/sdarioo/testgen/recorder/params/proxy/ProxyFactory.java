@@ -39,9 +39,18 @@ public class ProxyFactory
     
     public static Object newProxy(Class<?> type, Object value)
     {
+        Class<?> proxyInterface = type;
+        Class<?>[] interfaces = value.getClass().getInterfaces();
+        for (Class<?> interfce : interfaces) {
+            if (type.isAssignableFrom(interfce)) {
+                proxyInterface = interfce;
+                break;
+            }
+        }
+        
         Object proxy = Proxy.newProxyInstance(value.getClass().getClassLoader(), 
-                new Class<?>[]{ type }, 
-                new RecordingInvocationHandler(type, value));
+                new Class<?>[]{ proxyInterface }, 
+                new RecordingInvocationHandler(proxyInterface, value));
     
         return proxy;
     }

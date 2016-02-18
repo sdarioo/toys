@@ -39,13 +39,13 @@ public class ProxyParam
     {
         RecordingInvocationHandler handler = getHandler();
         if (handler == null) {
-            errors.add("Unsupported proxy InvocationHandler.");
+            errors.add("Unexpected proxy InvocationHandler."); //$NON-NLS-1$
             return false;
         }
-        if (!targetType.equals(handler.getType())) {
-            errors.add("Type not supported by proxy: " + TypeUtil.getName(targetType, new TestSuiteBuilder()));
+        if (!super.isAssignable(handler.getType(), targetType, errors)) {
             return false;
         }
+        
         List<Call> calls = handler.getCalls();
         boolean bSupported = true;
         for (Call call : calls) {
@@ -57,12 +57,12 @@ public class ProxyParam
     @Override
     public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        builder.addImport("org.mockito.Mockito");
+        builder.addImport("org.mockito.Mockito"); //$NON-NLS-1$
         
         String factoryMethodName = getFactoryMethodName(builder);
         String factoryMethodTemplate = getFactoryMethodTemplate(builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
-        return fmt("{0}()", factoryMethod.getName());
+        return fmt("{0}()", factoryMethod.getName()); //$NON-NLS-1$
     }
     
     public RecordingInvocationHandler getHandler()
@@ -74,6 +74,7 @@ public class ProxyParam
         return (RecordingInvocationHandler)handler;
     }
     
+    @SuppressWarnings("nls")
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
         RecordingInvocationHandler handler = getHandler();
@@ -100,7 +101,7 @@ public class ProxyParam
                 sb.append(args.get(i).toSouceCode(argTypes[i], builder));
             }
             String result = call.getResult().toSouceCode(method.getReturnType(), builder);
-            String when = fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", method.getName(), sb.toString(), result); 
+            String when = fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", method.getName(), sb.toString(), result);
             methodBuilder.statement(when);
         }
         
@@ -113,6 +114,7 @@ public class ProxyParam
         return template;
     }
     
+    @SuppressWarnings("nls")
     private String getFactoryMethodName(TestSuiteBuilder builder)
     {
         String objectClass = builder.getTypeName(getRecordedType());
@@ -120,7 +122,7 @@ public class ProxyParam
         if (index > 0) {
             objectClass = objectClass.substring(index + 1);
         }
-        return "new" + objectClass + "Mock"; //$NON-NLS-1$
+        return "new" + objectClass + "Mock";
     }
     
     @Override

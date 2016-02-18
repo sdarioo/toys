@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 import org.objectweb.asm.Type;
 
+import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.Recorder;
@@ -82,6 +83,10 @@ public final class RecorderAPI
 	
     public static Object proxy(Method method, int argIndex, Object argValue)
     {
+        if (Recorder.getDefault().getCount(method) >= Configuration.getDefault().getMaxCalls()) {
+            return argValue;
+        }
+        
         Class<?> argType = method.getParameterTypes()[argIndex];
         if (!ProxyFactory.canProxy(argType, argValue)) {
             return argValue;

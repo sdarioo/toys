@@ -66,6 +66,11 @@ public final class Recorder
             recordCall(_unsupportedCalls, call);
         }
     }
+    
+    public int getCount(Method method)
+    {
+        return count(method, _calls) + count(method, _unsupportedCalls);
+    }
 
     public Collection<Class<?>> getRecordedClasses()
     {
@@ -120,6 +125,14 @@ public final class Recorder
             }
             String key = type.getDescriptor() + '-' + method.getDescriptor();
             ARG_NAMES.put(key, names);
+        }
+    }
+    
+    private static int count(Method method, Map<Method, Set<Call>> calls)
+    {
+        synchronized (calls) {
+            Set<Call> methodCalls = calls.get(method);
+            return (methodCalls != null) ? methodCalls.size() : 0;
         }
     }
     
