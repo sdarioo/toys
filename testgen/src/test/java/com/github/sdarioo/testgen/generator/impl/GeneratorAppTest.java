@@ -120,7 +120,7 @@ public class GeneratorAppTest
     @SuppressWarnings("unused")
     private static Object[] testProxy_Parameters() throws Exception {
         return new Object[] {
-            new Object[]{ newIListProviderMock(), new String[]{"a", "b", "c"}, Arrays.<String>asList("a", "b", "c") }
+            new Object[]{ newIListProviderMock(new String[]{"a", "b", "c"}), new String[]{"a", "b", "c"}, Arrays.<String>asList("a", "b", "c") }
         };
     }
 
@@ -146,9 +146,9 @@ public class GeneratorAppTest
         return result;
     }
 
-    private static GeneratorApp.IListProvider newIListProviderMock() {
+    private static GeneratorApp.IListProvider newIListProviderMock(String[] arg0) {
         GeneratorApp.IListProvider mock = Mockito.mock(GeneratorApp.IListProvider.class);
-        Mockito.when(mock.toList(new String[]{"a", "b", "c"})).thenReturn(Arrays.asList("a", "b", "c"));
+        Mockito.when(mock.toList(arg0)).thenReturn(Arrays.asList("a", "b", "c"));
         return mock;
     }
 

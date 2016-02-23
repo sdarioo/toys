@@ -70,7 +70,7 @@ public final class Generator
             List<Call> calls = _recorder.getCalls(clazz);
             ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
             generator.setLocationDir(locationDir);
-            generator.setArgNamesProvider(_recorder);
+
             TestClass testSuite = generator.generate(clazz, calls);
             if (write(testSuite, locationDir)) {
                 Logger.info("Generated test: " + locationDir.getAbsolutePath() + File.separator + testSuite.getFileName());

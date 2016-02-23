@@ -10,18 +10,20 @@ package com.github.sdarioo.testgen.generator;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.ClassUtils;
 
 import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.IArgNamesProvider;
+import com.github.sdarioo.testgen.recorder.MethodArgNames;
 
 public abstract class AbstractTestSuiteGenerator 
     implements ITestSuiteGenerator
 {
-    private IArgNamesProvider _argNamesProvider;
     private File _locationDir;
     
     protected abstract void initTestSuite(Class<?> targetClass, 
@@ -37,15 +39,6 @@ public abstract class AbstractTestSuiteGenerator
             List<Call> callsWithException, 
             TestSuiteBuilder builder);
     
-    
-    /**
-     * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#setArgNamesProvider(com.github.sdarioo.testgen.recorder.IArgNamesProvider)
-     */
-    @Override
-    public void setArgNamesProvider(IArgNamesProvider argNamesProvider) 
-    {
-        _argNamesProvider = argNamesProvider;
-    }
     
     /**
      * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#setLocationDir(java.io.File)
@@ -99,10 +92,7 @@ public abstract class AbstractTestSuiteGenerator
     
     protected String[] getParameterNames(Method method)
     {
-        String[] names = null;
-        if (_argNamesProvider != null) {
-            names = _argNamesProvider.getArgumentNames(method);
-        }
+        String[] names = MethodArgNames.getArgNames(method);
         if (names == null) {
             int size = method.getParameterTypes().length;
             names = new String[size];

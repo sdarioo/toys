@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,6 +15,7 @@ import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.recorder.MethodArgNames;
 import com.github.sdarioo.testgen.recorder.params.AbstractParam;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
@@ -31,7 +34,7 @@ public class ProxyParam
     public Class<?> getRecordedType() 
     {
         RecordingInvocationHandler handler = getHandler();
-        return (handler != null) ? handler.getType() : super.getRecordedType();
+        return (handler != null) ? handler.getInterface() : super.getRecordedType();
     }
     
     @Override
@@ -42,7 +45,7 @@ public class ProxyParam
             errors.add("Unexpected proxy InvocationHandler."); //$NON-NLS-1$
             return false;
         }
-        if (!super.isAssignable(handler.getType(), targetType, errors)) {
+        if (!super.isAssignable(handler.getInterface(), targetType, errors)) {
             return false;
         }
         
@@ -62,7 +65,22 @@ public class ProxyParam
         String factoryMethodName = getFactoryMethodName(builder);
         String factoryMethodTemplate = getFactoryMethodTemplate(builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
-        return fmt("{0}()", factoryMethod.getName()); //$NON-NLS-1$
+        
+        StringBuilder sb = new StringBuilder();
+        for (Call call : getHandler().getCalls()) {
+            Method method = call.getMethod();
+            List<IParameter> args = call.args();
+            Class<?>[] argTypes = method.getParameterTypes();
+            
+            for (int i = 0; i < args.size(); i++) {
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(args.get(i).toSouceCode(argTypes[i], builder));
+            }
+        }
+        
+        return fmt("{0}({1})", factoryMethod.getName(), sb.toString()); //$NON-NLS-1$
     }
     
     public RecordingInvocationHandler getHandler()
@@ -78,28 +96,32 @@ public class ProxyParam
     private String getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
         RecordingInvocationHandler handler = getHandler();
-        Class<?> rawType = handler.getType();
+        List<Call> calls = handler.getCalls();
+        Class<?> rawType = handler.getInterface();
+        
+        List<Type> argTypes = new ArrayList<Type>();
+        List<String> argNames = new ArrayList<String>();
+        getArgTypesAndNames(calls, argTypes, argNames);
         
         MethodBuilder methodBuilder = new MethodBuilder(builder);
-        methodBuilder.modifier(Modifier.PRIVATE | Modifier.STATIC);
-        methodBuilder.returnType(rawType);
-        methodBuilder.name("###");
+        methodBuilder.modifier(Modifier.PRIVATE | Modifier.STATIC).
+            returnType(rawType).
+            name("###").
+            args(argTypes.toArray(new Type[0]), argNames.toArray(new String[0])).
+            statement(fmt("{0} mock = Mockito.mock({0}.class)", TypeUtil.getName(rawType, builder)));
+                
         
-        methodBuilder.statement(fmt("{0} mock = Mockito.mock({0}.class)", TypeUtil.getName(rawType, builder)));
-        
-        
-        for (Call call : handler.getCalls()) {
+        for (Call call : calls) {
             Method method = call.getMethod();
-            List<IParameter> args = call.args();
-            Class<?>[] argTypes = method.getParameterTypes();
             
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < args.size(); i++) {
+            for (String arg : argNames) {
                 if (sb.length() > 0) {
                     sb.append(", ");
                 }
-                sb.append(args.get(i).toSouceCode(argTypes[i], builder));
+                sb.append(arg);
             }
+            
             String result = call.getResult().toSouceCode(method.getReturnType(), builder);
             String when = fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", method.getName(), sb.toString(), result);
             methodBuilder.statement(when);
@@ -124,6 +146,27 @@ public class ProxyParam
         }
         return "new" + objectClass + "Mock";
     }
+    
+    private static void getArgTypesAndNames(List<Call> calls, List<Type> argTypes, List<String> argNames)
+    {
+        int uniqueIdx = 0;
+        // TODO - check if all calls has different method
+        // TODO - if params generic method also should be generic
+        for (Call call : calls) {
+            Method method = call.getMethod();
+            Type[] types = method.getParameterTypes();
+            String[] names = MethodArgNames.getArgNames(method);
+            if (names == null) {
+                names = new String[types.length];
+                for (int i = 0; i < names.length; i++) {
+                    names[i] = "arg" + uniqueIdx++;
+                }
+            }
+            argTypes.addAll(Arrays.asList(types));
+            argNames.addAll(Arrays.asList(names));
+        }
+    }
+    
     
     @Override
     public boolean equals(Object obj) 

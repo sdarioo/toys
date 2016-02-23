@@ -14,7 +14,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.Method;
 
-import com.github.sdarioo.testgen.recorder.Recorder;
+import com.github.sdarioo.testgen.recorder.MethodArgNames;
 
 public class TestGenMethodAdapter 
     extends AdviceAdapter
@@ -22,7 +22,7 @@ public class TestGenMethodAdapter
     private final Type _owner;
     private final Method _method;
     private final boolean _isStatic;
-    private final String[] _paramNames; 
+    private final String[] _argNames; 
     
     private final Label startFinallyLabel = new Label();
 
@@ -33,7 +33,7 @@ public class TestGenMethodAdapter
         _isStatic = isStatic(access);
         _owner = owner;
         _method = new Method(name, desc);
-        _paramNames = new String[_method.getArgumentTypes().length];
+        _argNames = new String[_method.getArgumentTypes().length];
     }
     
     @Override
@@ -43,8 +43,8 @@ public class TestGenMethodAdapter
         super.visitLocalVariable(name, desc, signature, start, end, index);
 
         int paramIndex = _isStatic ? index : index - 1;
-        if ((paramIndex >= 0) && (paramIndex < _paramNames.length)) {
-            _paramNames[paramIndex] = name;
+        if ((paramIndex >= 0) && (paramIndex < _argNames.length)) {
+            _argNames[paramIndex] = name;
         }
     }
     
@@ -121,7 +121,7 @@ public class TestGenMethodAdapter
     public void visitEnd() 
     {
         super.visitEnd();
-        Recorder.getDefault().setArgumentNames(_owner, _method, _paramNames);
+        MethodArgNames.setArgNames(_owner, _method, _argNames);
     }
     
     // -> java.lang.reflect.Method

@@ -12,20 +12,20 @@ import com.github.sdarioo.testgen.recorder.Recorder;
 public class RecordingInvocationHandler
     implements InvocationHandler
 {
-    private final Class<?> _type;
+    private final Class<?> _interface;
     private final Object _original;
     private final Recorder _recorder;
     
-    public RecordingInvocationHandler(Class<?> type, Object original)
+    public RecordingInvocationHandler(Class<?> interfce, Object original)
     {
-        _type = type;
+        _interface = interfce;
         _original = original;
         _recorder = Recorder.newRecorder();
     }
     
-    public Class<?> getType() 
+    public Class<?> getInterface() 
     {
-        return _type;
+        return _interface;
     }
     
     @Override
