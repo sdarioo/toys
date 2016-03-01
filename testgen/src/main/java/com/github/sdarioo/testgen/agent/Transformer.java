@@ -7,6 +7,7 @@ import java.security.ProtectionDomain;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 
+import com.github.sdarioo.testgen.instrument.ArgNamesIntrospector;
 import com.github.sdarioo.testgen.instrument.TestGenClassAdapter;
 import com.github.sdarioo.testgen.logging.Logger;
 
@@ -38,7 +39,9 @@ public class Transformer
     {
         ClassReader reader = new ClassReader(classfileBuffer);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
-        TestGenClassAdapter adapter = new TestGenClassAdapter(writer, methodName);
+        
+        ArgNamesIntrospector argsIntrospector = new ArgNamesIntrospector(writer);
+        TestGenClassAdapter adapter = new TestGenClassAdapter(argsIntrospector, methodName);
         
         try {
             // ClassReader.accept() calls that receive any subclass of LocalVariableSorter need EXPAND_FRAMES flag

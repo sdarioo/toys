@@ -19,7 +19,7 @@ import org.apache.commons.lang3.ClassUtils;
 
 import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.MethodArgNames;
+import com.github.sdarioo.testgen.recorder.ArgNamesCache;
 
 public abstract class AbstractTestSuiteGenerator 
     implements ITestSuiteGenerator
@@ -92,15 +92,7 @@ public abstract class AbstractTestSuiteGenerator
     
     protected String[] getParameterNames(Method method)
     {
-        String[] names = MethodArgNames.getArgNames(method);
-        if (names == null) {
-            int size = method.getParameterTypes().length;
-            names = new String[size];
-            for (int i = 0; i < size; i++) {
-                names[i] = "arg" + i; //$NON-NLS-1$
-            }
-        }
-        return names;
+        return ArgNamesCache.getArgNames(method);
     }
     
     protected static String fmt(String pattern, Object... args)

@@ -82,8 +82,7 @@ public class Call implements Comparable<Call>
     {
         _exception = new ExceptionInfo(thr);
     }
-    
-    
+        
     public Method getMethod()
     {
         return _method;

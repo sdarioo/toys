@@ -62,6 +62,7 @@ public final class RecorderAPI
 	    }
 	}
 	
+    @SuppressWarnings("nls")
     public static java.lang.reflect.Method getMethod(Class<?> owner, String name, String descriptor)
     {
         try {
@@ -92,7 +93,8 @@ public final class RecorderAPI
             return argValue;
         }
         
-        return ProxyFactory.newProxy(argType, argValue);
+        Object argProxy = ProxyFactory.newProxy(argType, argValue);
+        return (argProxy != null) ? argProxy : argValue;
     }
     
 	private static class ThreadLocalRecorder

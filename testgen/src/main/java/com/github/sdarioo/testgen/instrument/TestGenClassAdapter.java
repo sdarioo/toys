@@ -14,9 +14,9 @@ public class TestGenClassAdapter
 {
     private final String _methodName;
     
-    public TestGenClassAdapter(ClassWriter writer, String methodName) 
+    public TestGenClassAdapter(ClassVisitor visitor, String methodName) 
     {
-        super(writer);
+        super(visitor);
         _methodName = methodName;
     }
     

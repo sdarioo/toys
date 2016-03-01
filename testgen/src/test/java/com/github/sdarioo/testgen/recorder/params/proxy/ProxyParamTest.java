@@ -1,17 +1,26 @@
 package com.github.sdarioo.testgen.recorder.params.proxy;
 
-import org.mockito.Mockito;
-
 public class ProxyParamTest
 {
-    public void testMockito()
+    
+    public void testMockPram()
     {
-        IProvider p = Mockito.mock(IProvider.class);
-        Mockito.when(p.doSth("ala ma kota")).thenReturn("dome value");
+    
     }
     
-    public static interface IProvider
+    
+    public static int getLength(IServiceProvider provider, String name, String str)
     {
-        String doSth(String s);
+        IService service = provider.getService(name);
+        return service.length(str);
+    }
+    
+    public static interface IServiceProvider
+    {
+        IService getService(String name);
+    }
+    private static interface IService
+    {
+        int length(String str);
     }
 }

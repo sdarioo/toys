@@ -17,6 +17,7 @@ import java.util.Map;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.commons.Method;
 
+import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 import com.github.sdarioo.testgen.logging.Logger;
 
 public final class BeanFactory 
@@ -54,7 +55,7 @@ public final class BeanFactory
         Bean bean = null;
         InputStream is = null;
         try {
-            is = readClass(clazz);
+            is = InstrumentUtil.readClass(clazz);
             if (is != null) {
                 ClassReader reader = new ClassReader(is);
                 BeanIntrospector introspector = new BeanIntrospector(clazz);
@@ -69,21 +70,6 @@ public final class BeanFactory
             if (is != null) { try { is.close(); } catch (IOException e) {} }
         }
         return bean;
-    }
-    
-    private static InputStream readClass(Class<?> clazz)
-    {
-        String name = clazz.getName();
-        if (name == null) {
-            Logger.warn("Skipping annonymous class: " + clazz); //$NON-NLS-1$
-            return null;
-        }
-        ClassLoader classLoader = clazz.getClassLoader();
-        String resource = name.replace('.', '/') + ".class"; //$NON-NLS-1$
-        if (classLoader != null) {
-            return classLoader.getResourceAsStream(resource);
-        }
-        return ClassLoader.getSystemResourceAsStream(resource);
     }
     
     // Default access for junit tests

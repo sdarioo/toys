@@ -15,7 +15,7 @@ import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.IParameter;
-import com.github.sdarioo.testgen.recorder.MethodArgNames;
+import com.github.sdarioo.testgen.recorder.ArgNamesCache;
 import com.github.sdarioo.testgen.recorder.params.AbstractParam;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
@@ -48,13 +48,7 @@ public class ProxyParam
         if (!super.isAssignable(handler.getInterface(), targetType, errors)) {
             return false;
         }
-        
-        List<Call> calls = handler.getCalls();
-        boolean bSupported = true;
-        for (Call call : calls) {
-            bSupported &= call.isSupported(errors);
-        }
-        return bSupported;
+        return handler.isSupported(errors);
     }
 
     @Override
@@ -155,18 +149,12 @@ public class ProxyParam
         for (Call call : calls) {
             Method method = call.getMethod();
             Type[] types = method.getParameterTypes();
-            String[] names = MethodArgNames.getArgNames(method);
-            if (names == null) {
-                names = new String[types.length];
-                for (int i = 0; i < names.length; i++) {
-                    names[i] = "arg" + uniqueIdx++;
-                }
-            }
+            String[] names = ArgNamesCache.getArgNames(method, true);
+            
             argTypes.addAll(Arrays.asList(types));
             argNames.addAll(Arrays.asList(names));
         }
     }
-    
     
     @Override
     public boolean equals(Object obj) 

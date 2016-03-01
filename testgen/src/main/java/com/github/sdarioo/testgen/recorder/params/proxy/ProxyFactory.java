@@ -12,6 +12,9 @@ public class ProxyFactory
     
     public static boolean canProxy(Type argType, Object argValue)
     {
+        // TODO: consider limiting proxy creation for types from same packages (root) as
+        // declaring method
+        
         Class<?> rawType = TypeUtil.getRawType(argType);
         if (rawType == null) {
             return false;
@@ -23,7 +26,7 @@ public class ProxyFactory
             return false;
         }
         String typeName = rawType.getName();
-        if ((typeName == null) || typeName.startsWith("java")) {
+        if ((typeName == null) || typeName.startsWith("java.")) { //$NON-NLS-1$
             return false;
         }
         if (!Modifier.isPublic(rawType.getModifiers())) {
@@ -39,10 +42,14 @@ public class ProxyFactory
     
     public static Object newProxy(Class<?> type, Object value)
     {
+        if (!canProxy(type, value)) {
+            return null;
+        }
+        
         Class<?> proxyInterface = type;
         Class<?>[] interfaces = value.getClass().getInterfaces();
         for (Class<?> interfce : interfaces) {
-            if (type.isAssignableFrom(interfce)) {
+            if (proxyInterface.isAssignableFrom(interfce)) {
                 proxyInterface = interfce;
                 break;
             }

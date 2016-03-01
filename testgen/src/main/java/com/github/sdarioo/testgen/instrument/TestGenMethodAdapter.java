@@ -7,14 +7,9 @@
 
 package com.github.sdarioo.testgen.instrument;
 
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.Method;
-
-import com.github.sdarioo.testgen.recorder.MethodArgNames;
 
 public class TestGenMethodAdapter 
     extends AdviceAdapter
@@ -22,7 +17,6 @@ public class TestGenMethodAdapter
     private final Type _owner;
     private final Method _method;
     private final boolean _isStatic;
-    private final String[] _argNames; 
     
     private final Label startFinallyLabel = new Label();
 
@@ -33,19 +27,6 @@ public class TestGenMethodAdapter
         _isStatic = isStatic(access);
         _owner = owner;
         _method = new Method(name, desc);
-        _argNames = new String[_method.getArgumentTypes().length];
-    }
-    
-    @Override
-    public void visitLocalVariable(String name, String desc, String signature,
-            Label start, Label end, int index) 
-    {
-        super.visitLocalVariable(name, desc, signature, start, end, index);
-
-        int paramIndex = _isStatic ? index : index - 1;
-        if ((paramIndex >= 0) && (paramIndex < _argNames.length)) {
-            _argNames[paramIndex] = name;
-        }
     }
     
     @Override
@@ -117,14 +98,8 @@ public class TestGenMethodAdapter
         }
     }
     
-    @Override
-    public void visitEnd() 
-    {
-        super.visitEnd();
-        MethodArgNames.setArgNames(_owner, _method, _argNames);
-    }
-    
     // -> java.lang.reflect.Method
+    @SuppressWarnings("nls")
     private void getMethod()
     {
         mv.visitLdcInsn(_owner);
@@ -133,7 +108,6 @@ public class TestGenMethodAdapter
         mv.visitMethodInsn(INVOKESTATIC, RecorderAPI.TYPE_NAME, "getMethod", 
                 "(Ljava/lang/Class;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/reflect/Method;", false);
     }
-    
   
     @SuppressWarnings("nls")
     private int generateArgumentsArray()

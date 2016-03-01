@@ -37,31 +37,29 @@ public final class Recorder
         return new Recorder();
     }
     
-    public void record(Call call)
+    public boolean record(Call call)
     {
         if (!call.isFinished()) {
             Logger.error("Cannot record call without return value or thrown exception: " + call.getMethod().toString()); //$NON-NLS-1$
-            return;
+            return false;
         }
         if (call.getMethod() == null) {
             Logger.error("Cannot record call without java.lang.reflect.Method object."); //$NON-NLS-1$
-            return;
+            return false;
         }
         if (!call.isStatic() && (call.getTargetClass() == null)) {
             Logger.error("Missing target class for non-static method."); //$NON-NLS-1$
-            return;
+            return false;
         }
         if (call.args().size() != call.getMethod().getParameterTypes().length) {
             Logger.error(MessageFormat.format("Recorded call args count {0} is different that method parameters count {1}",  //$NON-NLS-1$
                     call.args().size(), call.getMethod().getParameterTypes().length));
-            return;
+            return false;
         }
-        
         if (call.isSupported(new HashSet<String>())) {
-            recordCall(_calls, call);
-        } else {
-            recordCall(_unsupportedCalls, call);
+            return recordCall(_calls, call);
         }
+        return recordCall(_unsupportedCalls, call);
     }
     
     public int getCount(Method method)
@@ -108,7 +106,7 @@ public final class Recorder
         }
     }
     
-    private void recordCall(Map<Method, Set<Call>> calls, Call call)
+    private boolean recordCall(Map<Method, Set<Call>> calls, Call call)
     {
         Method method = call.getMethod();
         int maxCalls = Configuration.getDefault().getMaxCalls();
@@ -119,12 +117,14 @@ public final class Recorder
                 methodCalls = new HashSet<Call>();
                 calls.put(method, methodCalls);
             }
-            if (methodCalls.size() < maxCalls) {
-                if (methodCalls.add(call)) {
-                    _timestamp.set(System.currentTimeMillis());
-                    logCall(call);
-                }
+            if (methodCalls.size() >= maxCalls) {
+                return false;
             }
+            if (methodCalls.add(call)) {
+                _timestamp.set(System.currentTimeMillis());
+                logCall(call);
+            }
+            return true;
         }
     }
     
