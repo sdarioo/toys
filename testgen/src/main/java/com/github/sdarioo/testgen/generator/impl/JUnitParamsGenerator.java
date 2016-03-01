@@ -17,6 +17,7 @@ import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.util.GeneratorUtil;
+import com.github.sdarioo.testgen.util.StringUtil;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class JUnitParamsGenerator
@@ -231,14 +232,7 @@ public class JUnitParamsGenerator
     
     private static String join(String[] args)
     {
-        StringBuilder sb = new StringBuilder();
-        for (String arg : args) {
-            if (sb.length() > 0) {
-                sb.append(", "); //$NON-NLS-1$
-            }
-            sb.append(arg);
-        }
-        return sb.toString();
+        return StringUtil.join(args, ", "); //$NON-NLS-1$
     }
     
     private static String[] toArray(List<String> list)

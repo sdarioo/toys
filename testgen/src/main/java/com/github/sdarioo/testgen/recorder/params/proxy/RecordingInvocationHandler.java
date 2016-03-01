@@ -79,6 +79,11 @@ public class RecordingInvocationHandler
         }
         return bSupported;
     }
+    
+    public boolean isMultipleCallsToSameMethod()
+    {
+        return getCalls().size() > getMethods().size();
+    }
 
     public Set<Method> getMethods()
     {
