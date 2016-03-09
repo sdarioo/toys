@@ -246,8 +246,15 @@ public class JUnitParamsGenerator
         if (!errors.isEmpty()) {
             int idx = 1;
             sb.append("// WARNING - cannot record parameters:"); //$NON-NLS-1$
-            for (String line : errors) {
-                sb.append(fmt("\n// {0}. {1}", idx++, line)); //$NON-NLS-1$
+            for (String message : errors) {
+                String[] lines = StringUtil.splitLines(message);
+                for (int i = 0; i < lines.length; i++) {
+                    if (i == 0) {
+                        sb.append(fmt("\n// {0}. {1}", idx++, lines[i])); //$NON-NLS-1$
+                    } else {
+                        sb.append(fmt("\n// {0}", lines[i])); //$NON-NLS-1$
+                    }
+                }
             }
         }
         return sb.toString();

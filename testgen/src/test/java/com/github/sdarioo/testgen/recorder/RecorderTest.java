@@ -46,7 +46,7 @@ public class RecorderTest
         assertNotNull(m);
         
         int max = Configuration.getDefault().getMaxCalls();
-        Recorder r = Recorder.newRecorder();
+        Recorder r = Recorder.newRecorder("test");
         for (int i = 0; i < max; i++) {
             Call c = Call.newCall(m, this, new Object[]{"param"+i});
             c.end();
@@ -68,7 +68,7 @@ public class RecorderTest
         Method m = RecorderAPI.getMethod(RecorderTest.class, "testCall", "(Ljava/lang/Object;)I");
         assertNotNull(m);
         
-        Recorder r = Recorder.newRecorder();
+        Recorder r = Recorder.newRecorder("test");
         
         Call c = Call.newCall(m, this, new Object[]{"param"});
         c.end();

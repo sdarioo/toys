@@ -43,6 +43,10 @@ public final class ArgNamesCache
     
     public static void setArgNames(org.objectweb.asm.Type type, org.objectweb.asm.commons.Method method, String[] names)
     {
+        if (!isValidArgNames(names)) {
+            return;
+        }
+        
         String key = getKey(type.getDescriptor(), method.getName(), method.getDescriptor());
         NAMES.put(key, names);
     }
@@ -83,5 +87,14 @@ public final class ArgNamesCache
         }
         return result;
     }
-    
+ 
+    private static boolean isValidArgNames(String... names)
+    {
+        for (String name : names) {
+            if (name == null) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

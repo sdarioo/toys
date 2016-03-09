@@ -1,9 +1,7 @@
 package com.github.sdarioo.testgen.recorder.params.proxy;
 
 import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
@@ -38,10 +36,18 @@ public class ProxyParam
             errors.add("Unexpected proxy InvocationHandler."); //$NON-NLS-1$
             return false;
         }
-        if (!super.isAssignable(handler.getInterface(), targetType, errors)) {
+        
+        Set<String> subErrors = new HashSet<>();
+        
+        if (!super.isAssignable(handler.getInterface(), targetType, subErrors)) {
+            errors.add(createErrorMessage(subErrors));
             return false;
         }
-        return handler.isSupported(errors);
+        if (!handler.isSupported(subErrors)) {
+            errors.add(createErrorMessage(subErrors));
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -86,6 +92,17 @@ public class ProxyParam
             objectClass = objectClass.substring(index + 1);
         }
         return "new" + objectClass + "Mock";
+    }
+    
+    @SuppressWarnings("nls")
+    private static String createErrorMessage(Set<String> subErrors)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Problems while recording mock invocations:\n");
+        for (String msg : subErrors) {
+            sb.append("  - ").append(msg).append('\n');
+        }
+        return sb.toString();
     }
     
     @Override

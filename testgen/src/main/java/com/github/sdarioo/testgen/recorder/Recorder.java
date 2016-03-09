@@ -18,23 +18,28 @@ import com.github.sdarioo.testgen.logging.Logger;
 // ThreadSafe
 public final class Recorder
 {
-    private static final Recorder DEFAULT = new Recorder();
+    private static final Recorder DEFAULT = new Recorder("Default"); //$NON-NLS-1$
     
     private final Map<Method, Set<Call>> _calls = new HashMap<Method, Set<Call>>();
     private final Map<Method, Set<Call>> _unsupportedCalls = new HashMap<Method, Set<Call>>();
     
     private AtomicLong _timestamp = new AtomicLong(0L);
 
-    private Recorder() {}
+    private final String _name;
+    
+    private Recorder(String name)
+    {
+        _name = name;
+    }
     
     public static Recorder getDefault()
     {
         return DEFAULT;
     }
     
-    public static Recorder newRecorder()
+    public static Recorder newRecorder(String name)
     {
-        return new Recorder();
+        return new Recorder(name);
     }
     
     public boolean record(Call call)
@@ -43,7 +48,8 @@ public final class Recorder
             Logger.error("Cannot record call without return value or thrown exception: " + call.getMethod().toString()); //$NON-NLS-1$
             return false;
         }
-        if (call.getMethod() == null) {
+        Method method = call.getMethod();
+        if (method == null) {
             Logger.error("Cannot record call without java.lang.reflect.Method object."); //$NON-NLS-1$
             return false;
         }
@@ -59,7 +65,11 @@ public final class Recorder
         if (call.isSupported(new HashSet<String>())) {
             return recordCall(_calls, call);
         }
-        return recordCall(_unsupportedCalls, call);
+        if (count(method, _calls) < Configuration.getDefault().getMaxCalls()) {
+            // Don't record unsupported calls if we have enough supported ones
+            return recordCall(_unsupportedCalls, call);
+        }
+        return false;
     }
     
     public int getCount(Method method)
@@ -159,13 +169,13 @@ public final class Recorder
     }
     
     @SuppressWarnings("nls")
-    private static void logCall(Call call)
+    private void logCall(Call call)
     {
         Set<String> errors = new HashSet<String>();
         boolean isSupported = call.isSupported(errors);
         
         StringBuilder sb = new StringBuilder();
-        sb.append(MessageFormat.format("Recording {0} call: {1}", (isSupported ? "supported" : "unsupported"), call));
+        sb.append(MessageFormat.format("[{0}] Recording {1} call: {2}", _name, (isSupported ? "supported" : "unsupported"), call));
         if (call.getExceptionInfo() != null) {
             sb.append("\n   Expected exception=").append(call.getExceptionInfo().getClassName());
         }

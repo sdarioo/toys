@@ -7,8 +7,7 @@
 
 package com.github.sdarioo.testgen.recorder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
 
@@ -38,6 +37,23 @@ public class ArgNamesCacheTest
         assertEquals(2, names.length);
         assertEquals("arg0", names[0]);
         assertEquals("arg1", names[1]);
+    }
+    
+    @Test
+    public void cannotIntrospectInterfaceArgNames() throws Throwable
+    {
+        ArgNamesCache.clear();
+        
+        Method method = IProvider.class.getDeclaredMethod("foo", String[].class);
+        String[] names = ArgNamesCache.getArgNames(method, true);
+        assertNotNull(names);
+        assertEquals("arg0", names[0]);
+    }
+    
+    
+    private static interface IProvider
+    {
+        void foo(String... args);
     }
     
     private static void foo(String xyz) {}

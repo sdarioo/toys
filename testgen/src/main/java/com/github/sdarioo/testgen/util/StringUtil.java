@@ -10,6 +10,8 @@ package com.github.sdarioo.testgen.util;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 public final class StringUtil 
 {
     private StringUtil() {}
@@ -29,5 +31,10 @@ public final class StringUtil
             sb.append(arg);
         }
         return sb.toString();
+    }
+    
+    public static String[] splitLines(String message)
+    {
+        return StringUtils.split(message, "\r\n"); //$NON-NLS-1$
     }
 }

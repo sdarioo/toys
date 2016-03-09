@@ -120,6 +120,10 @@ public final class ProxyParamSourceCode
     
     private static String methodNameToArgName(String methodName)
     {
+        if (methodName.length() <= 3) {
+            return methodName;
+        }
+        
         if (methodName.startsWith("get")) { //$NON-NLS-1$
             methodName = methodName.substring(3);
         }

@@ -1,4 +1,9 @@
 
+
 1. Interfejse proxy params
+   - parametryzacja
+   - generic params
+
+2. Improve method template generation (###)
 
 2. Zaznajomic sie z CodeModel: https://codemodel.java.net/

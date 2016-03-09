@@ -3,6 +3,7 @@ package com.github.sdarioo.testgen.recorder.params.proxy;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.Recorder;
@@ -18,11 +19,13 @@ public class RecordingInvocationHandler
     private boolean _isException;
     private boolean _isVoidCall;
     
+    private static final AtomicInteger _idGenerator = new AtomicInteger(0);
+    
     public RecordingInvocationHandler(Class<?> interfce, Object original)
     {
         _interface = interfce;
         _original = original;
-        _recorder = Recorder.newRecorder();
+        _recorder = Recorder.newRecorder("MockRecorder-" + _idGenerator.incrementAndGet()); //$NON-NLS-1$
     }
     
     public Class<?> getInterface() 
