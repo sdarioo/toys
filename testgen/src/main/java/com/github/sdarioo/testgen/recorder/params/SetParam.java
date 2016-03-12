@@ -12,6 +12,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.IParameter;
 
@@ -49,9 +50,9 @@ public class SetParam
     }
 
     @SuppressWarnings("nls")
-    private static final String AS_SET_TEMPLATE = 
-            "private static <T> Set<T> {0}(T... elements)  '{'\n"+
-            "    return new HashSet<T>(Arrays.<T>asList(elements));\n"+
-            "'}'\n";
+    private static final MethodTemplate AS_SET_TEMPLATE = new MethodTemplate(new String[] { 
+            "private static <T> Set<T> ${name}(T... elements)  {",
+            "    return new HashSet<T>(Arrays.<T>asList(elements));",
+            "}" });
     
 }

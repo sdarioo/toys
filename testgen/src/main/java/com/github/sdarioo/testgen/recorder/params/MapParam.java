@@ -14,6 +14,7 @@ import java.util.*;
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.util.TypeUtil;
@@ -79,7 +80,7 @@ public class MapParam
             }
         }
         
-        String asMapTemplate = getAsMapTemplate(targetType, builder);
+        MethodTemplate asMapTemplate = getAsMapTemplate(targetType, builder);
         TestMethod asMap = builder.addHelperMethod(asMapTemplate, "asMap"); //$NON-NLS-1$
         TestMethod asPair = builder.addHelperMethod(AS_PAIR_TEMPLATE, "asPair"); //$NON-NLS-1$
 
@@ -148,7 +149,7 @@ public class MapParam
     }
     
     @SuppressWarnings("nls")
-    private String getAsMapTemplate(Type targetType, TestSuiteBuilder builder)
+    private MethodTemplate getAsMapTemplate(Type targetType, TestSuiteBuilder builder)
     {
         Type mapType = getAssignable(getGeneratedTypes(), targetType);
         
@@ -166,7 +167,7 @@ public class MapParam
     
         MethodBuilder methodBuilder = new MethodBuilder(builder);
         methodBuilder.modifier(Modifier.PRIVATE | Modifier.STATIC);
-        methodBuilder.name("###");
+        methodBuilder.name(MethodTemplate.NAME_VARIABLE);
         methodBuilder.returnType(targetType);
         methodBuilder.varg(Object[].class, "pairs");
     
@@ -182,16 +183,13 @@ public class MapParam
         methodBuilder.statement("return map");
         
         String template = methodBuilder.build();
-        template = template.replace("{", "'{'");
-        template = template.replace("}", "'}'");
-        template = template.replace("###", "{0}");
-        return template;
+        return new MethodTemplate(template);
     }
     
     @SuppressWarnings("nls")
-    private static final String AS_PAIR_TEMPLATE =
-        "private static Object[] {0}(Object key, Object value) '{'\n" +
-        "    return new Object[] '{' key, value'}';\n" +
-        "'}'";
+    private static final MethodTemplate AS_PAIR_TEMPLATE = new MethodTemplate(new String[] {
+        "private static Object[] ${name}(Object key, Object value) {",
+        "    return new Object[] { key, value };",
+        "}"});
 
 }

@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 
@@ -91,20 +92,20 @@ public class StringParam
     }
     
     @SuppressWarnings("nls")
-    private static final String RES_TEMPLATE =
-            "private String {0}(String res) '{'\n" +
-            "    StringBuilder sb = new StringBuilder();\n" +
-            "    try '{'\n" + 
-            "        InputStream is = getClass().getResourceAsStream(res);\n" +
-            "        BufferedReader reader = new BufferedReader(new InputStreamReader(is, \"UTF-8\"));\n" +
-            "        char[] cbuf = new char[1024];\n" +
-            "        int c = 0;\n" +
-            "        while ((c = reader.read(cbuf)) > 0) '{'\n" +
-            "            sb.append(cbuf, 0, c);\n" +
-            "        '}'\n" +
-            "        is.close();\n" +
-            "    '}' catch (IOException e) '{' Assert.fail(e.getMessage()); '}'\n" +
-            "    return sb.toString();\n" +
-            "'}'\n";
+    private static final MethodTemplate RES_TEMPLATE = new MethodTemplate(new String[] {
+            "private String ${name}(String res) {",
+            "    StringBuilder sb = new StringBuilder();",
+            "    try {", 
+            "        InputStream is = getClass().getResourceAsStream(res);",
+            "        BufferedReader reader = new BufferedReader(new InputStreamReader(is, \"UTF-8\"));",
+            "        char[] cbuf = new char[1024];",
+            "        int c = 0;",
+            "        while ((c = reader.read(cbuf)) > 0) {",
+            "            sb.append(cbuf, 0, c);",
+            "        }",
+            "        is.close();",
+            "    } catch (IOException e) { Assert.fail(e.getMessage()); }",
+            "    return sb.toString();",
+            "}" });
     
 }

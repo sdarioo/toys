@@ -9,6 +9,7 @@ import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.SerializationUtils;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.util.TypeUtil;
@@ -34,7 +35,7 @@ public class SerializableParam
     public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
         builder.addImport("java.io.*"); //$NON-NLS-1$
-        String template = getFactoryMethodTemplate(targetType, builder);
+        MethodTemplate template = getFactoryMethodTemplate(targetType, builder);
         
         String resName = ClassUtils.getShortCanonicalName(getRecordedType());
         
@@ -44,13 +45,13 @@ public class SerializableParam
         return deserialize.getName() + "(\"" + resFile.getFileName() + "\")"; //$NON-NLS-1$ //$NON-NLS-2$
     }
     
-    private String getFactoryMethodTemplate(Type targetType, TestSuiteBuilder builder)
+    private MethodTemplate getFactoryMethodTemplate(Type targetType, TestSuiteBuilder builder)
     {
         String returnType = TypeUtil.getName(targetType, builder);
         
-        String template = builder.getTemplatesCache().get(returnType);
+        MethodTemplate template = builder.getTemplatesCache().get(returnType);
         if (template == null) {
-            template = DESERIALIZE_TEMPLATE_TEMPLATE.replace("<TYPE>", returnType); //$NON-NLS-1$
+            template = DESERIALIZE_TEMPLATE.with(MethodTemplate.TYPE_VARIABLE, returnType); //$NON-NLS-1$
             builder.getTemplatesCache().put(returnType, template);
         }
         return template;
@@ -79,14 +80,14 @@ public class SerializableParam
     }
     
     @SuppressWarnings("nls")
-    public static final String DESERIALIZE_TEMPLATE_TEMPLATE =
-    "private <TYPE> {0}(String res) throws Exception '{'\n" +
-    "    InputStream in = getClass().getResourceAsStream(res);\n" +
-    "    try '{'\n" +
-    "        ObjectInputStream stream = new ObjectInputStream(in);\n" +
-    "        return (<TYPE>)stream.readObject();\n" +
-    "    '}' finally '{'\n" +
-    "        in.close();\n" +
-    "    '}'\n" +
-    "}";
+    private static final MethodTemplate DESERIALIZE_TEMPLATE = new MethodTemplate(new String[] {
+    "private ${type} ${name}(String res) throws Exception {",
+    "    InputStream in = getClass().getResourceAsStream(res);",
+    "    try {",
+    "        ObjectInputStream stream = new ObjectInputStream(in);",
+    "        return (${type})stream.readObject();",
+    "    } finally {",
+    "        in.close();",
+    "    }",
+    "}" });
 }

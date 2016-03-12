@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-import com.github.sdarioo.testgen.generator.impl.UniqueNamesGenerator;
+import com.github.sdarioo.testgen.generator.impl.UniqueNamesProvider;
 
 public class UniqueNamesGeneratorTest
 {
@@ -19,7 +19,7 @@ public class UniqueNamesGeneratorTest
     @Test
     public void testGetUniqueName()
     {
-        UniqueNamesGenerator gen = new UniqueNamesGenerator();
+        UniqueNamesProvider gen = new UniqueNamesProvider();
         assertEquals("name", gen.generateUniqueName("name"));
         assertEquals("name2", gen.generateUniqueName("name"));
         assertEquals("name3", gen.generateUniqueName("name"));
@@ -32,7 +32,7 @@ public class UniqueNamesGeneratorTest
     @Test
     public void testExistingUniqueName()
     {
-        UniqueNamesGenerator gen = new UniqueNamesGenerator("name", "other");
+        UniqueNamesProvider gen = new UniqueNamesProvider("name", "other");
         
         assertEquals("name2", gen.generateUniqueName("name"));
         assertEquals("name3", gen.generateUniqueName("name"));

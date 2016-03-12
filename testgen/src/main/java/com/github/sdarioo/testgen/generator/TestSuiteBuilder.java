@@ -11,14 +11,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.Type;
 
-import com.github.sdarioo.testgen.generator.impl.UniqueNamesGenerator;
+import com.github.sdarioo.testgen.generator.impl.UniqueNamesProvider;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
@@ -29,8 +37,8 @@ import com.github.sdarioo.testgen.util.FileUtil;
 public class TestSuiteBuilder
     implements IUniqueNamesProvider
 {
-    private final UniqueNamesGenerator _methodNames;
-    private final UniqueNamesGenerator _fileNames;
+    private final UniqueNamesProvider _methodNames;
+    private final UniqueNamesProvider _fileNames;
     
     private final boolean _useFullTypeNames;
     
@@ -39,10 +47,10 @@ public class TestSuiteBuilder
     
     private final Set<String> _imports = new HashSet<String>();
     private final List<TestMethod> _testCases = new ArrayList<TestMethod>();
-    private final Map<String, TestMethod> _helperMethods = new LinkedHashMap<String, TestMethod>();
+    private final Map<MethodTemplate, TestMethod> _helperMethods = new LinkedHashMap<MethodTemplate, TestMethod>();
     private final List<ResourceFile> _resources = new ArrayList<ResourceFile>();
     
-    private final Map<String, String> _templatesCache = new HashMap<String, String>();
+    private final Map<String, MethodTemplate> _templatesCache = new HashMap<String, MethodTemplate>();
     
     private int _helperMethodOrder = 1000000;
     
@@ -54,13 +62,13 @@ public class TestSuiteBuilder
     public TestSuiteBuilder(boolean useFullTypeNames, File testLocation)
     {
         _useFullTypeNames = useFullTypeNames;
-        _methodNames = new UniqueNamesGenerator();
+        _methodNames = new UniqueNamesProvider();
         
         if (testLocation != null) {
             Set<String> usedNames = getExistingFileNames(testLocation);
-            _fileNames = new UniqueNamesGenerator(usedNames);
+            _fileNames = new UniqueNamesProvider(usedNames);
         } else {
-            _fileNames = new UniqueNamesGenerator();
+            _fileNames = new UniqueNamesProvider();
         }
     }
     
@@ -95,12 +103,13 @@ public class TestSuiteBuilder
         _testCases.add(testCase);
     }
     
-    public TestMethod addHelperMethod(String template, String methodName)
+    public TestMethod addHelperMethod(MethodTemplate template, String name)
     {
         TestMethod method = _helperMethods.get(template);
         if (method == null) {
-            String uniqueName = newUniqueMethodName(methodName);
-            String sourceCode = MessageFormat.format(template, uniqueName);
+            String uniqueName = newUniqueMethodName(name);
+            String sourceCode = template.withName(uniqueName).toString();
+            
             method = new TestMethod(uniqueName, sourceCode, _helperMethodOrder++);
             _helperMethods.put(template, method);    
         }
@@ -201,7 +210,7 @@ public class TestSuiteBuilder
         return uniqueName;
     }
 
-    public Map<String, String> getTemplatesCache()
+    public Map<String, MethodTemplate> getTemplatesCache()
     {
         return _templatesCache;
     }

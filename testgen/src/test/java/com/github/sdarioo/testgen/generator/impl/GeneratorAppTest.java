@@ -138,7 +138,7 @@ public class GeneratorAppTest
     }
 
     private static Object[] asPair(Object key, Object value) {
-        return new Object[] { key, value};
+        return new Object[] { key, value };
     }
 
     private static GeneratorApp.StringList newStringList(List<String> list) {

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 
 public class PropertiesParam 
@@ -59,19 +60,19 @@ public class PropertiesParam
     }
 
     @SuppressWarnings("nls")
-    private static final String AS_PAIR_TEMPLATE =
-            "private static String[] {0}(String key, String value) '{'\n" +
-            "    return new String[] '{' key, value'}';\n" +
-            "'}'";
+    private static final MethodTemplate AS_PAIR_TEMPLATE = new MethodTemplate(new String[] {
+            "private static String[] ${name}(String key, String value) {",
+            "    return new String[] { key, value };",
+            "}" });
     
     @SuppressWarnings("nls")
-    private static final String AS_PROPS_TEMPLATE = 
-            "private static Properties {0}(String[]... pairs) '{'\n" +
-            "    Properties p = new Properties();\n" +
-            "    for (String[] pair : pairs) '{'\n" +
-            "        p.setProperty(pair[0], pair[1]);\n" +
-            "    '}'\n" +
-            "    return p;\n" +
-            "}";
+    private static final MethodTemplate AS_PROPS_TEMPLATE = new MethodTemplate(new String[] {
+            "private static Properties ${name}(String[]... pairs) {",
+            "    Properties p = new Properties();",
+            "    for (String[] pair : pairs) {",
+            "        p.setProperty(pair[0], pair[1]);",
+            "    }",
+            "    return p;",
+            "}" });
     
 }

@@ -11,12 +11,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.recorder.ArgNamesCache;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.IParameter;
@@ -40,7 +44,7 @@ public final class ProxyParamSourceCode
     }
     
     @SuppressWarnings("nls")
-    public static String getFactoryMethodTemplate(RecordingInvocationHandler handler, TestSuiteBuilder builder)
+    public static MethodTemplate getFactoryMethodTemplate(RecordingInvocationHandler handler, TestSuiteBuilder builder)
     {
         boolean isArgs = isFactoryMethodWithArgs(handler);
         
@@ -54,7 +58,7 @@ public final class ProxyParamSourceCode
         MethodBuilder methodBuilder = new MethodBuilder(builder);
         methodBuilder.modifier(Modifier.PRIVATE | Modifier.STATIC).
             returnType(proxyType).
-            name("###");
+            name(MethodTemplate.NAME_VARIABLE);
             
         if (isArgs) {
             methodBuilder.args(argTypes.toArray(new Type[0]), argNames.toArray(new String[0]));
@@ -83,12 +87,8 @@ public final class ProxyParamSourceCode
             argIndex += (paramCount + 1);
         }
         methodBuilder.statement(fmt("return mock"));
-        
         String template = methodBuilder.build();
-        template = template.replace("{", "'{'");
-        template = template.replace("}", "'}'");
-        template = template.replace("###", "{0}");
-        return template;
+        return new MethodTemplate(template);
     }
     
     private static void getArgTypesAndNames(List<Call> calls, List<Type> typesHolder, List<String> namesHolder)

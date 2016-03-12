@@ -1,9 +1,17 @@
 package com.github.sdarioo.testgen.recorder.params.proxy;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.IParameter;
@@ -56,7 +64,7 @@ public class ProxyParam
         builder.addImport("org.mockito.Mockito"); //$NON-NLS-1$
         
         String factoryMethodName = getFactoryMethodName(builder);
-        String factoryMethodTemplate = ProxyParamSourceCode.getFactoryMethodTemplate(getHandler(), builder);
+        MethodTemplate factoryMethodTemplate = ProxyParamSourceCode.getFactoryMethodTemplate(getHandler(), builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
         List<String> args = new ArrayList<String>();

@@ -14,6 +14,7 @@ import org.objectweb.asm.commons.Method;
 
 import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
@@ -77,7 +78,7 @@ public class BeanParam
         }
         
         String factoryMethodName = getFactoryMethodName(builder);
-        String factoryMethodTemplate = getFactoryMethodTemplate(builder);
+        MethodTemplate factoryMethodTemplate = getFactoryMethodTemplate(builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
         return fmt("{0}({1})", factoryMethod.getName(), sb.toString());
@@ -148,19 +149,19 @@ public class BeanParam
     }
     
     @SuppressWarnings("nls")
-    private String getFactoryMethodTemplate(TestSuiteBuilder builder)
+    private MethodTemplate getFactoryMethodTemplate(TestSuiteBuilder builder)
     {
         Class<?> clazz = getRecordedType();
         Type type = TypeUtil.parameterize(clazz);
         String typeName = TypeUtil.getName(type, builder);
         
-        String template = builder.getTemplatesCache().get(typeName);
+        MethodTemplate template = builder.getTemplatesCache().get(typeName);
         if (template != null) {
             return template;
         }
         
         MethodBuilder methodBuilder = new MethodBuilder(builder);
-        methodBuilder.name("###").
+        methodBuilder.name(MethodTemplate.NAME_VARIABLE).
             modifier(Modifier.PRIVATE | Modifier.STATIC).
             typeParams(clazz.getTypeParameters()).
             returnType(type);
@@ -191,13 +192,8 @@ public class BeanParam
                 methodBuilder.statement(fmt("result.{0} = {1}", field.getName(), paramName(field)));
             }
         }
-        
         methodBuilder.statement("return result");
-        template = methodBuilder.build();
-        template = template.replace("{", "'{'");
-        template = template.replace("}", "'}'");
-        template = template.replace("###", "{0}");
-        
+        template = new MethodTemplate(methodBuilder.build());
         builder.getTemplatesCache().put(typeName, template);
         return template;
     }
