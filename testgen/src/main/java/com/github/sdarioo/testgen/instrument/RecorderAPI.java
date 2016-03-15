@@ -88,7 +88,7 @@ public final class RecorderAPI
             return argValue;
         }
         
-        Class<?> argType = method.getParameterTypes()[argIndex];
+        java.lang.reflect.Type argType = method.getGenericParameterTypes()[argIndex];
         if (!ProxyFactory.canProxy(argType, argValue)) {
             return argValue;
         }

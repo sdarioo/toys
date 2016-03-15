@@ -2,9 +2,11 @@ package com.github.sdarioo.testgen.recorder.params.proxy;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.Recorder;
 
@@ -12,12 +14,12 @@ public class RecordingInvocationHandler
     implements InvocationHandler
 {
     private final Class<?> _interface;
-    private final Object _original;
+    private final Object _original; // TODO - replace with WeakReference to avoid memory leaks
     private final Recorder _recorder;
     
     private boolean _isAllRecorded = true;
-    private boolean _isException;
-    private boolean _isVoidCall;
+    private String _exception;
+    
     
     private static final AtomicInteger _idGenerator = new AtomicInteger(0);
     
@@ -40,7 +42,7 @@ public class RecordingInvocationHandler
         Call call = Call.newCall(method, _original, (args != null ? args : new Object[0]));
         try {
             Object result = method.invoke(_original, args);
-            Class<?> returnType = method.getReturnType();
+            Type returnType = method.getGenericReturnType();
             if (returnType != Void.TYPE) {
                 if (result != null) {
                     if (ProxyFactory.canProxy(returnType, result)) {
@@ -50,12 +52,14 @@ public class RecordingInvocationHandler
                 call.endWithResult(result);
                 _isAllRecorded &= _recorder.record(call);
             } else {
-                _isVoidCall = true;
+                Logger.warn("Ignoring void method call on proxy: " + method.toGenericString()); //$NON-NLS-1$
                 call.end();
             }
             return result;
         } catch (Throwable thr) {
-            _isException = true;
+            // TODO: handle java.lang.reflect.InvocationTargetException
+            Logger.warn("Exception thrown in RecordingInvocationHandler.invoke: " + thr.toString()); //$NON-NLS-1$
+            _exception = thr.toString();
             call.endWithException(thr);
             throw thr;
         }
@@ -63,24 +67,22 @@ public class RecordingInvocationHandler
     
     public boolean isSupported(Collection<String> errors)
     {
-        if (_isException) {
-            errors.add("Cannot mock methods that throws exceptions."); //$NON-NLS-1$
+        if (_exception != null) {
+            errors.add("Proxy method exited with exception: " + _exception); //$NON-NLS-1$
             return false;
         }
-        if (_isVoidCall) {
-            errors.add("Cannot mock void methods."); //$NON-NLS-1$
-            return false;
-        }
+
         List<Call> calls = getCalls();
         if (!_isAllRecorded) {
             errors.add("Some method call could not be recorded."); //$NON-NLS-1$
             return false;
         }
-        boolean bSupported = true;
+        boolean bAllSupported = true;
         for (Call call : calls) {
-            bSupported &= call.isSupported(errors);
+            boolean bCallSupported = call.isSupported(errors);
+            bAllSupported &= bCallSupported;
         }
-        return bSupported;
+        return bAllSupported;
     }
     
     public boolean isMultipleCallsToSameMethod()

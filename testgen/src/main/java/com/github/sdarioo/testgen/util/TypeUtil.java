@@ -34,6 +34,13 @@ public class TypeUtil
             Type rawType = ((ParameterizedType)type).getRawType();
             return getRawType(rawType);
         }
+        // <? extends Type> - will resolve to Type
+        if (type instanceof WildcardType) {
+            Type[] upperBounds = ((WildcardType) type).getUpperBounds();
+            if (upperBounds != null && upperBounds.length == 1) {
+                return getRawType(upperBounds[0]);
+            }
+        }
         
         Logger.warn("Cannot get raw type from: " + type.getClass().getName()); //$NON-NLS-1$
         return null;

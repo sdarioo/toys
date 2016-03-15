@@ -44,6 +44,10 @@ public class ProxyParam
             errors.add("Unexpected proxy InvocationHandler."); //$NON-NLS-1$
             return false;
         }
+        if (targetType == null) {
+            errors.add("Mock prameter target type is unknown."); //$NON-NLS-1$
+            return false;
+        }
         
         Set<String> subErrors = new HashSet<>();
         
@@ -103,12 +107,12 @@ public class ProxyParam
     }
     
     @SuppressWarnings("nls")
-    private static String createErrorMessage(Set<String> subErrors)
+    private String createErrorMessage(Set<String> subErrors)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("Problems while recording mock invocations:\n");
+        sb.append(String.format("Problems while recording mock invocations for %s%n", getHandler().getInterface().getName()));
         for (String msg : subErrors) {
-            sb.append("  - ").append(msg).append('\n');
+            sb.append(String.format("  - %s%n", msg));
         }
         return sb.toString();
     }

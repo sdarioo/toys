@@ -12,6 +12,7 @@ import java.util.Collection;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
@@ -79,12 +80,19 @@ public abstract class CollectionParam
     }
 
     /**
-     * @return collection element generic type or null if collection is not parameterized type
+     * @return generic collection element type or null if collection is not parameterized type
      */
     protected static Type getElementType(Type paramType)
     {
         Type[] argTypes = TypeUtil.getActualTypeArguments(paramType);
-        return argTypes.length == 1 ? argTypes[0] : null;
+        if (argTypes.length == 1) {
+            return argTypes[0];
+        }
+        // ArrayParam also extends CollectionParam
+        if (paramType instanceof Class<?>) {
+            return ((Class<?>)paramType).getComponentType();
+        }
+        return null;
     }
     
     /**

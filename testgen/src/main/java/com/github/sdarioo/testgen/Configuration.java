@@ -42,4 +42,16 @@ public final class Configuration
     {
         return _backgroundGeneration;
     }
+    
+    public boolean isMockingEnabled(String interfaceType)
+    {
+        if (interfaceType == null) {
+            return false;
+        }
+        if (interfaceType.startsWith("java")) { //$NON-NLS-1$
+            return false;
+        }
+        // TODO - config
+        return true;
+    }
 }
