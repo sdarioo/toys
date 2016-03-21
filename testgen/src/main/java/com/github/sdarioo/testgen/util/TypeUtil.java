@@ -56,6 +56,28 @@ public class TypeUtil
         return org.apache.commons.lang3.reflect.TypeUtils.containsTypeVariables(type);
     }
     
+    public static boolean containsWildcards(Type type)
+    {
+        if (type instanceof TypeVariable<?>) {
+            return false;
+        }
+        if (type instanceof Class<?>) {
+            return false;
+        }
+        if (type instanceof ParameterizedType) {
+            for (final Type arg : ((ParameterizedType) type).getActualTypeArguments()) {
+                if (containsWildcards(arg)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (type instanceof WildcardType) {
+            return true;
+        }
+        return false;
+    }
+    
     /**
      * @param raw create parameterized type from given row type and type parameters
      * @return parameteryzed type if given raw type contains type parameters, raw type oterwise

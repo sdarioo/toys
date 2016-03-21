@@ -80,7 +80,8 @@ public class ProxyParam
                 for (int i = 0; i < types.length; i++) {
                     args.add(values.get(i).toSouceCode(types[i], builder));
                 }
-                args.add(call.getResult().toSouceCode(method.getReturnType(), builder));    
+                Type returnType = ProxyParamSourceCode.getReturnType(method);
+                args.add(call.getResult().toSouceCode(returnType, builder));    
             }
         }
         return fmt("{0}({1})", factoryMethod.getName(), StringUtil.join(args, ", ")); //$NON-NLS-1$ //$NON-NLS-2$

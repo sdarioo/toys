@@ -69,7 +69,7 @@ public class ProxyParamTest
         
         String src = param.toSouceCode(IServiceProvider.class, builder);
         
-        assertEquals("newIServiceProviderMock(Arrays.asList(newIServiceMock(\"xxx\", 2), newIServiceMock(\"xxx\", 4)))", src);
+        assertEquals("newIServiceProviderMock(Arrays.<ProxyParamTest.IService>asList(newIServiceMock(\"xxx\", 2), newIServiceMock(\"xxx\", 4)))", src);
         
         verifyHelperMethod(builder, 0, new String[] {
                 "private static ProxyParamTest.IServiceProvider newIServiceProviderMock(List<ProxyParamTest.IService> services) {",
@@ -86,9 +86,34 @@ public class ProxyParamTest
                 "    return mock;",
                 "}"
         });
-        
-        
     }
+    
+    @SuppressWarnings("nls")
+    @Test
+    public void testWildcardMockCollection()
+    {
+        IServiceProvider provider = new ServiceProvider();
+        IServiceProvider proxy = (IServiceProvider)ProxyFactory.newProxy(IServiceProvider.class, provider);
+        List<? extends IService> services = proxy.getServicesExt();
+        
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        ProxyParam param = new ProxyParam(proxy);
+        
+        boolean isSupported = param.isSupported(IServiceProvider.class, new HashSet<String>());
+        assertTrue(isSupported);
+        
+        String src = param.toSouceCode(IServiceProvider.class, builder);
+        assertEquals("newIServiceProviderMock(Arrays.asList(newIServiceMock(), newIServiceMock()))", src);
+        
+        verifyHelperMethod(builder, 0, new String[] {
+                "private static ProxyParamTest.IServiceProvider newIServiceProviderMock(List<? extends ProxyParamTest.IService> servicesExt) {",
+                "    ProxyParamTest.IServiceProvider mock = Mockito.mock(ProxyParamTest.IServiceProvider.class);",
+                "    Mockito.when(mock.getServicesExt()).thenReturn(servicesExt);",
+                "    return mock;",
+                "}"
+        });
+    }
+    
     
     private static void verifyHelperMethod(TestSuiteBuilder builder, int index, String[] expectedLines)
     {
@@ -110,6 +135,7 @@ public class ProxyParamTest
     {
         IService getService(String name);
         List<IService> getServices();
+        List<? extends IService> getServicesExt();
     }
     public static interface IService
     {
@@ -129,6 +155,10 @@ public class ProxyParamTest
         @Override
         public List<IService> getServices() {
             return Arrays.asList(new ServiceA(), new ServiceB());
+        }
+        @Override
+        public List<? extends IService> getServicesExt() {
+            return getServices();
         }
     }
     

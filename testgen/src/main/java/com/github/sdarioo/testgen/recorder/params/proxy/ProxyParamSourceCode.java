@@ -81,7 +81,7 @@ public final class ProxyParamSourceCode
                 stmt = fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", 
                         method.getName(), 
                         args, 
-                        call.getResult().toSouceCode(method.getReturnType(), builder));
+                        call.getResult().toSouceCode(getReturnType(method), builder));
             }
             methodBuilder.statement(stmt);
             argIndex += (paramCount + 1);
@@ -89,6 +89,12 @@ public final class ProxyParamSourceCode
         methodBuilder.statement(fmt("return mock"));
         String template = methodBuilder.build();
         return new MethodTemplate(template);
+    }
+    
+    static Type getReturnType(Method method)
+    {
+        Type type = method.getGenericReturnType();
+        return TypeUtil.containsTypeVariables(type) ? method.getReturnType() : type;
     }
     
     private static void getArgTypesAndNames(List<Call> calls, List<Type> typesHolder, List<String> namesHolder)
