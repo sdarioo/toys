@@ -14,8 +14,8 @@ import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.beans.Bean;
 import com.github.sdarioo.testgen.recorder.params.beans.BeanFactory;
 import com.github.sdarioo.testgen.recorder.params.beans.BeanParam;
-import com.github.sdarioo.testgen.recorder.params.proxy.ProxyFactory;
-import com.github.sdarioo.testgen.recorder.params.proxy.ProxyParam;
+import com.github.sdarioo.testgen.recorder.params.mock.ProxyFactory;
+import com.github.sdarioo.testgen.recorder.params.mock.MockParam;
 
 
 public final class ParamsFactory 
@@ -63,7 +63,7 @@ public final class ParamsFactory
         }
         // Proxy
         if (ProxyFactory.isProxy(value)) {
-            return new ProxyParam(value);
+            return new MockParam(value);
         }
         
         // Java Bean

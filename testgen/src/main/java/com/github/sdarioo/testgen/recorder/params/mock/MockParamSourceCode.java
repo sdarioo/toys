@@ -5,7 +5,7 @@
  * actual or intended publication of such source code.
  */
 
-package com.github.sdarioo.testgen.recorder.params.proxy;
+package com.github.sdarioo.testgen.recorder.params.mock;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -27,9 +27,9 @@ import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.util.StringUtil;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
-public final class ProxyParamSourceCode 
+public final class MockParamSourceCode 
 {
-    private ProxyParamSourceCode() {}
+    private MockParamSourceCode() {}
     
     
     public static boolean isFactoryMethodWithArgs(RecordingInvocationHandler handler)

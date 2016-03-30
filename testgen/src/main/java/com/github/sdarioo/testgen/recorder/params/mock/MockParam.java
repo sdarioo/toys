@@ -1,4 +1,4 @@
-package com.github.sdarioo.testgen.recorder.params.proxy;
+package com.github.sdarioo.testgen.recorder.params.mock;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -18,12 +18,12 @@ import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.AbstractParam;
 import com.github.sdarioo.testgen.util.StringUtil;
 
-public class ProxyParam
+public class MockParam
     extends AbstractParam
 {
     private final Object _proxy;
     
-    public ProxyParam(Object proxy)
+    public MockParam(Object proxy)
     {
         super(proxy.getClass());
         _proxy = proxy;
@@ -68,19 +68,19 @@ public class ProxyParam
         builder.addImport("org.mockito.Mockito"); //$NON-NLS-1$
         
         String factoryMethodName = getFactoryMethodName(builder);
-        MethodTemplate factoryMethodTemplate = ProxyParamSourceCode.getFactoryMethodTemplate(getHandler(), builder);
+        MethodTemplate factoryMethodTemplate = MockParamSourceCode.getFactoryMethodTemplate(getHandler(), builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
         List<String> args = new ArrayList<String>();
         for (Call call : getHandler().getCalls()) {
             Method method = call.getMethod();
-            if (ProxyParamSourceCode.isFactoryMethodWithArgs(getHandler())) {
+            if (MockParamSourceCode.isFactoryMethodWithArgs(getHandler())) {
                 Class<?>[] types = method.getParameterTypes();
                 List<IParameter> values = call.args();
                 for (int i = 0; i < types.length; i++) {
                     args.add(values.get(i).toSouceCode(types[i], builder));
                 }
-                Type returnType = ProxyParamSourceCode.getReturnType(method);
+                Type returnType = MockParamSourceCode.getReturnType(method);
                 args.add(call.getResult().toSouceCode(returnType, builder));    
             }
         }
@@ -130,7 +130,7 @@ public class ProxyParam
         if (getClass() != obj.getClass()) {
             return false;
         }
-        ProxyParam other = (ProxyParam)obj;
+        MockParam other = (MockParam)obj;
         RecordingInvocationHandler myHandler = getHandler();
         RecordingInvocationHandler otherHandler = other.getHandler();
         if ((myHandler == null) || (otherHandler == null)) {

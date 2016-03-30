@@ -1,6 +1,7 @@
-package com.github.sdarioo.testgen.recorder.params.proxy;
+package com.github.sdarioo.testgen.recorder.params.mock;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -11,7 +12,7 @@ import org.junit.Test;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 
-public class ProxyParamTest
+public class MockParamTest
 {
     
     @SuppressWarnings("nls")
@@ -27,21 +28,21 @@ public class ProxyParamTest
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
         
-        ProxyParam param = new ProxyParam(proxy);
+        MockParam param = new MockParam(proxy);
         String src = param.toSouceCode(IServiceProvider.class, builder);
         assertEquals("newIServiceProviderMock()", src);
         
         verifyHelperMethod(builder, 0, new String[] {
-                "private static ProxyParamTest.IService newIServiceMock(String arg0, int length) {",
-                "    ProxyParamTest.IService mock = Mockito.mock(ProxyParamTest.IService.class);",
+                "private static MockParamTest.IService newIServiceMock(String arg0, int length) {",
+                "    MockParamTest.IService mock = Mockito.mock(MockParamTest.IService.class);",
                 "    Mockito.when(mock.length(arg0)).thenReturn(length);",
                 "    return mock;",
                 "}"
         });
         
         verifyHelperMethod(builder, 1, new String[] {
-                "private static ProxyParamTest.IServiceProvider newIServiceProviderMock() {",
-                "    ProxyParamTest.IServiceProvider mock = Mockito.mock(ProxyParamTest.IServiceProvider.class);",
+                "private static MockParamTest.IServiceProvider newIServiceProviderMock() {",
+                "    MockParamTest.IServiceProvider mock = Mockito.mock(MockParamTest.IServiceProvider.class);",
                 "    Mockito.when(mock.getService(\"A\")).thenReturn(newIServiceMock(\"xxx\", 2));",
                 "    Mockito.when(mock.getService(\"B\")).thenReturn(newIServiceMock(\"xxx\", 4));",
                 "    return mock;",
@@ -62,26 +63,26 @@ public class ProxyParamTest
         }
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        ProxyParam param = new ProxyParam(proxy);
+        MockParam param = new MockParam(proxy);
         
         boolean isSupported = param.isSupported(IServiceProvider.class, new HashSet<String>());
         assertTrue(isSupported);
         
         String src = param.toSouceCode(IServiceProvider.class, builder);
         
-        assertEquals("newIServiceProviderMock(Arrays.<ProxyParamTest.IService>asList(newIServiceMock(\"xxx\", 2), newIServiceMock(\"xxx\", 4)))", src);
+        assertEquals("newIServiceProviderMock(Arrays.<MockParamTest.IService>asList(newIServiceMock(\"xxx\", 2), newIServiceMock(\"xxx\", 4)))", src);
         
         verifyHelperMethod(builder, 0, new String[] {
-                "private static ProxyParamTest.IServiceProvider newIServiceProviderMock(List<ProxyParamTest.IService> services) {",
-                "    ProxyParamTest.IServiceProvider mock = Mockito.mock(ProxyParamTest.IServiceProvider.class);",
+                "private static MockParamTest.IServiceProvider newIServiceProviderMock(List<MockParamTest.IService> services) {",
+                "    MockParamTest.IServiceProvider mock = Mockito.mock(MockParamTest.IServiceProvider.class);",
                 "    Mockito.when(mock.getServices()).thenReturn(services);",
                 "    return mock;",
                 "}"
         });
         
         verifyHelperMethod(builder, 1, new String[] {
-                "private static ProxyParamTest.IService newIServiceMock(String arg0, int length) {",
-                "    ProxyParamTest.IService mock = Mockito.mock(ProxyParamTest.IService.class);",
+                "private static MockParamTest.IService newIServiceMock(String arg0, int length) {",
+                "    MockParamTest.IService mock = Mockito.mock(MockParamTest.IService.class);",
                 "    Mockito.when(mock.length(arg0)).thenReturn(length);",
                 "    return mock;",
                 "}"
@@ -97,7 +98,7 @@ public class ProxyParamTest
         List<? extends IService> services = proxy.getServicesExt();
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
-        ProxyParam param = new ProxyParam(proxy);
+        MockParam param = new MockParam(proxy);
         
         boolean isSupported = param.isSupported(IServiceProvider.class, new HashSet<String>());
         assertTrue(isSupported);
@@ -106,8 +107,8 @@ public class ProxyParamTest
         assertEquals("newIServiceProviderMock(Arrays.asList(newIServiceMock(), newIServiceMock()))", src);
         
         verifyHelperMethod(builder, 0, new String[] {
-                "private static ProxyParamTest.IServiceProvider newIServiceProviderMock(List<? extends ProxyParamTest.IService> servicesExt) {",
-                "    ProxyParamTest.IServiceProvider mock = Mockito.mock(ProxyParamTest.IServiceProvider.class);",
+                "private static MockParamTest.IServiceProvider newIServiceProviderMock(List<? extends MockParamTest.IService> servicesExt) {",
+                "    MockParamTest.IServiceProvider mock = Mockito.mock(MockParamTest.IServiceProvider.class);",
                 "    Mockito.when(mock.getServicesExt()).thenReturn(servicesExt);",
                 "    return mock;",
                 "}"

@@ -9,7 +9,7 @@ import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.Recorder;
-import com.github.sdarioo.testgen.recorder.params.proxy.ProxyFactory;
+import com.github.sdarioo.testgen.recorder.params.mock.ProxyFactory;
 
 public final class RecorderAPI
 {

@@ -1,4 +1,4 @@
-package com.github.sdarioo.testgen.recorder.params.proxy;
+package com.github.sdarioo.testgen.recorder.params.mock;
 
 import java.lang.reflect.*;
 import java.util.ArrayList;

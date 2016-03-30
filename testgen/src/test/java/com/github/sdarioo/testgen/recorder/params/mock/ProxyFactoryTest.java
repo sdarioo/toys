@@ -5,11 +5,13 @@
  * actual or intended publication of such source code.
  */
 
-package com.github.sdarioo.testgen.recorder.params.proxy;
+package com.github.sdarioo.testgen.recorder.params.mock;
 
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
+import com.github.sdarioo.testgen.recorder.params.mock.ProxyFactory;
 
 public class ProxyFactoryTest
 {
