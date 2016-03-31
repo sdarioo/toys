@@ -1,12 +1,16 @@
 package com.github.sdarioo.testgen.recorder.params.mock;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.commons.lang3.reflect.TypeUtils;
 import org.junit.Test;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
@@ -115,6 +119,68 @@ public class MockParamTest
         });
     }
     
+    @Test
+    public void testGenericMock1()
+    {
+        ICollector<String> collector = new ICollector<String>() {
+            public int add(String value) { return 0; } 
+        };
+        Type collectorType = TypeUtils.parameterize(ICollector.class, String.class);
+        ICollector<String> proxy = (ICollector<String>)ProxyFactory.newProxy(collectorType, collector);
+        assertNotNull(proxy);
+        assertFalse(collector == proxy);
+        
+        proxy.add("str");
+        
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        MockParam param = new MockParam(proxy);
+        boolean isSupported = param.isSupported(collectorType, new HashSet<String>());
+        assertTrue(isSupported);
+        
+        String src = param.toSouceCode(IServiceProvider.class, builder);
+        assertEquals("newICollectorMock(\"str\", 0)", src);
+        
+        verifyHelperMethod(builder, 0, new String[] {
+                "private static <T> MockParamTest.ICollector<T> newICollectorMock(T arg0, int add) {",
+                "    MockParamTest.ICollector mock = Mockito.mock(MockParamTest.ICollector.class);",
+                "    Mockito.when(mock.add(arg0)).thenReturn(add);",
+                "    return mock;",
+                "}"
+        });
+    }
+
+    @Test
+    public void testGenericMock2()
+    {
+        ICollector<String> collector = new ICollector<String>() {
+            public int add(String value) { return 0; } 
+        };
+        Type collectorType = TypeUtils.parameterize(ICollector.class, String.class);
+        ICollector<String> proxy = (ICollector<String>)ProxyFactory.newProxy(collectorType, collector);
+        assertNotNull(proxy);
+        assertFalse(collector == proxy);
+        
+        proxy.add("1");
+        proxy.add("2");
+        
+        TestSuiteBuilder builder = new TestSuiteBuilder();
+        MockParam param = new MockParam(proxy);
+        boolean isSupported = param.isSupported(collectorType, new HashSet<String>());
+        assertTrue(isSupported);
+        
+        String src = param.toSouceCode(IServiceProvider.class, builder);
+        assertEquals("newICollectorMock()", src);
+        
+        verifyHelperMethod(builder, 0, new String[] {
+                "private static <T> MockParamTest.ICollector<T> newICollectorMock() {",
+                "    MockParamTest.ICollector mock = Mockito.mock(MockParamTest.ICollector.class);",
+                "    Mockito.when(mock.add(\"1\")).thenReturn(0);",
+                "    Mockito.when(mock.add(\"2\")).thenReturn(0);",
+                "    return mock;",
+                "}"
+        });
+    }
+    
     
     private static void verifyHelperMethod(TestSuiteBuilder builder, int index, String[] expectedLines)
     {
@@ -131,7 +197,10 @@ public class MockParamTest
     
     //-----------------------------------------------------------
     
-
+    public static interface ICollector<T>
+    {
+        int add(T value);
+    }
     public static interface IServiceProvider
     {
         IService getService(String name);
@@ -177,4 +246,5 @@ public class MockParamTest
             return str.length() + 1;
         }
     }
+    
 }

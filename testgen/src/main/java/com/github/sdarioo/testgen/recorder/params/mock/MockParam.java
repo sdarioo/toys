@@ -1,22 +1,14 @@
 package com.github.sdarioo.testgen.recorder.params.mock;
 
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
-import com.github.sdarioo.testgen.generator.source.MethodTemplate;
-import com.github.sdarioo.testgen.generator.source.TestMethod;
-import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.AbstractParam;
-import com.github.sdarioo.testgen.util.StringUtil;
 
 public class MockParam
     extends AbstractParam
@@ -68,23 +60,7 @@ public class MockParam
         builder.addImport("org.mockito.Mockito"); //$NON-NLS-1$
         
         String factoryMethodName = getFactoryMethodName(builder);
-        MethodTemplate factoryMethodTemplate = MockParamSourceCode.getFactoryMethodTemplate(getHandler(), builder);
-        TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
-        
-        List<String> args = new ArrayList<String>();
-        for (Call call : getHandler().getCalls()) {
-            Method method = call.getMethod();
-            if (MockParamSourceCode.isFactoryMethodWithArgs(getHandler())) {
-                Class<?>[] types = method.getParameterTypes();
-                List<IParameter> values = call.args();
-                for (int i = 0; i < types.length; i++) {
-                    args.add(values.get(i).toSouceCode(types[i], builder));
-                }
-                Type returnType = MockParamSourceCode.getReturnType(method);
-                args.add(call.getResult().toSouceCode(returnType, builder));    
-            }
-        }
-        return fmt("{0}({1})", factoryMethod.getName(), StringUtil.join(args, ", ")); //$NON-NLS-1$ //$NON-NLS-2$
+        return MockParamHelper.toSouceCode(getHandler(), factoryMethodName, builder);
     }
     
     public RecordingInvocationHandler getHandler()
