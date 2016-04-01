@@ -17,6 +17,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
 
+/**
+ * Represents recorded method call with argument values and result or exception info.
+ */
 public class Call implements Comparable<Call> 
 {
     private final Method _method;

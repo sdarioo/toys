@@ -12,5 +12,5 @@ public enum MockingStrategy
     None,
     NoArgsFactoryMethod,
     FactoryMethodWithArgs,
-    InnerClass
+    Singleton
 }

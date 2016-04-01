@@ -113,7 +113,7 @@ public class MockParamTest
         verifyHelperMethod(builder, 0, new String[] {
                 "private static MockParamTest.IServiceProvider newIServiceProviderMock(List<? extends MockParamTest.IService> servicesExt) {",
                 "    MockParamTest.IServiceProvider mock = Mockito.mock(MockParamTest.IServiceProvider.class);",
-                "    Mockito.when(mock.getServicesExt()).thenReturn(servicesExt);",
+                "    Mockito.doReturn(servicesExt).when(mock).getServicesExt();",
                 "    return mock;",
                 "}"
         });

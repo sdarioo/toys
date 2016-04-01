@@ -89,27 +89,25 @@ public final class MockParamHelper
         for (Call call : calls) {
             Method method = call.getMethod();
             Type[] argTypes = method.getGenericParameterTypes();
-            Type resultType = method.getGenericReturnType();
+            Type returnType = method.getGenericReturnType();
             String whenStmt;
             
             if (strategy == MockingStrategy.FactoryMethodWithArgs) {
                 
-                String[] argNames = ArgNamesCache.getArgNames(method, true);
-                String resultArgName = methodNameToArgName(method.getName());
+                String[] args = ArgNamesCache.getArgNames(method, true);
+                String whenArg = StringUtil.join(args, ", ");
+                String thenArg = methodNameToArgName(method.getName());
                 
-                mb.args(argTypes, argNames);
-                mb.arg(resultType, resultArgName);
+                mb.args(argTypes, args);
+                mb.arg(returnType, thenArg);
                 
-                whenStmt = fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", 
-                        method.getName(), 
-                        StringUtil.join(argNames, ", "), 
-                        resultArgName);
+                whenStmt = stub(method.getName(), returnType, whenArg,  thenArg);
             } else {
-                List<String> argSourceCode = toSourceCode(call.args(), argTypes, builder);
-                whenStmt = fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", 
-                        method.getName(), 
-                        StringUtil.join(argSourceCode, ", "), 
-                        call.getResult().toSouceCode(resultType, builder));
+                List<String> args = toSourceCode(call.args(), argTypes, builder);
+                String whenArg = StringUtil.join(args, ", ");
+                String thenArg = call.getResult().toSouceCode(returnType, builder);
+                 
+                whenStmt = stub(method.getName(), returnType, whenArg, thenArg);
             }
             mb.statement(whenStmt);
         }
@@ -117,6 +115,15 @@ public final class MockParamHelper
         mb.statement(fmt("return mock"));
         String template = mb.build();
         return new MethodTemplate(template);
+    }
+    
+    @SuppressWarnings("nls")
+    private static String stub(String methodName, Type returnType, String whenArg, String thenArg)
+    {
+        if (TypeUtil.containsWildcards(returnType)) {
+            return fmt("Mockito.doReturn({0}).when(mock).{1}({2})", thenArg, methodName, whenArg);
+        }
+        return fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", methodName, whenArg, thenArg);
     }
 
     private static List<String> toSourceCode(List<IParameter> values, Type[] types, TestSuiteBuilder builder)
