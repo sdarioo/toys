@@ -10,6 +10,7 @@ package com.github.sdarioo.testgen.generator;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -153,8 +154,8 @@ public class MethodBuilder
         
         for (int i = 0; i < lines.length; i++) {
             String line = ((i == 0) || (i == (lines.length - 1))) ? 
-                    "    " + lines[i] : 
-                    "        " + lines[i];
+                    indent(lines[i], 1) : 
+                    indent(lines[i], 2);
             if (bTerminate && (i == lines.length - 1)) {
                 line += ';';
             }
@@ -168,6 +169,16 @@ public class MethodBuilder
         for (String line : lines) {
             statement(line);
         }
+        return this;
+    }
+    
+    public MethodBuilder ifThen(String condition, List<String> thenStmt)
+    {
+        _lines.add(MessageFormat.format("    if({0}) {", condition));
+        for (String stmt : thenStmt) {
+            _lines.add(indent(stmt, 2));
+        }
+        _lines.add("    }");
         return this;
     }
     
@@ -212,5 +223,16 @@ public class MethodBuilder
         return sb.toString();
     }
     
+    private static String indent(String line, int level)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < level; i++) {
+            sb.append(INDENT);
+        }
+        sb.append(line);
+        return sb.toString();
+    }
+    
     private static final char LS = '\n';
+    private static final String INDENT = "    ";
 }

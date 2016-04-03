@@ -25,7 +25,7 @@ public class MockParam
     public Class<?> getRecordedType() 
     {
         RecordingInvocationHandler handler = getHandler();
-        return (handler != null) ? handler.getInterface() : super.getRecordedType();
+        return handler.getInterface();
     }
     
     @Override
@@ -57,10 +57,7 @@ public class MockParam
     @Override
     public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        builder.addImport("org.mockito.Mockito"); //$NON-NLS-1$
-        
-        String factoryMethodName = getFactoryMethodName(builder);
-        return MockParamHelper.toSouceCode(getHandler(), factoryMethodName, builder);
+        return MockParamHelper.toSouceCode(getHandler(), builder);
     }
     
     public RecordingInvocationHandler getHandler()
@@ -70,17 +67,6 @@ public class MockParam
             return null;
         }
         return (RecordingInvocationHandler)handler;
-    }
-    
-    @SuppressWarnings("nls")
-    private String getFactoryMethodName(TestSuiteBuilder builder)
-    {
-        String objectClass = builder.getTypeName(getRecordedType());
-        int index = objectClass.lastIndexOf('.');
-        if (index > 0) {
-            objectClass = objectClass.substring(index + 1);
-        }
-        return "new" + objectClass + "Mock";
     }
     
     @SuppressWarnings("nls")

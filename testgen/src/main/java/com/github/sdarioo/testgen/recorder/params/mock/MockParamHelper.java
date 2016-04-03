@@ -36,24 +36,30 @@ public final class MockParamHelper
             return MockingStrategy.None;
         }
         
+        if (handler.getRefCount() > 1) {
+            return MockingStrategy.Singleton;
+        }
+        
         List<Call> calls = handler.getCalls();
         Set<Method> methods = handler.getMethods();
         
         // If more than one call to same method than we must generate no-args factory method
         if (calls.size() > methods.size()) {
             return MockingStrategy.NoArgsFactoryMethod;
+        } else {
+            return MockingStrategy.FactoryMethodWithArgs;
         }
-        return MockingStrategy.FactoryMethodWithArgs;
     }
     
-    public static String toSouceCode(RecordingInvocationHandler handler, 
-            String factoryMethodName, TestSuiteBuilder builder) 
+    public static String toSouceCode(RecordingInvocationHandler handler, TestSuiteBuilder builder) 
     {
+        MockingStrategy strategy = MockParamHelper.getMockingStrategy(handler);
+        String factoryMethodName = getFactoryMethodName(handler, strategy, builder);
+        
         MethodTemplate factoryMethodTemplate = getFactoryMethodTemplate(handler, builder);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
         List<String> args = new ArrayList<String>();
-        MockingStrategy strategy = MockParamHelper.getMockingStrategy(handler);
         
         if (strategy == MockingStrategy.FactoryMethodWithArgs) {
             for (Call call : handler.getCalls()) {
@@ -65,6 +71,7 @@ public final class MockParamHelper
             }    
         }
         
+        builder.addImport("org.mockito.Mockito"); //$NON-NLS-1$
         return fmt("{0}({1})", factoryMethod.getName(), StringUtil.join(args, ", ")); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
@@ -85,6 +92,7 @@ public final class MockParamHelper
         String returnTypeName = TypeUtil.getName(mockClass, builder);
         mb.statement(fmt("{0} mock = Mockito.mock({0}.class)", returnTypeName));
         
+         
         List<Call> calls = handler.getCalls();
         for (Call call : calls) {
             Method method = call.getMethod();
@@ -96,7 +104,7 @@ public final class MockParamHelper
                 
                 String[] args = ArgNamesCache.getArgNames(method, true);
                 String whenArg = StringUtil.join(args, ", ");
-                String thenArg = methodNameToArgName(method.getName());
+                String thenArg = resultArgName(method.getName());
                 
                 mb.args(argTypes, args);
                 mb.arg(returnType, thenArg);
@@ -125,6 +133,21 @@ public final class MockParamHelper
         }
         return fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", methodName, whenArg, thenArg);
     }
+    
+    @SuppressWarnings("nls")
+    private static String getFactoryMethodName(RecordingInvocationHandler handler, MockingStrategy strategy, TestSuiteBuilder builder)
+    {
+        String returnType = builder.getTypeName(handler.getInterface());
+        int index = returnType.lastIndexOf('.');
+        if (index > 0) {
+            returnType = returnType.substring(index + 1);
+        }
+        if (strategy == MockingStrategy.Singleton) {
+            return "get" + returnType + "Mock";
+        } else {
+            return "new" + returnType + "Mock";
+        }
+    }
 
     private static List<String> toSourceCode(List<IParameter> values, Type[] types, TestSuiteBuilder builder)
     {
@@ -135,19 +158,12 @@ public final class MockParamHelper
         return result;
     }
     
-    private static String methodNameToArgName(String methodName)
+    private static String resultArgName(String methodName)
     {
-        if (methodName.length() <= 3) {
-            return methodName;
-        }
-        
-        if (methodName.startsWith("get")) { //$NON-NLS-1$
-            methodName = methodName.substring(3);
-        }
         if (Character.isUpperCase(methodName.charAt(0))) {
             methodName = StringUtils.uncapitalize(methodName);
         }
-        return methodName;
+        return methodName + "Result";
     }
     
     private static String fmt(String pattern, Object... args)

@@ -1,6 +1,7 @@
 package com.github.sdarioo.testgen.recorder.params.mock;
 
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.*;
@@ -10,16 +11,20 @@ import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.Recorder;
 
+/**
+ * Proxy invocation handler. 
+ * Each proxy instance has separate instance of invocation handler.
+ */
 public class RecordingInvocationHandler
     implements InvocationHandler
 {
     private final Class<?> _interface;
-    private final Object _original; // TODO - replace with WeakReference to avoid memory leaks
+    private final Object _original;
     private final Recorder _recorder;
     
     private boolean _isAllRecorded = true;
     private String _exception;
-    
+    private int _refCount = 0;
     
     private static final AtomicInteger _idGenerator = new AtomicInteger(0);
     
@@ -35,11 +40,25 @@ public class RecordingInvocationHandler
         return _interface;
     }
     
+    public int getRefCount()
+    {
+        return _refCount;
+    }
+    
+    public void incRefCount()
+    {
+        _refCount++;
+    }
+    
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) 
         throws Throwable 
     {
-        Call call = Call.newCall(method, _original, (args != null ? args : new Object[0]));
+        if (args == null) {
+            args = new Object[0];
+        }
+        
+        Call call = Call.newCall(method, _original, args);
         try {
             Object result = method.invoke(_original, args);
             Type returnType = method.getGenericReturnType();
@@ -48,7 +67,16 @@ public class RecordingInvocationHandler
                     if (ProxyFactory.canProxy(returnType, result)) {
                         result = ProxyFactory.newProxy(returnType, result);
                     }
-                }    
+                }   
+                
+                // If proxy is passed as argument into another proxy we must increment its reference count, otherwise
+                // it will be treated as other object in generated code
+                for (Object arg : args) {
+                    if (ProxyFactory.isProxy(arg)) {
+                        ProxyFactory.getHandler(arg).incRefCount();
+                    }
+                }
+                
                 call.endWithResult(result);
                 _isAllRecorded &= _recorder.record(call);
             } else {
@@ -57,11 +85,14 @@ public class RecordingInvocationHandler
             }
             return result;
         } catch (Throwable thr) {
-            // TODO: handle java.lang.reflect.InvocationTargetException
-            Logger.warn("Exception thrown in RecordingInvocationHandler.invoke: " + thr.toString()); //$NON-NLS-1$
-            _exception = thr.toString();
-            call.endWithException(thr);
-            throw thr;
+            Throwable cause = thr;
+            if (thr instanceof InvocationTargetException) {
+                cause = ((InvocationTargetException)thr).getCause();
+            }
+            Logger.warn("Exception thrown in RecordingInvocationHandler.invoke: " + cause); //$NON-NLS-1$
+            _exception = cause.toString();
+            call.endWithException(cause);
+            throw cause;
         }
     }
     

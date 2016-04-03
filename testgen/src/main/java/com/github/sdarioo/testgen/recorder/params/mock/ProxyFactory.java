@@ -1,8 +1,13 @@
 package com.github.sdarioo.testgen.recorder.params.mock;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.util.TypeUtil;
@@ -10,6 +15,9 @@ import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class ProxyFactory 
 {
+ 
+    // IdentityHashCode -> Proxy instance
+    private static ConcurrentMap<Integer, Object> CACHED_PROXIES = new ConcurrentHashMap<Integer, Object>();
     
     public static boolean canProxy(Type type, Object value)
     {
@@ -20,31 +28,27 @@ public class ProxyFactory
         if (value == null) {
             return false;
         }
-
-        // Support for List<Proxy>
-        if (List.class.equals(rawType) && (value instanceof List)) {
+        if (Modifier.isPrivate(rawType.getModifiers())) {
+            return false;
+        }
+        // List<Proxy>
+        if (List.class.equals(rawType)) {
             Type[] elementType = TypeUtil.getActualTypeArguments(type);
             if (elementType.length == 1) {
                return canProxyList((List<?>)value, elementType[0]);
             }
             return false;
         }
-        
-        // Support for Proxy[]
+        // Proxy[]
         if (rawType.isArray()) {
             Class<?> elementType = rawType.getComponentType();
             return canProxyArray(value, elementType);
         }
-        
         if (!rawType.isInterface()) {
             return false;
         }
-        
         String typeName = rawType.getName();
         if (!Configuration.getDefault().isMockingEnabled(typeName)) {
-            return false;
-        }
-        if (Modifier.isPrivate(rawType.getModifiers())) {
             return false;
         }
         return true;
@@ -83,7 +87,13 @@ public class ProxyFactory
     
     public static boolean isProxy(Object value)
     {
-        return Proxy.isProxyClass(value.getClass());
+        return Proxy.isProxyClass(value.getClass()) &&
+                (Proxy.getInvocationHandler(value) instanceof RecordingInvocationHandler);
+    }
+    
+    public static RecordingInvocationHandler getHandler(Object proxy)
+    {
+        return (RecordingInvocationHandler)Proxy.getInvocationHandler(proxy);
     }
     
     public static Object newProxy(Type type, Object value)
@@ -93,7 +103,7 @@ public class ProxyFactory
         }
         Class<?> rawType = TypeUtil.getRawType(type);
         
-        // Support for List<Proxy> 
+        // List<Proxy> 
         if (List.class.equals(rawType)) {
             Type elementType = TypeUtil.getActualTypeArguments(type)[0];
             List<?> list = (List<?>)value;
@@ -103,7 +113,7 @@ public class ProxyFactory
             }
             return newList;
         }
-        // Support for Proxy[]
+        // Proxy[]
         if (rawType.isArray()) {
             int length = Array.getLength(value);
             Class<?> elementType = rawType.getComponentType();
@@ -115,19 +125,38 @@ public class ProxyFactory
             return newArray;
         }
         
-        Class<?> proxyInterface = rawType;
-        Class<?>[] interfaces = value.getClass().getInterfaces();
-        for (Class<?> interfce : interfaces) {
-            if (proxyInterface.isAssignableFrom(interfce)) {
-                proxyInterface = interfce;
-                break;
+        Integer objectHash = System.identityHashCode(value);
+        Object proxy = getFromCache(objectHash);
+        
+        if (proxy == null) {
+            Class<?> proxyInterface = rawType;
+            Class<?>[] interfaces = value.getClass().getInterfaces();
+            for (Class<?> interfce : interfaces) {
+                if (proxyInterface.isAssignableFrom(interfce)) {
+                    proxyInterface = interfce;
+                    break;
+                }
             }
+            proxy = Proxy.newProxyInstance(value.getClass().getClassLoader(), 
+                    new Class<?>[]{ proxyInterface }, 
+                    new RecordingInvocationHandler(proxyInterface, value));
+            
+            proxy = addToCache(objectHash, proxy);
         }
         
-        Object proxy = Proxy.newProxyInstance(value.getClass().getClassLoader(), 
-                new Class<?>[]{ proxyInterface }, 
-                new RecordingInvocationHandler(proxyInterface, value));
-    
+        ((RecordingInvocationHandler)Proxy.getInvocationHandler(proxy)).incRefCount();
         return proxy;
     }
+    
+    private static Object getFromCache(Integer hash)
+    {
+        return CACHED_PROXIES.get(hash);
+    }
+    
+    private static Object addToCache(Integer hash, Object proxy)
+    {
+        Object other = CACHED_PROXIES.putIfAbsent(hash, proxy);
+        return (other != null) ? other : proxy;
+    }
+    
 }
