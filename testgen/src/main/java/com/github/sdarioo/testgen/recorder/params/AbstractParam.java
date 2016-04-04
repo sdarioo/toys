@@ -8,6 +8,7 @@
 package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.text.MessageFormat;
 import java.util.Collection;
 
@@ -33,6 +34,10 @@ public abstract class AbstractParam
 
     protected static boolean isAssignable(Type type, Type targetType, Collection<String> errors)
     {
+        if (targetType instanceof TypeVariable<?>) {
+            return true; // TODO - verify this, bounded variables??
+        }
+        
         if (org.apache.commons.lang3.reflect.TypeUtils.isAssignable(type, targetType)) {
             return true;
         }

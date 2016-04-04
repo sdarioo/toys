@@ -38,6 +38,7 @@ public class TestSuiteBuilder
     implements IUniqueNamesProvider
 {
     private final UniqueNamesProvider _methodNames;
+    private final UniqueNamesProvider _fieldNames;
     private final UniqueNamesProvider _fileNames;
     
     private final boolean _useFullTypeNames;
@@ -63,6 +64,7 @@ public class TestSuiteBuilder
     {
         _useFullTypeNames = useFullTypeNames;
         _methodNames = new UniqueNamesProvider();
+        _fieldNames = new UniqueNamesProvider();
         
         if (testLocation != null) {
             Set<String> usedNames = getExistingFileNames(testLocation);
@@ -193,6 +195,12 @@ public class TestSuiteBuilder
     public String newUniqueMethodName(String methodName) 
     {
         return _methodNames.generateUniqueName(methodName);
+    }
+    
+    @Override
+    public String newUniqueFieldName(String fieldName) 
+    {
+        return _fieldNames.generateUniqueName(fieldName);
     }
     
     /**

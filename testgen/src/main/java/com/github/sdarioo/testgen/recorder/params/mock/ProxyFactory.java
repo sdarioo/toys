@@ -16,8 +16,9 @@ import com.github.sdarioo.testgen.util.TypeUtil;
 public class ProxyFactory 
 {
  
-    // IdentityHashCode -> Proxy instance
-    private static ConcurrentMap<Integer, Object> CACHED_PROXIES = new ConcurrentHashMap<Integer, Object>();
+    // Instance -> Proxy Instance
+    // TODO - shouldn't span object across more than one test suite
+    private static ConcurrentMap<Object, Object> CACHED_PROXIES = new ConcurrentHashMap<Object, Object>();
     
     public static boolean canProxy(Type type, Object value)
     {
@@ -31,6 +32,10 @@ public class ProxyFactory
         if (Modifier.isPrivate(rawType.getModifiers())) {
             return false;
         }
+        if (isProxy(value)) {
+            return false;
+        }
+        
         // List<Proxy>
         if (List.class.equals(rawType)) {
             Type[] elementType = TypeUtil.getActualTypeArguments(type);
@@ -125,9 +130,7 @@ public class ProxyFactory
             return newArray;
         }
         
-        Integer objectHash = System.identityHashCode(value);
-        Object proxy = getFromCache(objectHash);
-        
+        Object proxy = getFromCache(value);
         if (proxy == null) {
             Class<?> proxyInterface = rawType;
             Class<?>[] interfaces = value.getClass().getInterfaces();
@@ -141,21 +144,21 @@ public class ProxyFactory
                     new Class<?>[]{ proxyInterface }, 
                     new RecordingInvocationHandler(proxyInterface, value));
             
-            proxy = addToCache(objectHash, proxy);
+            proxy = addToCache(value, proxy);
         }
         
         ((RecordingInvocationHandler)Proxy.getInvocationHandler(proxy)).incRefCount();
         return proxy;
     }
     
-    private static Object getFromCache(Integer hash)
+    private static Object getFromCache(Object obj)
     {
-        return CACHED_PROXIES.get(hash);
+        return CACHED_PROXIES.get(obj);
     }
     
-    private static Object addToCache(Integer hash, Object proxy)
+    private static Object addToCache(Object obj, Object proxy)
     {
-        Object other = CACHED_PROXIES.putIfAbsent(hash, proxy);
+        Object other = CACHED_PROXIES.putIfAbsent(obj, proxy);
         return (other != null) ? other : proxy;
     }
     

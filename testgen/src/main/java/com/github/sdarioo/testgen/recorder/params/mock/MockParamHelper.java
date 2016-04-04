@@ -54,9 +54,21 @@ public final class MockParamHelper
     public static String toSouceCode(RecordingInvocationHandler handler, TestSuiteBuilder builder) 
     {
         MockingStrategy strategy = MockParamHelper.getMockingStrategy(handler);
+        
+        String singletonFieldName = null;
+        if (strategy == MockingStrategy.Singleton) {
+            String sourceCode = handler.getAttr("sourcecode");
+            if (sourceCode != null) {
+                return sourceCode;
+            }
+            singletonFieldName = getMockFieldName(handler, builder);
+            handler.setAttr("sourcecode", singletonFieldName);
+        }
+        
+        
         String factoryMethodName = getFactoryMethodName(handler, strategy, builder);
         
-        MethodTemplate factoryMethodTemplate = getFactoryMethodTemplate(handler, builder);
+        MethodTemplate factoryMethodTemplate = getFactoryMethodTemplate(handler, builder, singletonFieldName);
         TestMethod factoryMethod = builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
         List<String> args = new ArrayList<String>();
@@ -76,7 +88,8 @@ public final class MockParamHelper
     }
 
     @SuppressWarnings("nls")
-    public static MethodTemplate getFactoryMethodTemplate(RecordingInvocationHandler handler, TestSuiteBuilder builder)
+    private static MethodTemplate getFactoryMethodTemplate(RecordingInvocationHandler handler, 
+            TestSuiteBuilder builder, String mockFieldName)
     {
         MockingStrategy strategy = getMockingStrategy(handler);
         
@@ -88,12 +101,14 @@ public final class MockParamHelper
         mb.returnType(mockType);
         mb.name(MethodTemplate.NAME_VARIABLE);
         mb.typeParams(mockClass.getTypeParameters());
+        mb.exception(Exception.class.getName());
         
         String returnTypeName = TypeUtil.getName(mockClass, builder);
-        mb.statement(fmt("{0} mock = Mockito.mock({0}.class)", returnTypeName));
+        String mockName = (strategy == MockingStrategy.Singleton) ? mockFieldName : "mock";
         
-         
         List<Call> calls = handler.getCalls();
+        List<String> stubs = new ArrayList<String>();
+        
         for (Call call : calls) {
             Method method = call.getMethod();
             Type[] argTypes = method.getGenericParameterTypes();
@@ -104,38 +119,63 @@ public final class MockParamHelper
                 
                 String[] args = ArgNamesCache.getArgNames(method, true);
                 String whenArg = StringUtil.join(args, ", ");
-                String thenArg = resultArgName(method.getName());
+                String thenArg = toArgName(method.getName());
                 
                 mb.args(argTypes, args);
                 mb.arg(returnType, thenArg);
                 
-                whenStmt = stub(method.getName(), returnType, whenArg,  thenArg);
+                whenStmt = stub(mockName, method.getName(), whenArg,  thenArg, returnType);
             } else {
                 List<String> args = toSourceCode(call.args(), argTypes, builder);
                 String whenArg = StringUtil.join(args, ", ");
                 String thenArg = call.getResult().toSouceCode(returnType, builder);
                  
-                whenStmt = stub(method.getName(), returnType, whenArg, thenArg);
+                whenStmt = stub(mockName, method.getName(), whenArg, thenArg, returnType);
             }
-            mb.statement(whenStmt);
+            stubs.add(whenStmt);
         }
         
-        mb.statement(fmt("return mock"));
+        if (strategy == MockingStrategy.Singleton) {
+            // Hack: declare mock static field as annotation in method builder..
+            mb.annotation(fmt("private static {0} {1} = null;", returnTypeName, mockName));
+            
+            List<String> ifBody = new ArrayList<String>();
+            ifBody.add(fmt("{0} = Mockito.mock({1}.class)", mockName, returnTypeName));
+            ifBody.addAll(stubs);
+            mb.ifThen(fmt("{0} == null", mockName), ifBody);
+        } else {
+            mb.statement(fmt("{0} {1} = Mockito.mock({0}.class)", returnTypeName, mockName));
+            mb.statements(stubs);
+        }
+        
+        mb.statement(fmt("return {0}", mockName));
         String template = mb.build();
+        
+        
         return new MethodTemplate(template);
     }
     
     @SuppressWarnings("nls")
-    private static String stub(String methodName, Type returnType, String whenArg, String thenArg)
+    private static String stub(String mockName, String methodName, String whenArg, String thenArg, Type returnType)
     {
         if (TypeUtil.containsWildcards(returnType)) {
-            return fmt("Mockito.doReturn({0}).when(mock).{1}({2})", thenArg, methodName, whenArg);
+            return fmt("Mockito.doReturn({0}).when({1}).{2}({3})", thenArg, mockName, methodName, whenArg);
         }
-        return fmt("Mockito.when(mock.{0}({1})).thenReturn({2})", methodName, whenArg, thenArg);
+        return fmt("Mockito.when({0}.{1}({2})).thenReturn({3})", mockName, methodName, whenArg, thenArg);
+    }
+
+    private static List<String> toSourceCode(List<IParameter> values, Type[] types, TestSuiteBuilder builder)
+    {
+        List<String> result = new ArrayList<String>();
+        for (int i = 0; i < types.length; i++) {
+            result.add(values.get(i).toSouceCode(types[i], builder));
+        }
+        return result;
     }
     
     @SuppressWarnings("nls")
-    private static String getFactoryMethodName(RecordingInvocationHandler handler, MockingStrategy strategy, TestSuiteBuilder builder)
+    private static String getFactoryMethodName(RecordingInvocationHandler handler, 
+            MockingStrategy strategy, TestSuiteBuilder builder)
     {
         String returnType = builder.getTypeName(handler.getInterface());
         int index = returnType.lastIndexOf('.');
@@ -149,21 +189,23 @@ public final class MockParamHelper
         }
     }
 
-    private static List<String> toSourceCode(List<IParameter> values, Type[] types, TestSuiteBuilder builder)
+    private static String getMockFieldName(RecordingInvocationHandler handler, TestSuiteBuilder builder)
     {
-        List<String> result = new ArrayList<String>();
-        for (int i = 0; i < types.length; i++) {
-            result.add(values.get(i).toSouceCode(types[i], builder));
+        String name = builder.getTypeName(handler.getInterface());
+        int index = name.lastIndexOf('.');
+        if (index > 0) {
+            name = name.substring(index + 1);
         }
-        return result;
+        name = name.toUpperCase();
+        return builder.newUniqueFieldName(name);
     }
     
-    private static String resultArgName(String methodName)
+    private static String toArgName(String methodName)
     {
         if (Character.isUpperCase(methodName.charAt(0))) {
             methodName = StringUtils.uncapitalize(methodName);
         }
-        return methodName + "Result";
+        return methodName + "Result"; //$NON-NLS-1$
     }
     
     private static String fmt(String pattern, Object... args)

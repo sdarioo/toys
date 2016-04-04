@@ -10,7 +10,6 @@ package com.github.sdarioo.testgen.generator;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -172,13 +171,15 @@ public class MethodBuilder
         return this;
     }
     
+    @SuppressWarnings("nls")
     public MethodBuilder ifThen(String condition, List<String> thenStmt)
     {
-        _lines.add(MessageFormat.format("    if({0}) {", condition));
+        String ifCondition = "if (" + condition + ") {";
+        _lines.add(indent(ifCondition, 1));
         for (String stmt : thenStmt) {
-            _lines.add(indent(stmt, 2));
+            _lines.add(indent(stmt, 2) + ';');
         }
-        _lines.add("    }");
+        _lines.add(indent("}", 1));
         return this;
     }
     
@@ -234,5 +235,5 @@ public class MethodBuilder
     }
     
     private static final char LS = '\n';
-    private static final String INDENT = "    ";
+    private static final String INDENT = "    "; //$NON-NLS-1$
 }

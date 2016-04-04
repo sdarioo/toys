@@ -1,7 +1,5 @@
 package com.github.sdarioo.testgen.recorder.params.mock;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashSet;
@@ -62,18 +60,14 @@ public class MockParam
     
     public RecordingInvocationHandler getHandler()
     {
-        InvocationHandler handler = Proxy.getInvocationHandler(_proxy);
-        if (!(handler instanceof RecordingInvocationHandler)) {
-            return null;
-        }
-        return (RecordingInvocationHandler)handler;
+        return ProxyFactory.getHandler(_proxy);
     }
     
     @SuppressWarnings("nls")
     private String createErrorMessage(Set<String> subErrors)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("Problems while recording mock invocations for %s%n", getHandler().getInterface().getName()));
+        sb.append(String.format("Problems while recording mock invocations for %s:%n", getHandler().getInterface().getName()));
         for (String msg : subErrors) {
             sb.append(String.format("  - %s%n", msg));
         }
@@ -105,10 +99,7 @@ public class MockParam
     public int hashCode() 
     {
         RecordingInvocationHandler handler = getHandler();
-        if (handler == null) {
-            return 0;
-        }
-        return handler.getCalls().hashCode();
+        return handler.hashCode();
     }
 
 }

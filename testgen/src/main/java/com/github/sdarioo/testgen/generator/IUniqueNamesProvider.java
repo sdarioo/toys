@@ -11,5 +11,7 @@ public interface IUniqueNamesProvider
 {
     String newUniqueMethodName(String methodName);
     
+    String newUniqueFieldName(String fieldName);
+    
     String newUniqueFileName(String fileName);
 }
