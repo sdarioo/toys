@@ -172,14 +172,30 @@ public class MethodBuilder
     }
     
     @SuppressWarnings("nls")
-    public MethodBuilder ifThen(String condition, List<String> thenStmt)
+    public MethodBuilder ifThen(String condition, List<String> then)
     {
-        String ifCondition = "if (" + condition + ") {";
-        _lines.add(indent(ifCondition, 1));
-        for (String stmt : thenStmt) {
-            _lines.add(indent(stmt, 2) + ';');
+        statement(String.format("if (%s) {", condition), false);
+        for (String line : then) {
+            statement(indent(line, 1));
         }
-        _lines.add(indent("}", 1));
+        statement("}", false);
+        
+        return this;
+    }
+    
+    @SuppressWarnings("nls")
+    public MethodBuilder tryCatch(List<String> body, String exc, String... catchLines)
+    {
+        statement("try {", false);
+        for (String line : body) {
+            statement(indent(line, 1));
+        }
+        statement(String.format("} catch (%s) {", exc), false);
+        for (String line : catchLines) {
+            statement(indent(line, 1));
+        }
+        statement("}", false);
+        
         return this;
     }
     

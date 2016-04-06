@@ -31,18 +31,19 @@ public class SerializableParam
         return true;
     }
     
+    @SuppressWarnings("nls")
     @Override
     public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        builder.addImport("java.io.*"); //$NON-NLS-1$
+        builder.addImport("java.io.*");
         MethodTemplate template = getFactoryMethodTemplate(targetType, builder);
         
         String resName = ClassUtils.getShortCanonicalName(getRecordedType());
         
         ResourceFile resFile = builder.addResource(_bytes, resName);
-        TestMethod deserialize = builder.addHelperMethod(template, "deserialize"); //$NON-NLS-1$
+        TestMethod deserialize = builder.addHelperMethod(template, "deserialize");
         
-        return deserialize.getName() + "(\"" + resFile.getFileName() + "\")"; //$NON-NLS-1$ //$NON-NLS-2$
+        return deserialize.getName() + "(\"" + resFile.getFileName() + "\")";
     }
     
     private MethodTemplate getFactoryMethodTemplate(Type targetType, TestSuiteBuilder builder)
@@ -51,7 +52,7 @@ public class SerializableParam
         
         MethodTemplate template = builder.getTemplatesCache().get(returnType);
         if (template == null) {
-            template = DESERIALIZE_TEMPLATE.with(MethodTemplate.TYPE_VARIABLE, returnType); //$NON-NLS-1$
+            template = DESERIALIZE_TEMPLATE.with(MethodTemplate.TYPE_VARIABLE, returnType);
             builder.getTemplatesCache().put(returnType, template);
         }
         return template;

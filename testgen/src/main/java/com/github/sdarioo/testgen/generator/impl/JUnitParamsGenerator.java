@@ -247,12 +247,12 @@ public class JUnitParamsGenerator
             int idx = 1;
             sb.append("// WARNING - cannot record parameters:"); //$NON-NLS-1$
             for (String message : errors) {
-                String[] lines = StringUtil.splitLines(message);
-                for (int i = 0; i < lines.length; i++) {
+                List<String> lines = StringUtil.splitLines(message);
+                for (int i = 0; i < lines.size(); i++) {
                     if (i == 0) {
-                        sb.append(fmt("\n// {0}. {1}", idx++, lines[i])); //$NON-NLS-1$
+                        sb.append(fmt("\n// {0}. {1}", idx++, lines.get(i))); //$NON-NLS-1$
                     } else {
-                        sb.append(fmt("\n// {0}", lines[i])); //$NON-NLS-1$
+                        sb.append(fmt("\n// {0}", lines.get(i))); //$NON-NLS-1$
                     }
                 }
             }

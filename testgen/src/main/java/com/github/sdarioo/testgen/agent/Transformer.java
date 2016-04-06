@@ -19,7 +19,7 @@ public class Transformer
     
     public Transformer(String className, String methodName)
     {
-        _className = className;
+        _className = className.replace('.', '/');
         _methodName = methodName;
     }
     

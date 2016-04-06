@@ -26,10 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.objectweb.asm.Type;
 
 import com.github.sdarioo.testgen.generator.impl.UniqueNamesProvider;
-import com.github.sdarioo.testgen.generator.source.MethodTemplate;
-import com.github.sdarioo.testgen.generator.source.ResourceFile;
-import com.github.sdarioo.testgen.generator.source.TestClass;
-import com.github.sdarioo.testgen.generator.source.TestMethod;
+import com.github.sdarioo.testgen.generator.source.*;
 import com.github.sdarioo.testgen.instrument.InstrumentUtil;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.util.FileUtil;
@@ -47,11 +44,13 @@ public class TestSuiteBuilder
     private String _signature;
     
     private final Set<String> _imports = new HashSet<String>();
-    private final List<TestMethod> _testCases = new ArrayList<TestMethod>();
-    private final Map<MethodTemplate, TestMethod> _helperMethods = new LinkedHashMap<MethodTemplate, TestMethod>();
-    private final List<ResourceFile> _resources = new ArrayList<ResourceFile>();
     
-    private final Map<String, MethodTemplate> _templatesCache = new HashMap<String, MethodTemplate>();
+    private final List<FieldSrc> _fields = new ArrayList<>();
+    private final List<TestMethod> _testCases = new ArrayList<>();
+    private final Map<MethodTemplate, TestMethod> _helperMethods = new LinkedHashMap<>();
+    private final List<ResourceFile> _resources = new ArrayList<>();
+    
+    private final Map<String, MethodTemplate> _templatesCache = new HashMap<>();
     
     private int _helperMethodOrder = 1000000;
     
@@ -80,7 +79,7 @@ public class TestSuiteBuilder
         methods.addAll(_testCases);
         methods.addAll(_helperMethods.values());
         
-        return new TestClass(_qName, _signature, _imports, methods, _resources);
+        return new TestClass(_qName, _signature, _imports, _fields, methods, _resources);
     }
     
     public void addImport(String classOrPkg) 
@@ -98,6 +97,11 @@ public class TestSuiteBuilder
     public void setSignature(String signature) 
     {
         _signature = signature;
+    }
+    
+    public void addField(FieldSrc field)
+    {
+        _fields.add(field);
     }
     
     public void addTestCase(TestMethod testCase)

@@ -7,13 +7,15 @@
 
 package com.github.sdarioo.testgen.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
 
 public final class Formatter 
 {
     private Formatter() {}
     
-    public static String indentLines(String text, String indentText)
+    public static String indentLines(String text)
     {
         String delim = "\n"; //$NON-NLS-1$
         StringBuilder sb = new StringBuilder();
@@ -27,9 +29,28 @@ public final class Formatter
             } else if (sLine.trim().length() == 0) {
                 sb.append(sLine);
             } else {
-                sb.append(indentText + sLine);
+                sb.append(getIndent() + sLine);
             }
         }
         return sb.toString();
+    }
+    
+    public static List<String> indentLines(List<String> lines)
+    {
+        List<String> result = new ArrayList<>(lines.size());
+        
+        for (String line : lines) {
+            if (line.trim().length() == 0) {
+                result.add(line);
+            } else {
+                result.add(getIndent() + line);
+            }
+        }
+        return result;
+    }
+    
+    public static String getIndent()
+    {
+        return "    "; //$NON-NLS-1$
     }
 }

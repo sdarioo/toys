@@ -7,6 +7,7 @@
 
 package com.github.sdarioo.testgen.generator.impl;
 
+import java.io.IOException;
 import java.util.List;
 
 public class MockApp 
@@ -32,14 +33,14 @@ public class MockApp
     
     public static int foo(IFile file, IContext context)
     {
-        file.read();
+        try {file.read();}catch(Throwable t) {}
         file.getLines();
         return context.getLength(file);
     }
     
     public static interface IFile
     {
-        String read();
+        String read() throws IOException;
         
         List<? extends List> getLines();
     }

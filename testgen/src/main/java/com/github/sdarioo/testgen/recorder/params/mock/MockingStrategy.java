@@ -10,7 +10,7 @@ package com.github.sdarioo.testgen.recorder.params.mock;
 public enum MockingStrategy 
 {
     None,
-    NoArgsFactoryMethod,
+    StaticField,
     FactoryMethodWithArgs,
-    Singleton
+
 }

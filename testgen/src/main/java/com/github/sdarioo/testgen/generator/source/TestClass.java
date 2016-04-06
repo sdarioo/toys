@@ -12,25 +12,29 @@ import java.util.*;
 import org.apache.commons.lang3.ClassUtils;
 
 import com.github.sdarioo.testgen.util.Formatter;
+import com.github.sdarioo.testgen.util.StringUtil;
 
 public class TestClass
 {
     private final String _qName;
     private final String _signature;
     private final List<String> _imports;
+    private final List<FieldSrc> _fields;
     private final List<TestMethod> _methods;
     private final List<ResourceFile> _resources;
     
     public TestClass(String name, String signature, 
             Collection<String> imports, 
+            Collection<FieldSrc> fields,
             Collection<TestMethod> methods, 
             Collection<ResourceFile> resources)
     {
         _qName = name;
         _signature = signature;
-        _imports = new ArrayList<String>(imports);
-        _methods = new ArrayList<TestMethod>(methods);
-        _resources = new ArrayList<ResourceFile>(resources);
+        _imports = new ArrayList<>(imports);
+        _fields = new ArrayList<>(fields);
+        _methods = new ArrayList<>(methods);
+        _resources = new ArrayList<>(resources);
         
         Collections.sort(_imports);
         Collections.sort(_methods);
@@ -55,28 +59,44 @@ public class TestClass
     @SuppressWarnings("nls")
     public String toSourceCode() 
     {
-        StringBuilder result = new StringBuilder();
-        result.append(AUTO_GENERATED_SIGNATURE).append('\n');
+        List<String> lines = new ArrayList<>();
+        lines.add(AUTO_GENERATED_SIGNATURE);
         
         String pkg = getPackage();
-        if (pkg != null && pkg.length() > 0) {
-            result.append("package ").append(pkg).append(";\n\n");
+        if ((pkg != null) && (pkg.length() > 0)) {
+            lines.add(String.format("package %s;", pkg));
         }
-        
-        for (String imprt : _imports) {
-            result.append("import " + imprt).append(';').append('\n');
+        if (!_imports.isEmpty()) {
+            lines.add("");
+            for (String imprt : _imports) {
+                lines.add(String.format("import %s;", imprt));
+            }
         }
-        result.append('\n').append('\n');
-        result.append(_signature).append('\n');
-        result.append('{').append('\n');
+        lines.add("");
+        lines.add("");
+        lines.add(_signature);
+        lines.add("{");
         
+        if (!_fields.isEmpty()) {
+            for (FieldSrc field : _fields) {
+                List<String> fieldLines = field.toSourceCodeLines();
+                fieldLines = Formatter.indentLines(fieldLines);
+                lines.addAll(fieldLines);
+            }
+            lines.add("");
+            lines.add("");
+        }
         for (TestMethod method : _methods) {
-            String sourceCode = method.toSourceCode();
-            sourceCode = Formatter.indentLines(sourceCode, "    ");
-            result.append(sourceCode).append('\n').append('\n');
+            List<String> methodLines = method.toSourceCodeLines();
+            methodLines = Formatter.indentLines(methodLines);
+            lines.addAll(methodLines);
+            lines.add("");
         }
-        result.append('}').append('\n');
-        return result.toString();
+
+        lines.add("}");
+        lines.add("");
+        
+        return StringUtil.join(lines, "\n");
     }
     
     public List<ResourceFile> getResources() 
@@ -90,4 +110,5 @@ public class TestClass
     // When first line in existing file matches this comment than test will be overwritten.
     // Otherwise new test suite file will be created.
     public static final String AUTO_GENERATED_SIGNATURE = "// AUTO-GENERATED"; //$NON-NLS-1$
+    
 }

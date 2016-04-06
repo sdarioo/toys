@@ -13,7 +13,7 @@ public class MethodTemplate
     
     public MethodTemplate(String[] templateLines)
     {
-        this(StringUtil.join(templateLines, "\n"));
+        this(StringUtil.join(templateLines, "\n")); //$NON-NLS-1$
     }
     
     public String toString()
@@ -48,6 +48,6 @@ public class MethodTemplate
         return _template.equals(other._template);
     }
 
-    public static final String NAME_VARIABLE = "${name}";
-    public static final String TYPE_VARIABLE = "${type}";
+    public static final String NAME_VARIABLE = "${name}"; //$NON-NLS-1$
+    public static final String TYPE_VARIABLE = "${type}"; //$NON-NLS-1$
 }

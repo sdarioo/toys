@@ -55,7 +55,8 @@ public class MockParam
     @Override
     public String toSouceCode(Type targetType, TestSuiteBuilder builder) 
     {
-        return MockParamHelper.toSouceCode(getHandler(), builder);
+        MockParamHelper helper = new MockParamHelper(getHandler(), builder);
+        return helper.toSouceCode();
     }
     
     public RecordingInvocationHandler getHandler()

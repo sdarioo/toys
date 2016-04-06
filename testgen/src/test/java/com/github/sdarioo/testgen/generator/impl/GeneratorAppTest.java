@@ -146,9 +146,9 @@ public class GeneratorAppTest
         return result;
     }
 
-    private static GeneratorApp.IListProvider newIListProviderMock(String[] arg0, List<String> toList) {
+    private static GeneratorApp.IListProvider newIListProviderMock(String[] arg0, List<String> toListResult) {
         GeneratorApp.IListProvider mock = Mockito.mock(GeneratorApp.IListProvider.class);
-        Mockito.when(mock.toList(arg0)).thenReturn(toList);
+        Mockito.when(mock.toList(arg0)).thenReturn(toListResult);
         return mock;
     }
 

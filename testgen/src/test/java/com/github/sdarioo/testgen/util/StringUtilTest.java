@@ -16,6 +16,6 @@ public class StringUtilTest
     @Test
     public void splitLines()
     {
-        assertArrayEquals(new String[]{"x", "y", "z"}, StringUtil.splitLines("x\ny\r\nz\r"));
+        assertArrayEquals(new String[]{"x", "y", "z"}, StringUtil.splitLines("x\ny\r\nz\r").toArray(new String[0]));
     }
 }

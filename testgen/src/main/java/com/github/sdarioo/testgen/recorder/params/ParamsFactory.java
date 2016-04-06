@@ -42,6 +42,9 @@ public final class ParamsFactory
         if (ClassUtils.isPrimitiveWrapper(value.getClass())) {
             return toPrimitiveValue(value);
         }
+        if (value instanceof Class<?>) {
+            return new ClassParam((Class<?>)value);
+        }
 
         // Collections
         if (value instanceof Properties) {

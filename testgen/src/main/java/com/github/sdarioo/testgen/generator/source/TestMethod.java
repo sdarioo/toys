@@ -7,7 +7,11 @@
 
 package com.github.sdarioo.testgen.generator.source;
 
+import java.util.List;
+
 import org.apache.commons.lang3.math.NumberUtils;
+
+import com.github.sdarioo.testgen.util.StringUtil;
 
 public class TestMethod 
     implements Comparable<TestMethod>
@@ -36,6 +40,11 @@ public class TestMethod
     public String toSourceCode()
     {
         return _source;
+    }
+    
+    public List<String> toSourceCodeLines()
+    {
+        return StringUtil.splitLines(_source);
     }
     
     @Override

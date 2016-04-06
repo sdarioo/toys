@@ -66,7 +66,7 @@ public class ResourceFile
         }
         ResourceFile other = (ResourceFile)obj;
         return Objects.equals(_content, other._content) &&
-                Objects.equals(_bytes, other._bytes);
+               Objects.equals(_bytes, other._bytes);
     }
     
 }

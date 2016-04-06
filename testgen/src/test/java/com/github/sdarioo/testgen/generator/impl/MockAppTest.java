@@ -13,6 +13,9 @@ import org.mockito.Mockito;
 @RunWith(JUnitParamsRunner.class)
 public class MockAppTest
 {
+    private static final MockApp.IFile IFILE = newIFileMock();
+
+
     @Test
     @Parameters(method = "testFoo_Parameters")
     public void testFoo(MockApp.IFile file, MockApp.IContext context, int expected) throws Exception {
@@ -23,23 +26,24 @@ public class MockAppTest
     @SuppressWarnings("unused")
     private static Object[] testFoo_Parameters() throws Exception {
         return new Object[] {
-            new Object[]{ getIFileMock(), newIContextMock(getIFileMock(), 666), 666 }
+            new Object[]{ IFILE, newIContextMock(IFILE, 666), 666 }
         };
     }
 
-    private static MockApp.IFile IFILE = null;
-    private static MockApp.IFile getIFileMock() {
-        if (IFILE == null) {
-            IFILE = Mockito.mock(MockApp.IFile.class);
-            Mockito.when(IFILE.read()).thenReturn("text");
-            Mockito.doReturn(null).when(IFILE).getLines();
+    private static MockApp.IFile newIFileMock() {
+        MockApp.IFile mock = Mockito.mock(MockApp.IFile.class);
+        try {
+            Mockito.when(mock.read()).thenReturn("text");
+            Mockito.doReturn(null).when(mock).getLines();
+        } catch (Exception e) {
+            Assert.fail(e.toString());
         }
-        return IFILE;
+        return mock;
     }
 
-    private static MockApp.IContext newIContextMock(MockApp.IFile arg0, int length) {
+    private static MockApp.IContext newIContextMock(MockApp.IFile arg0, int getLengthResult) {
         MockApp.IContext mock = Mockito.mock(MockApp.IContext.class);
-        Mockito.when(mock.getLength(arg0)).thenReturn(length);
+        Mockito.when(mock.getLength(arg0)).thenReturn(getLengthResult);
         return mock;
     }
 

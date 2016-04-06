@@ -33,8 +33,9 @@ public final class StringUtil
         return sb.toString();
     }
     
-    public static String[] splitLines(String message)
+    public static List<String> splitLines(String message)
     {
-        return StringUtils.split(message, "\r\n"); //$NON-NLS-1$
+        String[] lines = StringUtils.split(message, "\r\n"); //$NON-NLS-1$
+        return Arrays.asList(lines);
     }
 }
