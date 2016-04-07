@@ -99,9 +99,14 @@ public class TestSuiteBuilder
         _signature = signature;
     }
     
-    public void addField(FieldSrc field)
+    public boolean addField(FieldSrc field)
     {
-        _fields.add(field);
+        for (FieldSrc existing : _fields) {
+            if (existing.getName().equals(field.getName())) {
+                return false;
+            }
+        }
+        return _fields.add(field);
     }
     
     public void addTestCase(TestMethod testCase)

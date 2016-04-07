@@ -28,6 +28,11 @@ public final class Configuration
         return _maxCalls;
     }
     
+    public int getMaxMockCalls()
+    {
+        return _maxCalls;
+    }
+    
     public int getMaxCollectionSize()
     {
         return _maxCollectionSize;

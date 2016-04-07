@@ -2,7 +2,9 @@ package com.github.sdarioo.testgen.recorder.params.mock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Type;
@@ -19,6 +21,30 @@ import com.github.sdarioo.testgen.generator.source.TestMethod;
 public class MockParamTest
 {
     
+    //@Test
+    public void testEquals()
+    {
+        IServiceProvider provider1 = new ServiceProvider();
+        IServiceProvider provider2 = new ServiceProvider();
+        
+        IServiceProvider proxy1 = (IServiceProvider)ProxyFactory.newProxy(IServiceProvider.class, provider1);
+        IServiceProvider proxy2 = (IServiceProvider)ProxyFactory.newProxy(IServiceProvider.class, provider2);
+        
+        assertNotSame(proxy1, proxy2);
+        
+        MockParam param1 = new MockParam(proxy1);
+        MockParam param2 = new MockParam(proxy2);
+        
+        assertEquals(param1, param2);
+        
+        proxy1.getService("A"); //$NON-NLS-1$
+        assertNotEquals(param1, param2);
+        
+        proxy2.getService("A"); //$NON-NLS-1$
+        assertEquals(param1, param2);
+    }
+    
+    
     @SuppressWarnings("nls")
     @Test
     public void testNestedMock()
@@ -34,9 +60,9 @@ public class MockParamTest
         
         MockParam param = new MockParam(proxy);
         String src = param.toSouceCode(IServiceProvider.class, builder);
-        assertEquals("ISERVICEPROVIDER", src);
+        assertEquals("newIServiceProviderMock()", src);
         
-        verifyHelperMethod(builder, 0, new String[] {
+        verifyHelperMethod(builder, "newIServiceMock", new String[] {
                 "private static MockParamTest.IService newIServiceMock(String arg0, int lengthResult) {",
                 "    MockParamTest.IService mock = Mockito.mock(MockParamTest.IService.class);",
                 "    Mockito.when(mock.length(arg0)).thenReturn(lengthResult);",
@@ -44,7 +70,7 @@ public class MockParamTest
                 "}"
         });
         
-        verifyHelperMethod(builder, 1, new String[] {
+        verifyHelperMethod(builder, "newIServiceProviderMock", new String[] {
                 "private static MockParamTest.IServiceProvider newIServiceProviderMock() {",
                 "    MockParamTest.IServiceProvider mock = Mockito.mock(MockParamTest.IServiceProvider.class);",
                 "    Mockito.when(mock.getService(\"A\")).thenReturn(newIServiceMock(\"xxx\", 2));",
@@ -76,7 +102,7 @@ public class MockParamTest
         
         assertEquals("newIServiceProviderMock(Arrays.<MockParamTest.IService>asList(newIServiceMock(\"xxx\", 2), newIServiceMock(\"xxx\", 4)))", src);
         
-        verifyHelperMethod(builder, 0, new String[] {
+        verifyHelperMethod(builder, "newIServiceProviderMock", new String[] {
                 "private static MockParamTest.IServiceProvider newIServiceProviderMock(List<MockParamTest.IService> getServicesResult) {",
                 "    MockParamTest.IServiceProvider mock = Mockito.mock(MockParamTest.IServiceProvider.class);",
                 "    Mockito.when(mock.getServices()).thenReturn(getServicesResult);",
@@ -84,7 +110,7 @@ public class MockParamTest
                 "}"
         });
         
-        verifyHelperMethod(builder, 1, new String[] {
+        verifyHelperMethod(builder, "newIServiceMock", new String[] {
                 "private static MockParamTest.IService newIServiceMock(String arg0, int lengthResult) {",
                 "    MockParamTest.IService mock = Mockito.mock(MockParamTest.IService.class);",
                 "    Mockito.when(mock.length(arg0)).thenReturn(lengthResult);",
@@ -110,7 +136,7 @@ public class MockParamTest
         String src = param.toSouceCode(IServiceProvider.class, builder);
         assertEquals("newIServiceProviderMock(Arrays.asList(newIServiceMock(), newIServiceMock()))", src);
         
-        verifyHelperMethod(builder, 0, new String[] {
+        verifyHelperMethod(builder, "newIServiceProviderMock", new String[] {
                 "private static MockParamTest.IServiceProvider newIServiceProviderMock(List<? extends MockParamTest.IService> getServicesExtResult) {",
                 "    MockParamTest.IServiceProvider mock = Mockito.mock(MockParamTest.IServiceProvider.class);",
                 "    Mockito.doReturn(getServicesExtResult).when(mock).getServicesExt();",
@@ -141,7 +167,7 @@ public class MockParamTest
         String src = param.toSouceCode(IServiceProvider.class, builder);
         assertEquals("newICollectorMock(\"str\", 0)", src);
         
-        verifyHelperMethod(builder, 0, new String[] {
+        verifyHelperMethod(builder, "newICollectorMock", new String[] {
                 "private static <T> MockParamTest.ICollector<T> newICollectorMock(T arg0, int addResult) {",
                 "    MockParamTest.ICollector mock = Mockito.mock(MockParamTest.ICollector.class);",
                 "    Mockito.when(mock.add(arg0)).thenReturn(addResult);",
@@ -171,9 +197,9 @@ public class MockParamTest
         assertTrue(isSupported);
         
         String src = param.toSouceCode(IServiceProvider.class, builder);
-        assertEquals("ICOLLECTOR", src);
+        assertEquals("newICollectorMock()", src);
         
-        verifyHelperMethod(builder, 0, new String[] {
+        verifyHelperMethod(builder, "newICollectorMock", new String[] {
                 "private static <T> MockParamTest.ICollector<T> newICollectorMock() {",
                 "    MockParamTest.ICollector mock = Mockito.mock(MockParamTest.ICollector.class);",
                 "    Mockito.when(mock.add(\"1\")).thenReturn(0);",
@@ -206,10 +232,10 @@ public class MockParamTest
         String src = param.toSouceCode(IService.class, builder);
         assertEquals("ISERVICE", src);
         
-        verifyHelperMethod(builder, 0, new String[] {
-                "private static MockParamTest.IService newIServiceMock() {",
+        verifyHelperMethod(builder, "newIServiceMock", new String[] {
+                "private static MockParamTest.IService newIServiceMock(String arg0, int lengthResult) {",
                 "    MockParamTest.IService mock = Mockito.mock(MockParamTest.IService.class);",
-                "    Mockito.when(mock.length(\"text\")).thenReturn(0);",
+                "    Mockito.when(mock.length(arg0)).thenReturn(lengthResult);",
                 "    return mock;",
                 "}"
         });
@@ -232,23 +258,29 @@ public class MockParamTest
         String src = param.toSouceCode(IType.class, builder);
         assertEquals("ITYPE", src);
         
-        verifyHelperMethod(builder, 0, new String[] {
-                "private static MockParamTest.IType newITypeMock() {",
+        verifyHelperMethod(builder, "newITypeMock", new String[] {
+                "private static MockParamTest.IType newITypeMock(MockParamTest.IType getResult) {",
                 "    MockParamTest.IType mock = Mockito.mock(MockParamTest.IType.class);",
-                "    Mockito.when(mock.get()).thenReturn(ITYPE);",
+                "    Mockito.when(mock.get()).thenReturn(getResult);",
                 "    return mock;",
                 "}"
         });
     }
     
-    private static void verifyHelperMethod(TestSuiteBuilder builder, int index, String[] expectedLines)
+    private static void verifyHelperMethod(TestSuiteBuilder builder, String name, String[] expectedLines)
     {
+        String src = null;
         List<TestMethod> methods = builder.getHelperMethods();
-        assertTrue(methods.size() > index);
-        String src = methods.get(index).toSourceCode();
+        for (TestMethod method : methods) {
+            if (name.equals(method.getName())) {
+                src = method.toSourceCode();
+                break;
+            }
+        }
+        assertNotNull(src);
         
         String[] lines = src.split("\\n"); //$NON-NLS-1$
-        assertEquals(lines.length, expectedLines.length);
+        assertEquals(expectedLines.length, lines.length);
         for (int i = 0; i < lines.length; i++) {
             assertEquals(lines[i], expectedLines[i]);
         }

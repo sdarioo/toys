@@ -9,14 +9,17 @@ package com.github.sdarioo.testgen.recorder.params;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.recorder.IAggregateParameter;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
 public abstract class CollectionParam
     extends AbstractParam
+    implements IAggregateParameter
 {
     private final int _originalSize;
     protected final Collection<IParameter> _elements;
@@ -40,6 +43,14 @@ public abstract class CollectionParam
     
     protected abstract Class<?> getGeneratedSourceCodeType();
     
+    /**
+     * @see com.github.sdarioo.testgen.recorder.IAggregateParameter#getComponents()
+     */
+    @Override
+    public Collection<IParameter> getComponents() 
+    {
+        return Collections.unmodifiableCollection(_elements);
+    }
     
     @Override
     public boolean isSupported(Type targetType, Collection<String> errors) 

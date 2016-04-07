@@ -1,12 +1,12 @@
 package com.github.sdarioo.testgen.recorder.params.mock;
 
 import java.lang.reflect.*;
+import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
+import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.Recorder;
 
 /**
  * Proxy invocation handler. 
@@ -15,32 +15,26 @@ import com.github.sdarioo.testgen.recorder.Recorder;
 public class RecordingInvocationHandler
     implements InvocationHandler
 {
-    private final Class<?> _interface;
-    private final Object _original;
-    private final Recorder _recorder;
+    private final Class<?> _proxyType;
+    private final Object _target;
     
-    private int _hash = 1;
-    private boolean _isAllRecorded = true;
-    private boolean _isAllSupported = true;
+    private final Set<Call> _calls = new LinkedHashSet<Call>();
+    private final Set<String> _errors = new HashSet<String>();
     
-    private String _exception;
     private int _refCount = 0;
-    
     
     private final Map<String, String> _attrs = new HashMap<String, String>();
     
-    private static final AtomicInteger _idGenerator = new AtomicInteger(0);
     
-    public RecordingInvocationHandler(Class<?> interfce, Object original)
+    public RecordingInvocationHandler(Class<?> type, Object value)
     {
-        _interface = interfce;
-        _original = original;
-        _recorder = Recorder.newRecorder("MockRecorder-" + _idGenerator.incrementAndGet()); //$NON-NLS-1$
+        _proxyType = type;
+        _target = value;
     }
     
-    public Class<?> getInterface() 
+    public Class<?> getType() 
     {
-        return _interface;
+        return _proxyType;
     }
     
     public int getRefCount()
@@ -73,52 +67,27 @@ public class RecordingInvocationHandler
         
         Object result = null;
         try {
-            result = method.invoke(_original, args);
+            result = method.invoke(_target, args);
         } catch (Throwable exception) {
             if (exception instanceof InvocationTargetException) {
                 exception = ((InvocationTargetException)exception).getCause();
             }
-            Logger.warn("Exception thrown in RecordingInvocationHandler.invoke: " + exception); //$NON-NLS-1$
-            _exception = exception.toString();
+            String warning = MessageFormat.format(
+                "Exception thrown while invoking proxy method: {0} : {1}",  //$NON-NLS-1$ 
+                    method.getName(), 
+                    exception.toString());
+            
+            Logger.warn(warning);
+            _errors.add(warning);
             throw exception;
         }
-        
-        Call call = Call.newCall(method, _original, args);
-        Type returnType = method.getGenericReturnType();
-        if (returnType != Void.TYPE) {
-            if (ProxyFactory.canProxy(returnType, result)) {
-                result = ProxyFactory.newProxy(returnType, result);
-            }
-            for (Object arg : args) {
-                if (ProxyFactory.isProxy(arg)) {
-                    ProxyFactory.getHandler(arg).incRefCount();
-                }
-            }
-            
-            call.endWithResult(result);
-            
-            _hash = 31 * _hash + call.hashCode();
-            _isAllSupported &= call.isSupported(new HashSet<String>());
-            _isAllRecorded &= _recorder.record(call);
-            
-        } else {
-            Logger.warn("Ignoring void method call on proxy: " + method.toGenericString()); //$NON-NLS-1$
-        }
-        return result;
+        return recordCall(method, args, result);
     }
     
     public boolean isSupported(Collection<String> errors)
     {
-        if (_exception != null) {
-            errors.add("Proxy method exited with exception: " + _exception); //$NON-NLS-1$
-            return false;
-        }
-
-        if (!_isAllRecorded) {
-            errors.add("Some method call could not be recorded."); //$NON-NLS-1$
-            return false;
-        }
-        return _isAllSupported;
+        errors.addAll(_errors);
+        return _errors.isEmpty();
     }
     
     public boolean isMultipleCallsToSameMethod()
@@ -135,20 +104,63 @@ public class RecordingInvocationHandler
         return methods;
     }
     
-    public List<Call> getCalls()
+    public Collection<Call> getCalls()
     {
-        Collection<Class<?>> recordedClasses = _recorder.getRecordedClasses();
-        if (recordedClasses.isEmpty()) {
+        if (!_errors.isEmpty()) {
             return Collections.emptyList();
         }
-        Class<?> clazz = recordedClasses.iterator().next();
-        return _recorder.getCalls(clazz);
+        return Collections.unmodifiableCollection(_calls);
     }
     
     @Override
     public int hashCode() 
     {
-        return _hash;
+        return _target.hashCode();
+    }
+    
+    @Override
+    public boolean equals(Object obj) 
+    {
+        if (!(obj instanceof RecordingInvocationHandler)) {
+            return false;
+        }
+        RecordingInvocationHandler other = (RecordingInvocationHandler)obj;
+        return _target.equals(other._target);
+    }
+    
+    private Object recordCall(Method method, Object[] args, Object result)
+    {
+        if (!_errors.isEmpty()) {
+            return result;
+        }
+        Type returnType = method.getGenericReturnType();
+        if (returnType == Void.TYPE) {
+            Logger.warn("Ignoring VOID method call on proxy: " + method.toGenericString()); //$NON-NLS-1$
+            return result;
+        }
+        
+        Object callResult = result;
+        Call call = Call.newCall(method, _target, args);
+        
+        if (ProxyFactory.canProxy(returnType, result)) {
+            callResult = ProxyFactory.newProxy(returnType, result);
+        }
+        call.endWithResult(callResult);
+        
+        if (call.isSupported(_errors)) {
+            _calls.add(call);
+            if (_calls.size() <= Configuration.getDefault().getMaxMockCalls()) {
+                for (Object arg : args) {
+                    if (ProxyFactory.isProxy(arg)) {
+                        ProxyFactory.getHandler(arg).incRefCount();
+                    }
+                }
+                result = callResult;
+            } else {
+                _errors.add("Mock calls limit has been reached: " + _calls.size()); //$NON-NLS-1$
+            }
+        }
+        return result;
     }
     
 }

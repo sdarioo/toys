@@ -1,15 +1,17 @@
 package com.github.sdarioo.testgen.recorder.params.mock;
 
 import java.lang.reflect.Type;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
+import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.IAggregateParameter;
+import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.AbstractParam;
 
 public class MockParam
     extends AbstractParam
+    implements IAggregateParameter
 {
     private final Object _proxy;
     
@@ -23,7 +25,21 @@ public class MockParam
     public Class<?> getRecordedType() 
     {
         RecordingInvocationHandler handler = getHandler();
-        return handler.getInterface();
+        return handler.getType();
+    }
+    
+    /**
+     * @see com.github.sdarioo.testgen.recorder.IAggregateParameter#getComponents()
+     */
+    @Override
+    public Collection<IParameter> getComponents() 
+    {
+        List<IParameter> components = new ArrayList<IParameter>();
+        for (Call call : getHandler().getCalls()) {
+            components.addAll(call.args());
+            components.add(call.getResult());
+        }
+        return components;
     }
     
     @Override
@@ -41,7 +57,7 @@ public class MockParam
         
         Set<String> subErrors = new HashSet<>();
         
-        if (!super.isAssignable(handler.getInterface(), targetType, subErrors)) {
+        if (!super.isAssignable(handler.getType(), targetType, subErrors)) {
             errors.add(createErrorMessage(subErrors));
             return false;
         }
@@ -68,7 +84,7 @@ public class MockParam
     private String createErrorMessage(Set<String> subErrors)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append(String.format("Problems while recording mock invocations for %s:%n", getHandler().getInterface().getName()));
+        sb.append(String.format("Problems while recording mock invocations for %s:%n", getHandler().getType().getName()));
         for (String msg : subErrors) {
             sb.append(String.format("  - %s%n", msg));
         }
@@ -88,12 +104,7 @@ public class MockParam
             return false;
         }
         MockParam other = (MockParam)obj;
-        RecordingInvocationHandler myHandler = getHandler();
-        RecordingInvocationHandler otherHandler = other.getHandler();
-        if ((myHandler == null) || (otherHandler == null)) {
-            return false;
-        }
-        return myHandler.getCalls().equals(otherHandler.getCalls());
+        return getHandler().equals(other.getHandler());
     }
     
     @Override

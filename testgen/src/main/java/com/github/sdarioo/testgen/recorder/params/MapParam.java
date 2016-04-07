@@ -16,11 +16,13 @@ import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
+import com.github.sdarioo.testgen.recorder.IAggregateParameter;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class MapParam
     extends AbstractParam
+    implements IAggregateParameter
 {
     private final int _originalSize;
     
@@ -44,6 +46,18 @@ public class MapParam
             IParameter value = ParamsFactory.newValue(entry.getValue());
             _elements.put(key, value);
         }
+    }
+    
+    /**
+     * @see com.github.sdarioo.testgen.recorder.IAggregateParameter#getComponents()
+     */
+    @Override
+    public Collection<IParameter> getComponents() 
+    {
+        Set<IParameter> components = new HashSet<IParameter>();
+        components.addAll(_elements.keySet());
+        components.addAll(_elements.values());
+        return components;
     }
     
     @Override

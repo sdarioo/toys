@@ -32,9 +32,6 @@ public class ProxyFactory
         if (Modifier.isPrivate(rawType.getModifiers())) {
             return false;
         }
-        if (isProxy(value)) {
-            return false;
-        }
         
         // List<Proxy>
         if (List.class.equals(rawType)) {
@@ -92,6 +89,9 @@ public class ProxyFactory
     
     public static boolean isProxy(Object value)
     {
+        if (value == null) {
+            return false;
+        }
         return Proxy.isProxyClass(value.getClass()) &&
                 (Proxy.getInvocationHandler(value) instanceof RecordingInvocationHandler);
     }
@@ -103,6 +103,11 @@ public class ProxyFactory
     
     public static Object newProxy(Type type, Object value)
     {
+        if (isProxy(value)) {
+            getHandler(value).incRefCount();
+            return value;
+        }
+        
         if (!canProxy(type, value)) {
             return null;
         }

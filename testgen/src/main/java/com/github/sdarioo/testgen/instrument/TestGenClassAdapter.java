@@ -33,7 +33,7 @@ public class TestGenClassAdapter
 
     private boolean isTransformMethod(String methodName, int access)
     {
-        if ("<cinit>".equals(methodName) || "<init>".equals(methodName)) { //$NON-NLS-1$ //$NON-NLS-2$
+        if ("<clinit>".equals(methodName) || "<init>".equals(methodName)) { //$NON-NLS-1$ //$NON-NLS-2$
             return false;
         }
         if (!isMethodVisitable(methodName, access)) {

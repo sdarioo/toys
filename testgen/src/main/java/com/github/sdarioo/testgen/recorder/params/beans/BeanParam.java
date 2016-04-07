@@ -17,6 +17,7 @@ import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.MethodTemplate;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.logging.Logger;
+import com.github.sdarioo.testgen.recorder.IAggregateParameter;
 import com.github.sdarioo.testgen.recorder.IParameter;
 import com.github.sdarioo.testgen.recorder.params.AbstractParam;
 import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
@@ -25,6 +26,7 @@ import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class BeanParam
     extends AbstractParam
+    implements IAggregateParameter
 {
     private final Bean _bean;
     
@@ -44,6 +46,12 @@ public class BeanParam
             _fields.add(field);
             _values.add(getFieldValue(obj, field));
         }
+    }
+    
+    @Override
+    public Collection<IParameter> getComponents() 
+    {
+        return Collections.unmodifiableCollection(_values);
     }
     
     @Override
