@@ -8,14 +8,13 @@
 package com.github.sdarioo.testgen.generator;
 
 import java.io.File;
-import java.util.List;
 
 import com.github.sdarioo.testgen.generator.source.TestClass;
-import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.RecordedClass;
 
 public interface ITestSuiteGenerator 
 {
-    TestClass generate(Class<?> targetClass, List<Call> recordedCalls);
+    TestClass generate(RecordedClass recordedClass);
  
     void setLocationDir(File locationDir);
  

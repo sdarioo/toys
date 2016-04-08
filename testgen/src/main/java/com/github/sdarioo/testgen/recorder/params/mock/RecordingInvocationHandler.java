@@ -21,10 +21,7 @@ public class RecordingInvocationHandler
     private final Set<Call> _calls = new LinkedHashSet<Call>();
     private final Set<String> _errors = new HashSet<String>();
     
-    private int _refCount = 0;
-    
     private final Map<String, String> _attrs = new HashMap<String, String>();
-    
     
     public RecordingInvocationHandler(Class<?> type, Object value)
     {
@@ -35,16 +32,6 @@ public class RecordingInvocationHandler
     public Class<?> getType() 
     {
         return _proxyType;
-    }
-    
-    public int getRefCount()
-    {
-        return _refCount;
-    }
-    
-    public void incRefCount()
-    {
-        _refCount++;
     }
     
     public String getAttr(String key)
@@ -148,13 +135,9 @@ public class RecordingInvocationHandler
         call.endWithResult(callResult);
         
         if (call.isSupported(_errors)) {
+            // TODO - logger
             _calls.add(call);
             if (_calls.size() <= Configuration.getDefault().getMaxMockCalls()) {
-                for (Object arg : args) {
-                    if (ProxyFactory.isProxy(arg)) {
-                        ProxyFactory.getHandler(arg).incRefCount();
-                    }
-                }
                 result = callResult;
             } else {
                 _errors.add("Mock calls limit has been reached: " + _calls.size()); //$NON-NLS-1$

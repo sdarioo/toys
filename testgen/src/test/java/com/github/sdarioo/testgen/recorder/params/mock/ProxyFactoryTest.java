@@ -16,7 +16,7 @@ import com.github.sdarioo.testgen.recorder.params.mock.ProxyFactory;
 public class ProxyFactoryTest
 {
     @Test
-    public void canProxy()
+    public void testCanProxy()
     {
         assertFalse(ProxyFactory.canProxy(Object.class, new Object()));
         assertFalse(ProxyFactory.canProxy(IBase.class, null));
@@ -28,7 +28,7 @@ public class ProxyFactoryTest
     }
     
     @Test
-    public void newProxy()
+    public void testNewProxy()
     {
         Object obj = new IDerived() {};
         Object proxy = ProxyFactory.newProxy(IBase.class, obj);

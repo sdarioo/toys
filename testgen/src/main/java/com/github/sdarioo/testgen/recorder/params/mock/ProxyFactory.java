@@ -15,10 +15,17 @@ import com.github.sdarioo.testgen.util.TypeUtil;
 
 public class ProxyFactory 
 {
- 
-    // Instance -> Proxy Instance
-    // TODO - shouldn't span object across more than one test suite
-    private static ConcurrentMap<Object, Object> CACHED_PROXIES = new ConcurrentHashMap<Object, Object>();
+    public static boolean isProxy(Object value)
+    {
+        return (value != null) && 
+               Proxy.isProxyClass(value.getClass()) &&
+               (Proxy.getInvocationHandler(value) instanceof RecordingInvocationHandler);
+    }
+    
+    public static RecordingInvocationHandler getHandler(Object proxy)
+    {
+        return (RecordingInvocationHandler)Proxy.getInvocationHandler(proxy);
+    }
     
     public static boolean canProxy(Type type, Object value)
     {
@@ -56,55 +63,12 @@ public class ProxyFactory
         return true;
     }
     
-    private static boolean canProxyList(List<?> list, Type elementType)
-    {
-        if (list.size() > Configuration.getDefault().getMaxCollectionSize()) {
-            return false;
-        }
-        for (Object object : list) {
-            if (!canProxy(elementType, object)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    private static boolean canProxyArray(Object array, Type elementType)
-    {
-        if (TypeUtil.getRawType(elementType) == null) {
-            return false;
-        }
-        int length = Array.getLength(array);
-        if (length > Configuration.getDefault().getMaxCollectionSize()) {
-            return false;
-        }
-        for (int i = 0; i < length; i++) {
-            Object element = Array.get(array, i);
-            if (!canProxy(elementType, element)) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    public static boolean isProxy(Object value)
-    {
-        if (value == null) {
-            return false;
-        }
-        return Proxy.isProxyClass(value.getClass()) &&
-                (Proxy.getInvocationHandler(value) instanceof RecordingInvocationHandler);
-    }
-    
-    public static RecordingInvocationHandler getHandler(Object proxy)
-    {
-        return (RecordingInvocationHandler)Proxy.getInvocationHandler(proxy);
-    }
+
+
     
     public static Object newProxy(Type type, Object value)
     {
         if (isProxy(value)) {
-            getHandler(value).incRefCount();
             return value;
         }
         
@@ -135,36 +99,50 @@ public class ProxyFactory
             return newArray;
         }
         
-        Object proxy = getFromCache(value);
-        if (proxy == null) {
-            Class<?> proxyInterface = rawType;
-            Class<?>[] interfaces = value.getClass().getInterfaces();
-            for (Class<?> interfce : interfaces) {
-                if (proxyInterface.isAssignableFrom(interfce)) {
-                    proxyInterface = interfce;
-                    break;
-                }
+        Class<?> proxyInterface = rawType;
+        Class<?>[] interfaces = value.getClass().getInterfaces();
+        for (Class<?> interfce : interfaces) {
+            if (proxyInterface.isAssignableFrom(interfce)) {
+                proxyInterface = interfce;
+                break;
             }
-            proxy = Proxy.newProxyInstance(value.getClass().getClassLoader(), 
-                    new Class<?>[]{ proxyInterface }, 
-                    new RecordingInvocationHandler(proxyInterface, value));
-            
-            proxy = addToCache(value, proxy);
         }
+        Object proxy = Proxy.newProxyInstance(value.getClass().getClassLoader(), 
+                new Class<?>[]{ proxyInterface }, 
+                new RecordingInvocationHandler(proxyInterface, value));
         
-        ((RecordingInvocationHandler)Proxy.getInvocationHandler(proxy)).incRefCount();
         return proxy;
     }
     
-    private static Object getFromCache(Object obj)
+    private static boolean canProxyList(List<?> list, Type elementType)
     {
-        return CACHED_PROXIES.get(obj);
+        if (list.size() > Configuration.getDefault().getMaxCollectionSize()) {
+            return false;
+        }
+        for (Object object : list) {
+            if (!canProxy(elementType, object)) {
+                return false;
+            }
+        }
+        return true;
     }
     
-    private static Object addToCache(Object obj, Object proxy)
+    private static boolean canProxyArray(Object array, Type elementType)
     {
-        Object other = CACHED_PROXIES.putIfAbsent(obj, proxy);
-        return (other != null) ? other : proxy;
+        if (TypeUtil.getRawType(elementType) == null) {
+            return false;
+        }
+        int length = Array.getLength(array);
+        if (length > Configuration.getDefault().getMaxCollectionSize()) {
+            return false;
+        }
+        for (int i = 0; i < length; i++) {
+            Object element = Array.get(array, i);
+            if (!canProxy(elementType, element)) {
+                return false;
+            }
+        }
+        return true;
     }
     
 }

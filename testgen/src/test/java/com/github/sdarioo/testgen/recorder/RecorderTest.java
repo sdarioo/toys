@@ -10,8 +10,6 @@ package com.github.sdarioo.testgen.recorder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
@@ -57,7 +55,10 @@ public class RecorderTest
         c.end();
         r.record(c);
         
-        List<Call> calls = r.getCalls(m.getDeclaringClass());
+        RecordedClass recordedClass = r.getRecordedClass(m.getDeclaringClass());
+        assertNotNull(recordedClass);
+        
+        List<Call> calls = recordedClass.getCalls(m);
         assertEquals(max, calls.size());
         assertFalse(calls.contains(c));
     }
@@ -79,7 +80,10 @@ public class RecorderTest
         c.end();
         r.record(c);
         
-        List<Call> calls = r.getCalls(m.getDeclaringClass());
+        RecordedClass recordedClass = r.getRecordedClass(m.getDeclaringClass());
+        assertNotNull(recordedClass);
+        
+        List<Call> calls = recordedClass.getCalls(m);
         assertEquals(2, calls.size());
         assertTrue(calls.contains(c));
     }

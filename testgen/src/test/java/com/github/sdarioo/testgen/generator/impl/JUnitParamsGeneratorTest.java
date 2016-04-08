@@ -18,6 +18,8 @@ import org.junit.Test;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.RecordedClass;
+import com.github.sdarioo.testgen.recorder.Recorder;
 
 public class JUnitParamsGeneratorTest
 {
@@ -75,8 +77,13 @@ public class JUnitParamsGeneratorTest
         calls.add(c1);
         calls.add(c2);
         
+        Recorder r = Recorder.newRecorder("test");
+        r.record(c1);
+        r.record(c2);
+        RecordedClass recordedClass = r.getRecordedClass(method.getDeclaringClass());
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        String src = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
+        String src = gen.generate(recordedClass).toSourceCode();
         List<String> lines = toLines(src);
         
         assertEquals(30, lines.size());
@@ -103,14 +110,19 @@ public class JUnitParamsGeneratorTest
         p2.setProperty("key2", "value2");
         
         List<Call> calls = new ArrayList<Call>();
-        calls.add(Call.newCall(method, p1));
-        calls.add(Call.newCall(method, p2));
+        calls.add(Call.newCall(method, this, new Object[]{p1}));
+        calls.add(Call.newCall(method, this, new Object[]{p2}));
         
         calls.get(0).endWithResult(null);
         calls.get(1).endWithResult(null);
         
+        Recorder r = Recorder.newRecorder("test");
+        r.record(calls.get(0));
+        r.record(calls.get(1));
+        RecordedClass recordedClass = r.getRecordedClass(method.getDeclaringClass());
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        String src = gen.generate(method.getDeclaringClass(), calls).toSourceCode();
+        String src = gen.generate(recordedClass).toSourceCode();
         List<String> set = toLines(src);
         
         assertTrue(set.contains("@Parameters(method = \"testMethodWithProperties_Parameters\")"));
@@ -125,8 +137,12 @@ public class JUnitParamsGeneratorTest
         Call call = Call.newCall(method, (Object)null);
         call.endWithException(new IllegalArgumentException());
         
+        Recorder r = Recorder.newRecorder("test");
+        r.record(call);
+        RecordedClass recordedClass = r.getRecordedClass(method.getDeclaringClass());
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
+        String src = gen.generate(recordedClass).toSourceCode();
         List<String> set = toLines(src);
         
         assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
@@ -138,11 +154,15 @@ public class JUnitParamsGeneratorTest
     public void testCallException()
     {
         Method method = getMethod("methodWithProperties");
-        Call call = Call.newCall(method, (Object)null);
+        Call call = Call.newCall(method, this, new Object[]{(Object)null});
         call.endWithException(new IllegalArgumentException());
         
+        Recorder r = Recorder.newRecorder("test");
+        r.record(call);
+        RecordedClass recordedClass = r.getRecordedClass(call.getTargetClass());
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
+        String src = gen.generate(recordedClass).toSourceCode();
         List<String> set = toLines(src);
         
         assertTrue(set.contains("@Test(expected=IllegalArgumentException.class)"));
@@ -157,8 +177,12 @@ public class JUnitParamsGeneratorTest
         Call call = Call.newCall(method, new Inner("", true, 100L, E.value), new Object[]{Integer.valueOf(1)});
         call.endWithResult(Integer.valueOf(1));
         
+        Recorder r = Recorder.newRecorder("test");
+        r.record(call);
+        RecordedClass recordedClass = r.getRecordedClass(call.getTargetClass());
+        
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
-        String src = gen.generate(method.getDeclaringClass(), Collections.singletonList(call)).toSourceCode();
+        String src = gen.generate(recordedClass).toSourceCode();
         List<String> set = toLines(src);
         
         assertTrue(set.contains("// WARNING - constructing JUnitParamsGeneratorTest.Inner with default parameters;"));

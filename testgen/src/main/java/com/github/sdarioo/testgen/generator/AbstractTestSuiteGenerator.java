@@ -11,15 +11,14 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang3.ClassUtils;
 
 import com.github.sdarioo.testgen.generator.source.TestClass;
-import com.github.sdarioo.testgen.recorder.Call;
 import com.github.sdarioo.testgen.recorder.ArgNamesCache;
+import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.RecordedClass;
 
 public abstract class AbstractTestSuiteGenerator 
     implements ITestSuiteGenerator
@@ -49,27 +48,25 @@ public abstract class AbstractTestSuiteGenerator
     }
     
     /**
-     * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#generate(java.lang.Class, java.util.List)
+     * @see com.github.sdarioo.testgen.generator.ITestSuiteGenerator#generate(com.github.sdarioo.testgen.recorder.RecordedClass)
      */
     @Override
-    public TestClass generate(Class<?> targetClass, List<Call> recordedCalls)
+    public TestClass generate(RecordedClass recordedClass)
     {
-        Map<Method, List<Call>> callMap = groupByMethod(recordedCalls);
-        
         TestSuiteBuilder builder = new TestSuiteBuilder(false, _locationDir);
-        initTestSuite(targetClass, builder);
+        Class<?> clazz = recordedClass.getRecordedClass();
+        initTestSuite(clazz, builder);
         
-        for (Map.Entry<Method, List<Call>> entry : callMap.entrySet()) {
-            Method method = entry.getKey();
-            List<Call> methodCalls = entry.getValue();
-            
+        for (Method method : recordedClass.getMethods()) {
+            List<Call> methodCalls = recordedClass.getCalls(method);
             List<Call> callsWithResult = getCallsWithResult(methodCalls);
+            
             if (!callsWithResult.isEmpty()) {
-                addTestCases(targetClass, method, callsWithResult, builder);
+                addTestCases(clazz, method, callsWithResult, builder);
             }
             List<Call> callsWithExc = getCallsWithException(methodCalls);
             if (!callsWithExc.isEmpty()) {
-                addTestCasesForExceptions(targetClass, method, callsWithExc, builder);
+                addTestCasesForExceptions(clazz, method, callsWithExc, builder);
             }
         }
         
@@ -98,21 +95,6 @@ public abstract class AbstractTestSuiteGenerator
     protected static String fmt(String pattern, Object... args)
     {
         return MessageFormat.format(pattern, args);
-    }
-    
-    private static Map<Method, List<Call>> groupByMethod(List<Call> clazzCalls)
-    {
-        Map<Method, List<Call>> result = new LinkedHashMap<Method, List<Call>>();
-        for (Call call : clazzCalls) {
-            Method method = call.getMethod();
-            List<Call> methodCalls = result.get(method);
-            if (methodCalls == null) {
-                methodCalls = new ArrayList<Call>();
-                result.put(method, methodCalls);
-            }
-            methodCalls.add(call);
-        }
-        return result;
     }
     
     private static List<Call> getCallsWithException(List<Call> calls)

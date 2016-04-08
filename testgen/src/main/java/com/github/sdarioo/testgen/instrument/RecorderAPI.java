@@ -8,6 +8,7 @@ import org.objectweb.asm.Type;
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.RecordedClass;
 import com.github.sdarioo.testgen.recorder.Recorder;
 import com.github.sdarioo.testgen.recorder.params.mock.ProxyFactory;
 
@@ -82,15 +83,21 @@ public final class RecorderAPI
         return null;
     }
 	
-    public static Object proxy(Method method, int argIndex, Object argValue)
+    public static Object proxy(Object target, Method method, int argIndex, Object argValue)
     {
-        if (Recorder.getDefault().getCount(method) >= Configuration.getDefault().getMaxCalls()) {
-            return argValue;
-        }
-        
         java.lang.reflect.Type argType = method.getGenericParameterTypes()[argIndex];
         if (!ProxyFactory.canProxy(argType, argValue)) {
             return argValue;
+        }
+        
+        Recorder recorder = Recorder.getDefault();
+        Class<?> clazz = (target != null) ? target.getClass() : method.getDeclaringClass();
+        RecordedClass recordedClass = recorder.getRecordedClass(clazz);
+        if (recordedClass != null) {
+            int maxCalls = Configuration.getDefault().getMaxCalls();
+            if (recordedClass.getCalls(method).size() >= maxCalls) {
+                return argValue;
+            }
         }
         
         Object argProxy = ProxyFactory.newProxy(argType, argValue);

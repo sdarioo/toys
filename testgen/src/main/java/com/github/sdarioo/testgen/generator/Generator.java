@@ -9,18 +9,16 @@ package com.github.sdarioo.testgen.generator;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.nio.file.*;
 import java.util.Collection;
-import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.github.sdarioo.testgen.generator.impl.JUnitParamsGenerator;
 import com.github.sdarioo.testgen.generator.source.ResourceFile;
 import com.github.sdarioo.testgen.generator.source.TestClass;
 import com.github.sdarioo.testgen.logging.Logger;
-import com.github.sdarioo.testgen.recorder.Call;
+import com.github.sdarioo.testgen.recorder.RecordedClass;
 import com.github.sdarioo.testgen.recorder.Recorder;
 import com.github.sdarioo.testgen.util.TestLocationUtil;
 
@@ -28,7 +26,7 @@ import com.github.sdarioo.testgen.util.TestLocationUtil;
 public final class Generator
 {
     private final Recorder _recorder;
-    private volatile long _timestamp = 0L;
+    private final ConcurrentMap<Class<?>, Long> _lastWriteTime = new ConcurrentHashMap<>();
     
     private static final Generator DEFAULT = new Generator(Recorder.getDefault());
 
@@ -55,27 +53,43 @@ public final class Generator
     private void internalGenerateTests()
         throws IOException
     {
-        if (_timestamp == _recorder.getTimestamp()) {
-            return;
-        }
-        _timestamp = _recorder.getTimestamp();
-        
-        Collection<Class<?>> classes = _recorder.getRecordedClasses();
-        for (Class<?> clazz : classes) {
+        Collection<RecordedClass> classes = _recorder.getRecordedClasses();
+        for (RecordedClass recordedClass : classes) {
+            
+            Class<?> clazz = recordedClass.getRecordedClass();
             File locationDir = TestLocationUtil.getTestLocation(clazz);
             if (locationDir == null) {
                 Logger.error("Null test location for class: " + clazz.getName());
                 continue;
             }
-            List<Call> calls = _recorder.getCalls(clazz);
+            long timestamp = recordedClass.getTimestamp();
+            if ((timestamp == 0) || (timestamp == getLastWriteTime(clazz))) {
+                continue;
+            }
+            
             ITestSuiteGenerator generator = getTestSuiteGenerator(clazz);
             generator.setLocationDir(locationDir);
 
-            TestClass testSuite = generator.generate(clazz, calls);
+            TestClass testSuite = generator.generate(recordedClass);
             if (write(testSuite, locationDir)) {
+                setLastWriteTime(clazz, timestamp);
                 Logger.info("Generated test: " + locationDir.getAbsolutePath() + File.separator + testSuite.getFileName());
             }
         }
+    }
+    
+    private long getLastWriteTime(Class<?> clazz)
+    {
+        Long time = _lastWriteTime.get(clazz);
+        if (time == null) {
+            return 0L;
+        }
+        return time.longValue();
+    }
+    
+    private void setLastWriteTime(Class<?> clazz, long timestamp)
+    {
+        _lastWriteTime.put(clazz, timestamp);
     }
     
     private static ITestSuiteGenerator getTestSuiteGenerator(Class<?> testedClass)
