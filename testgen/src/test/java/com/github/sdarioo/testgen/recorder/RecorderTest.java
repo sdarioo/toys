@@ -55,7 +55,7 @@ public class RecorderTest
         c.end();
         r.record(c);
         
-        RecordedClass recordedClass = r.getRecordedClass(m.getDeclaringClass());
+        RecordedClass recordedClass = r.getRecordedClass(m, this, false);
         assertNotNull(recordedClass);
         
         List<Call> calls = recordedClass.getCalls(m);
@@ -80,7 +80,7 @@ public class RecorderTest
         c.end();
         r.record(c);
         
-        RecordedClass recordedClass = r.getRecordedClass(m.getDeclaringClass());
+        RecordedClass recordedClass = r.getRecordedClass(m, this, false);
         assertNotNull(recordedClass);
         
         List<Call> calls = recordedClass.getCalls(m);

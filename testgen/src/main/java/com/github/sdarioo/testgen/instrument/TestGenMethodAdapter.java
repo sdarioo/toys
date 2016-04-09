@@ -144,17 +144,17 @@ public class TestGenMethodAdapter
             Type argumentType = argumentTypes[i];
             if (argumentType.getSort() == Type.OBJECT) {
                 
+                getMethod();
                 if (_isStatic) {
                     mv.visitInsn(ACONST_NULL);
                 } else {
                     mv.visitVarInsn(ALOAD, 0);
                 }
-                getMethod();
                 mv.visitLdcInsn(i);
                 mv.visitVarInsn(ALOAD, argIndex);
                 
                 mv.visitMethodInsn(INVOKESTATIC, 
-                        RecorderAPI.TYPE_NAME, "proxy", "(Ljava/lang/Object;Ljava/lang/reflect/Method;ILjava/lang/Object;)Ljava/lang/Object;", false);
+                        RecorderAPI.TYPE_NAME, "proxyArg", "(Ljava/lang/reflect/Method;Ljava/lang/Object;ILjava/lang/Object;)Ljava/lang/Object;", false);
                 
                 mv.visitTypeInsn(CHECKCAST, argumentType.getInternalName());
                 mv.visitVarInsn(ASTORE, argIndex);

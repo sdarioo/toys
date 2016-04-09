@@ -6,8 +6,6 @@ import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.util.TypeUtil;
@@ -63,12 +61,15 @@ public class ProxyFactory
         return true;
     }
     
-
-
-    
     public static Object newProxy(Type type, Object value)
     {
+        return newProxy(type, value, new ProxiesCache());
+    }
+
+    public static Object newProxy(Type type, Object value, ProxiesCache cache)
+    {
         if (isProxy(value)) {
+            getHandler(value).incReferencesCount();
             return value;
         }
         
@@ -83,7 +84,7 @@ public class ProxyFactory
             List<?> list = (List<?>)value;
             List<Object> newList = new ArrayList<Object>();
             for (Object element : list) {
-                newList.add(newProxy(elementType, element));
+                newList.add(newProxy(elementType, element, cache));
             }
             return newList;
         }
@@ -94,7 +95,7 @@ public class ProxyFactory
             Object newArray = Array.newInstance(elementType, length);
             for (int i = 0; i < length; i++) {
                 Object element = Array.get(value, i);
-                Array.set(newArray, i, newProxy(elementType, element));
+                Array.set(newArray, i, newProxy(elementType, element, cache));
             }
             return newArray;
         }
@@ -107,10 +108,15 @@ public class ProxyFactory
                 break;
             }
         }
-        Object proxy = Proxy.newProxyInstance(value.getClass().getClassLoader(), 
-                new Class<?>[]{ proxyInterface }, 
-                new RecordingInvocationHandler(proxyInterface, value));
-        
+        Object proxy = cache.get(value);
+        if (proxy == null) {
+           proxy = Proxy.newProxyInstance(value.getClass().getClassLoader(), 
+                    new Class<?>[]{ proxyInterface }, 
+                    new RecordingInvocationHandler(proxyInterface, value, cache));
+           
+           proxy = cache.putIfAbsent(value, proxy);
+        }
+        getHandler(proxy).incReferencesCount();
         return proxy;
     }
     

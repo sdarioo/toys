@@ -17,21 +17,35 @@ public class RecordingInvocationHandler
 {
     private final Class<?> _proxyType;
     private final Object _target;
+    private final ProxiesCache _proxiesCache;
+    
+    private int _referencesCount = 0;
     
     private final Set<Call> _calls = new LinkedHashSet<Call>();
     private final Set<String> _errors = new HashSet<String>();
     
     private final Map<String, String> _attrs = new HashMap<String, String>();
     
-    public RecordingInvocationHandler(Class<?> type, Object value)
+    public RecordingInvocationHandler(Class<?> type, Object value, ProxiesCache proxiesCache)
     {
         _proxyType = type;
         _target = value;
+        _proxiesCache = proxiesCache;
     }
     
     public Class<?> getType() 
     {
         return _proxyType;
+    }
+    
+    public void incReferencesCount()
+    {
+        _referencesCount++;
+    }
+    
+    public int getReferencesCount()
+    {
+        return _referencesCount;
     }
     
     public String getAttr(String key)
@@ -130,15 +144,20 @@ public class RecordingInvocationHandler
         Call call = Call.newCall(method, _target, args);
         
         if (ProxyFactory.canProxy(returnType, result)) {
-            callResult = ProxyFactory.newProxy(returnType, result);
+            callResult = ProxyFactory.newProxy(returnType, result, _proxiesCache);
         }
         call.endWithResult(callResult);
         
         if (call.isSupported(_errors)) {
             // TODO - logger
-            _calls.add(call);
             if (_calls.size() <= Configuration.getDefault().getMaxMockCalls()) {
+                _calls.add(call);
                 result = callResult;
+                for (Object arg : args) {
+                    if (ProxyFactory.isProxy(arg)) {
+                        ProxyFactory.getHandler(arg).incReferencesCount();
+                    }
+                }
             } else {
                 _errors.add("Mock calls limit has been reached: " + _calls.size()); //$NON-NLS-1$
             }

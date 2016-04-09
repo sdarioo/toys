@@ -10,13 +10,15 @@ package com.github.sdarioo.testgen.recorder;
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
+import com.github.sdarioo.testgen.recorder.params.mock.ProxiesCache;
 
+/**
+ * Stores recorded calls for single tested class. 
+ */
 public final class RecordedClass 
 {
     private final Class<?> _clazz;
@@ -24,9 +26,10 @@ public final class RecordedClass
     
     private final Map<Method, Set<Call>> _calls = new LinkedHashMap<Method, Set<Call>>();
     private final Map<Method, Set<Call>> _unsupportedCalls = new LinkedHashMap<Method, Set<Call>>();
-    
-    // Instance -> Proxy Instance
-    private ConcurrentMap<Object, Object> _proxyCache = new ConcurrentHashMap<Object, Object>();
+
+    // Proxies should be shared withing single test class but not across multiple
+    // test classes (shared mock will have class field scope)
+    private final ProxiesCache _proxiesCache = new ProxiesCache();
     
     RecordedClass(Class<?> clazz)
     {
@@ -82,15 +85,9 @@ public final class RecordedClass
         return result;
     }
     
-    public Object getProxyFromCache(Object obj)
+    public ProxiesCache getProxiesCache()
     {
-        return _proxyCache.get(obj);
-    }
-    
-    public Object addProxyToCache(Object obj, Object proxy)
-    {
-        Object other = _proxyCache.putIfAbsent(obj, proxy);
-        return (other != null) ? other : proxy;
+        return _proxiesCache;
     }
     
     boolean record(Call call)

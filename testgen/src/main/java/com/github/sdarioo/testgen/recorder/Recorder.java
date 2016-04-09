@@ -53,18 +53,22 @@ public final class Recorder
         return _recordedClasses.values();
     }
     
-    public RecordedClass getRecordedClass(Class<?> clazz)
+    public RecordedClass getRecordedClass(Method method, Object target, boolean bCreate)
     {
-        return _recordedClasses.get(clazz);
+        Class<?> clazz = (target == null) ? method.getDeclaringClass() : target.getClass(); 
+        return getRecordedClass(clazz, bCreate);
     }
 
-    private RecordedClass getRecordedClass(Call call, boolean bCreate)
+    public RecordedClass getRecordedClass(Call call, boolean bCreate)
     {
-        Method method = call.getMethod();
-        Class<?> clazz = call.isStatic() ?  method.getDeclaringClass() : call.getTargetClass();
-        
+        Class<?> clazz = call.isStatic() ? call.getMethod().getDeclaringClass() : call.getTargetClass();
+        return getRecordedClass(clazz, bCreate);
+    }
+    
+    private RecordedClass getRecordedClass(Class<?> clazz, boolean bCreate)
+    {
         RecordedClass recordedClass = _recordedClasses.get(clazz);
-        if ((recordedClass == null) && bCreate) {
+        if (bCreate && (recordedClass == null)) {
             recordedClass = new RecordedClass(clazz);
             RecordedClass other = _recordedClasses.putIfAbsent(clazz, recordedClass);
             if (other != null) {

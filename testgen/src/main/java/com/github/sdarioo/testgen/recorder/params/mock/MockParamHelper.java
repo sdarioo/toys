@@ -39,8 +39,7 @@ public class MockParamHelper
     
     private boolean isStaticField()
     {
-        // return _handler.getRefCount() > 1;
-        return false; // TODO
+         return _handler.getReferencesCount() > 1;
     }
     
     private boolean isFactoryMethodWithArgs()

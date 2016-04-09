@@ -83,24 +83,21 @@ public final class RecorderAPI
         return null;
     }
 	
-    public static Object proxy(Object target, Method method, int argIndex, Object argValue)
+    public static Object proxyArg(Method method, Object target, int argIndex, Object argValue)
     {
         java.lang.reflect.Type argType = method.getGenericParameterTypes()[argIndex];
         if (!ProxyFactory.canProxy(argType, argValue)) {
             return argValue;
         }
+        RecordedClass recordedClass = Recorder.getDefault().getRecordedClass(method, target, true);
         
-        Recorder recorder = Recorder.getDefault();
-        Class<?> clazz = (target != null) ? target.getClass() : method.getDeclaringClass();
-        RecordedClass recordedClass = recorder.getRecordedClass(clazz);
-        if (recordedClass != null) {
-            int maxCalls = Configuration.getDefault().getMaxCalls();
-            if (recordedClass.getCalls(method).size() >= maxCalls) {
-                return argValue;
-            }
+        // Don't proxy argument if recorded calls limit has been reached
+        int maxCalls = Configuration.getDefault().getMaxCalls();
+        if (recordedClass.getCalls(method).size() >= maxCalls) {
+            return argValue;
         }
         
-        Object argProxy = ProxyFactory.newProxy(argType, argValue);
+        Object argProxy = ProxyFactory.newProxy(argType, argValue, recordedClass.getProxiesCache());
         return (argProxy != null) ? argProxy : argValue;
     }
     

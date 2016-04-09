@@ -80,7 +80,7 @@ public class JUnitParamsGeneratorTest
         Recorder r = Recorder.newRecorder("test");
         r.record(c1);
         r.record(c2);
-        RecordedClass recordedClass = r.getRecordedClass(method.getDeclaringClass());
+        RecordedClass recordedClass = r.getRecordedClass(method, null, false);
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(recordedClass).toSourceCode();
@@ -119,7 +119,7 @@ public class JUnitParamsGeneratorTest
         Recorder r = Recorder.newRecorder("test");
         r.record(calls.get(0));
         r.record(calls.get(1));
-        RecordedClass recordedClass = r.getRecordedClass(method.getDeclaringClass());
+        RecordedClass recordedClass = r.getRecordedClass(method, this, false);
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(recordedClass).toSourceCode();
@@ -139,7 +139,7 @@ public class JUnitParamsGeneratorTest
         
         Recorder r = Recorder.newRecorder("test");
         r.record(call);
-        RecordedClass recordedClass = r.getRecordedClass(method.getDeclaringClass());
+        RecordedClass recordedClass = r.getRecordedClass(call, false);
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(recordedClass).toSourceCode();
@@ -159,7 +159,7 @@ public class JUnitParamsGeneratorTest
         
         Recorder r = Recorder.newRecorder("test");
         r.record(call);
-        RecordedClass recordedClass = r.getRecordedClass(call.getTargetClass());
+        RecordedClass recordedClass = r.getRecordedClass(call, false);
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(recordedClass).toSourceCode();
@@ -179,7 +179,7 @@ public class JUnitParamsGeneratorTest
         
         Recorder r = Recorder.newRecorder("test");
         r.record(call);
-        RecordedClass recordedClass = r.getRecordedClass(call.getTargetClass());
+        RecordedClass recordedClass = r.getRecordedClass(call, false);
         
         JUnitParamsGenerator gen = new JUnitParamsGenerator();
         String src = gen.generate(recordedClass).toSourceCode();
