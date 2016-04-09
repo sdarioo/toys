@@ -76,9 +76,9 @@ public final class RecordedClass
         // then return unsupported calls (info about it can be added to generated test suite).
         List<Call> result = new ArrayList<Call>();
         
-        collectCalls(_calls, result);
+        collectCalls(_calls, method, result);
         if (result.size() < maxCalls) {
-            collectCalls(_unsupportedCalls, result);
+            collectCalls(_unsupportedCalls, method, result);
         }
         
         Collections.sort(result);
@@ -145,11 +145,13 @@ public final class RecordedClass
         }
     }
     
-    private static void collectCalls(Map<Method, Set<Call>> calls, List<Call> result)
+    private static void collectCalls(Map<Method, Set<Call>> calls, Method method, List<Call> result)
     {
         synchronized (calls) {
-            for (Set<Call> values : calls.values()) {
-                result.addAll(values);
+            for (Map.Entry<Method, Set<Call>> entry : calls.entrySet()) {
+                if (entry.getKey().equals(method)) {
+                    result.addAll(entry.getValue());
+                }
             }
         }
     }

@@ -2,6 +2,7 @@
 package com.github.sdarioo.testgen.generator.impl;
 
 import com.github.sdarioo.testgen.generator.impl.MockApp;
+import java.util.List;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.junit.Assert;
@@ -13,7 +14,7 @@ import org.mockito.Mockito;
 @RunWith(JUnitParamsRunner.class)
 public class MockAppTest
 {
-    private static final MockApp.IFile IFILE = newIFileMock();
+    private static final MockApp.IFile IFILE = newIFileMock("text", null);
 
 
     @Test
@@ -30,11 +31,11 @@ public class MockAppTest
         };
     }
 
-    private static MockApp.IFile newIFileMock() {
+    private static MockApp.IFile newIFileMock(String readResult, List<? extends List> getLinesResult) {
         MockApp.IFile mock = Mockito.mock(MockApp.IFile.class);
         try {
-            Mockito.when(mock.read()).thenReturn("text");
-            Mockito.doReturn(null).when(mock).getLines();
+            Mockito.when(mock.read()).thenReturn(readResult);
+            Mockito.doReturn(getLinesResult).when(mock).getLines();
         } catch (Exception e) {
             Assert.fail(e.toString());
         }

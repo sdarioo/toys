@@ -18,12 +18,6 @@ import org.mockito.Mockito;
 public class GeneratorAppTest
 {
     @Test
-    @Parameters(method = "testMain_Parameters")
-    public void testMain(String[] args) throws Exception {
-        GeneratorApp.main(args);
-    }
-
-    @Test
     @Parameters(method = "testCount_Parameters")
     public void testCount(List<GeneratorApp.Pair<String>> list, String expected) throws Exception {
         String result = GeneratorApp.count(list);
@@ -75,11 +69,10 @@ public class GeneratorAppTest
         GeneratorApp.runtimeException(null);
     }
 
-    @SuppressWarnings("unused")
-    private static Object[] testMain_Parameters() throws Exception {
-        return new Object[] {
-            new Object[]{ new String[]{} }
-        };
+    @Test
+    @Parameters(method = "testMain_Parameters")
+    public void testMain(String[] args) throws Exception {
+        GeneratorApp.main(args);
     }
 
     @SuppressWarnings("unused")
@@ -121,6 +114,13 @@ public class GeneratorAppTest
     private static Object[] testProxy_Parameters() throws Exception {
         return new Object[] {
             new Object[]{ newIListProviderMock(new String[]{"a", "b", "c"}, Arrays.<String>asList("a", "b", "c")), new String[]{"a", "b", "c"}, Arrays.<String>asList("a", "b", "c") }
+        };
+    }
+
+    @SuppressWarnings("unused")
+    private static Object[] testMain_Parameters() throws Exception {
+        return new Object[] {
+            new Object[]{ new String[]{} }
         };
     }
 
