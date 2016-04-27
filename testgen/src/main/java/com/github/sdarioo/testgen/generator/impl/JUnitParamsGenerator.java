@@ -121,7 +121,11 @@ public class JUnitParamsGenerator
        
         List<String> body = getCall(targetClass, method, paramNames, RESULT, builder);
         if (hasReturn(method)) {
-            body.add(fmt("Assert.assertEquals({0}, {1})", EXPECTED, RESULT)); //$NON-NLS-1$
+            if (method.getReturnType().isArray()) {
+                body.add(fmt("Assert.assertArrayEquals({0}, {1})", EXPECTED, RESULT)); //$NON-NLS-1$
+            } else {
+                body.add(fmt("Assert.assertEquals({0}, {1})", EXPECTED, RESULT)); //$NON-NLS-1$
+            }
         }
         methodBuilder.statements(body);
         

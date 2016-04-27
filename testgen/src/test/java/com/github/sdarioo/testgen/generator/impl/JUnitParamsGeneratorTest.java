@@ -38,6 +38,19 @@ public class JUnitParamsGeneratorTest
     
     @SuppressWarnings("nls")
     @Test
+    public void testGenerateTestMethodWithArray()
+    {
+        Method method = getMethod("getArray");
+        assertNotNull(method);
+        
+        JUnitParamsGenerator gen = new JUnitParamsGenerator();
+        
+        TestMethod source = gen.generateTestCase(this.getClass(), method, new TestSuiteBuilder());
+        assertTrue(source.toSourceCode().contains("assertArrayEquals"));
+    }
+    
+    @SuppressWarnings("nls")
+    @Test
     public void testGenerateParmasProviderMethod()
     {
         Method method = getMethod("sayHello");
@@ -194,6 +207,8 @@ public class JUnitParamsGeneratorTest
     {
         return null;
     }
+    
+    public static String[] getArray() { return null; }
     
     public int methodWithProperties(Properties p)
     {
