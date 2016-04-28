@@ -15,7 +15,7 @@ import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.recorder.values.IValue;
 import com.github.sdarioo.testgen.util.GeneratorUtil;
 import com.github.sdarioo.testgen.util.StringUtil;
 import com.github.sdarioo.testgen.util.TypeUtil;
@@ -71,7 +71,7 @@ public class JUnitParamsGenerator
             Class<?>[] paramTypes = method.getParameterTypes();
             Type[] paramGenericTypes = method.getGenericParameterTypes();
             
-            List<IParameter> callArgs = call.args();
+            List<IValue> callArgs = call.args();
             List<String> callArgsCode = new ArrayList<String>();
             
             for (int i = 0; i < callArgs.size(); i++) {
@@ -159,7 +159,7 @@ public class JUnitParamsGenerator
             Class<?>[] paramTypes = method.getParameterTypes();
             Type[] paramGenericTypes = method.getGenericParameterTypes();
             
-            List<IParameter> callArgs = call.args();
+            List<IValue> callArgs = call.args();
             List<String> callArgsCode = new ArrayList<String>();
             for (int i = 0; i < callArgs.size(); i++) {
                 Type type = getTypeWithoutVariables(paramTypes[i], paramGenericTypes[i]);

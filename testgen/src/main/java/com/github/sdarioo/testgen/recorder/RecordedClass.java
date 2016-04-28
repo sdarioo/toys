@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
-import com.github.sdarioo.testgen.recorder.params.mock.ProxiesCache;
+import com.github.sdarioo.testgen.recorder.values.mock.ProxiesCache;
 
 /**
  * Stores recorded calls for single tested class. 
