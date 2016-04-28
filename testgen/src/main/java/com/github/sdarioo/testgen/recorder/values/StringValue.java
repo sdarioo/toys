@@ -93,10 +93,10 @@ public class StringValue
     
     @SuppressWarnings("nls")
     private static final MethodTemplate RES_TEMPLATE = new MethodTemplate(new String[] {
-            "private String ${name}(String res) {",
+            "private static String ${name}(String res) {",
             "    StringBuilder sb = new StringBuilder();",
             "    try {", 
-            "        InputStream is = getClass().getResourceAsStream(res);",
+            "        InputStream is = ${test_suite_class}.class.getResourceAsStream(res);",
             "        BufferedReader reader = new BufferedReader(new InputStreamReader(is, \"UTF-8\"));",
             "        char[] cbuf = new char[1024];",
             "        int c = 0;",

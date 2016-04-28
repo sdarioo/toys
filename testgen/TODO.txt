@@ -1,9 +1,1 @@
-1. Interfejse proxy params
-
-   - parametryzacja
-   - generic params
-
-
-2. When recording mock params reuse same proxy instance for same object instance.
-
-3. Helper method 'res' musi być static.
+1. 

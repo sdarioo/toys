@@ -82,8 +82,8 @@ public class SerializableValue
     
     @SuppressWarnings("nls")
     private static final MethodTemplate DESERIALIZE_TEMPLATE = new MethodTemplate(new String[] {
-    "private ${type} ${name}(String res) throws Exception {",
-    "    InputStream in = getClass().getResourceAsStream(res);",
+    "private static ${type} ${name}(String res) throws Exception {",
+    "    InputStream in = ${test_suite_class}.class.getResourceAsStream(res);",
     "    try {",
     "        ObjectInputStream stream = new ObjectInputStream(in);",
     "        return (${type})stream.readObject();",

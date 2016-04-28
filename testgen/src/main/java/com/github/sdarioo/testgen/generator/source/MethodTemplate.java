@@ -28,8 +28,12 @@ public class MethodTemplate
     
     public MethodTemplate with(String variable, String value)
     {
-        String newTemplate = _template.replace(variable, value);
-        return new MethodTemplate(newTemplate);
+        if (value != null) {
+            String newTemplate = _template.replace(variable, value);
+            return new MethodTemplate(newTemplate);
+        } else {
+            return this;
+        }
     }
     
     @Override
@@ -50,4 +54,5 @@ public class MethodTemplate
 
     public static final String NAME_VARIABLE = "${name}"; //$NON-NLS-1$
     public static final String TYPE_VARIABLE = "${type}"; //$NON-NLS-1$
+    public static final String SUITE_CLASS_VARIABLE = "${test_suite_class}"; //$NON-NLS-1$
 }

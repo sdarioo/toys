@@ -119,8 +119,11 @@ public class TestSuiteBuilder
         TestMethod method = _helperMethods.get(template);
         if (method == null) {
             String uniqueName = newUniqueMethodName(name);
-            String sourceCode = template.withName(uniqueName).toString();
-            
+            String sourceCode = template
+                    .withName(uniqueName)
+                    .with(MethodTemplate.SUITE_CLASS_VARIABLE, ClassUtils.getShortClassName(_qName))
+                    .toString();
+
             method = new TestMethod(uniqueName, sourceCode, _helperMethodOrder++);
             _helperMethods.put(template, method);    
         }
