@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
 
 // ThreadSafe
@@ -55,13 +56,19 @@ public final class Recorder
     
     public RecordedClass getRecordedClass(Method method, Object target, boolean bCreate)
     {
-        Class<?> clazz = (target == null) ? method.getDeclaringClass() : target.getClass(); 
+        Class<?> clazz = method.getDeclaringClass();
+        if ((target != null) && !Configuration.getDefault().isAlwaysGenerateForDeclaringClass()) {
+            clazz = target.getClass();
+        }
         return getRecordedClass(clazz, bCreate);
     }
 
     public RecordedClass getRecordedClass(Call call, boolean bCreate)
     {
-        Class<?> clazz = call.isStatic() ? call.getMethod().getDeclaringClass() : call.getTargetClass();
+        Class<?> clazz = call.getMethod().getDeclaringClass();
+        if (!call.isStatic() && !Configuration.getDefault().isAlwaysGenerateForDeclaringClass()) {
+            clazz = call.getTargetClass();
+        }
         return getRecordedClass(clazz, bCreate);
     }
     

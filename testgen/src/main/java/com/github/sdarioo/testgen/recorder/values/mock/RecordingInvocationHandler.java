@@ -153,11 +153,6 @@ public class RecordingInvocationHandler
             if (_calls.size() <= Configuration.getDefault().getMaxMockCalls()) {
                 _calls.add(call);
                 result = callResult;
-                for (Object arg : args) {
-                    if (ProxyFactory.isProxy(arg)) {
-                        ProxyFactory.getHandler(arg).incReferencesCount();
-                    }
-                }
             } else {
                 _errors.add("Mock calls limit has been reached: " + _calls.size()); //$NON-NLS-1$
             }

@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class ProxiesCache 
 {
-   // Instance -> Proxy Instance
+    // Instance -> Proxy Instance
     private ConcurrentMap<Object, Object> _cache = new ConcurrentHashMap<Object, Object>();
     
     

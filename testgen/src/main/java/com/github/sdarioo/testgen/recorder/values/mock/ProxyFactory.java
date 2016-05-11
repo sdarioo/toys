@@ -69,7 +69,6 @@ public class ProxyFactory
     public static Object newProxy(Type type, Object value, ProxiesCache cache)
     {
         if (isProxy(value)) {
-            getHandler(value).incReferencesCount();
             return value;
         }
         
@@ -100,7 +99,7 @@ public class ProxyFactory
             return newArray;
         }
         
-        Class<?> proxyInterface = rawType;
+        Class<?> proxyInterface = findProxyInterface(rawType, value);
         Class<?>[] interfaces = value.getClass().getInterfaces();
         for (Class<?> interfce : interfaces) {
             if (proxyInterface.isAssignableFrom(interfce)) {
@@ -116,7 +115,6 @@ public class ProxyFactory
            
            proxy = cache.putIfAbsent(value, proxy);
         }
-        getHandler(proxy).incReferencesCount();
         return proxy;
     }
     
@@ -149,6 +147,17 @@ public class ProxyFactory
             }
         }
         return true;
+    }
+    
+    private static Class<?> findProxyInterface(Class<?> argumentType, Object value)
+    {
+        Class<?>[] interfaces = value.getClass().getInterfaces();
+        for (Class<?> clazz : interfaces) {
+            if (clazz.isAssignableFrom(argumentType) && canProxy(clazz, value)) {
+                return clazz;
+            }
+        }
+        return argumentType;
     }
     
 }

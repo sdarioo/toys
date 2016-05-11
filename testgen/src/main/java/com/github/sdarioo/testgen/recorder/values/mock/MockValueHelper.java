@@ -11,7 +11,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,7 +39,7 @@ public class MockValueHelper
         _builder = builder;
     }
     
-    private boolean isStaticField()
+    private boolean isGenerateStaticField()
     {
          return _handler.getReferencesCount() > 1;
     }
@@ -55,19 +57,24 @@ public class MockValueHelper
         MethodTemplate factoryMethodTemplate = getFactoryMethodTemplate();
         TestMethod factoryMethod = _builder.addHelperMethod(factoryMethodTemplate, factoryMethodName);
         
-        if (isStaticField()) {
+        if (isGenerateStaticField()) {
             String mockFieldName = _handler.getAttr(FILED_ATTR);
-            if (mockFieldName != null) {
-                return mockFieldName;
+            if (mockFieldName == null) {
+                mockFieldName = getGeneratedStaticFieldName();
+                mockFieldName = _builder.newUniqueFieldName(mockFieldName);
+                _handler.setAttr(FILED_ATTR, mockFieldName);
             }
-            mockFieldName = _builder.newUniqueFieldName(getFieldName());
-            _handler.setAttr(FILED_ATTR, mockFieldName);
+            // Protection against recursion
+            if (!isGeneratingSourceCode()) {
+                setGeneratingSourceCode(true);
+                
+                String mockType = TypeUtil.getName(_handler.getType(), _builder);
+                String mockFieldDecl = fmt("private static final {0} {1} = {2};",  //$NON-NLS-1$
+                        mockType, mockFieldName, getFactoryMethodCall(factoryMethod));
             
-            String mockType = TypeUtil.getName(_handler.getType(), _builder);
-            String mockFieldDecl = fmt("private static final {0} {1} = {2};",  //$NON-NLS-1$
-                    mockType, mockFieldName, getFactoryMethodCall(factoryMethod));
-            
-            _builder.addField(new FieldSrc(mockFieldName, mockFieldDecl));
+                _builder.addField(new FieldSrc(mockFieldName, mockFieldDecl));
+                setGeneratingSourceCode(false);
+            }
             return mockFieldName;
         }
         
@@ -177,7 +184,7 @@ public class MockValueHelper
         return "new" + mockType + "Mock";
     }
 
-    private String getFieldName()
+    private String getGeneratedStaticFieldName()
     {
         String mockType = _builder.getTypeName(_handler.getType());
         int index = mockType.lastIndexOf('.');
@@ -200,5 +207,16 @@ public class MockValueHelper
         return MessageFormat.format(pattern, args);
     }
     
+    private boolean isGeneratingSourceCode()
+    {
+        return Boolean.TRUE.toString().equals(_handler.getAttr(GENERATING_ATTR));
+    }
+    
+    private void setGeneratingSourceCode(boolean bValue)
+    {
+        _handler.setAttr(GENERATING_ATTR, String.valueOf(bValue));
+    }
+    
     private static final String FILED_ATTR = "field"; //$NON-NLS-1$
+    private static final String GENERATING_ATTR = "generating"; //$NON-NLS-1$
 }

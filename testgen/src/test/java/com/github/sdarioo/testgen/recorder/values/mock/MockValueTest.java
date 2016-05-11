@@ -225,6 +225,9 @@ public class MockValueTest
         ICollector<IService> collectorProxy = (ICollector<IService>)ProxyFactory.newProxy(collectorType, collector);
         IService serviceProxy = (IService)ProxyFactory.newProxy(IService.class, service);
         
+        ProxyFactory.getHandler(serviceProxy).incReferencesCount();
+        ProxyFactory.getHandler(serviceProxy).incReferencesCount();
+        
         serviceProxy.length("text");
         collectorProxy.add(serviceProxy);
         
@@ -250,6 +253,9 @@ public class MockValueTest
         IType type = new IType() {public IType get() {return this;}};
         IType proxy = (IType)ProxyFactory.newProxy(IType.class, type);
         proxy.get();
+        
+        ProxyFactory.getHandler(proxy).incReferencesCount();
+        ProxyFactory.getHandler(proxy).incReferencesCount();
         
         TestSuiteBuilder builder = new TestSuiteBuilder();
         MockValue param = new MockValue(proxy);
