@@ -15,7 +15,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
+import com.github.sdarioo.testgen.recorder.values.IValue;
+import com.github.sdarioo.testgen.recorder.values.ValuesFactory;
 
 /**
  * Represents recorded method call with argument values and result or exception info.
@@ -26,9 +27,9 @@ public class Call implements Comparable<Call>
     private final Class<?> _targetClass;
     
     private final long _callId;
-    private final List<IParameter> _args;
+    private final List<IValue> _args;
     
-    private IParameter _result;
+    private IValue _result;
     private ExceptionInfo _exception;
     
     private static final AtomicLong _callIdGenerator = new AtomicLong(0);
@@ -40,10 +41,10 @@ public class Call implements Comparable<Call>
     
     public static Call newCall(Method method, Object target, Object[] args)
     {
-        List<IParameter> params = new ArrayList<IParameter>(args.length);
+        List<IValue> params = new ArrayList<IValue>(args.length);
         
         for (int i = 0; i < args.length; i++) {
-            params.add(ParamsFactory.newValue(args[i]));
+            params.add(ValuesFactory.newValue(args[i]));
         }
         
         return new Call(method, target, params);
@@ -63,7 +64,7 @@ public class Call implements Comparable<Call>
         return newCall(method, target, args);
     }
     
-    private Call(Method method, Object target, List<IParameter> args)
+    private Call(Method method, Object target, List<IValue> args)
     {
         _method = method;
         _targetClass = (target != null) ? target.getClass() : null;
@@ -73,12 +74,12 @@ public class Call implements Comparable<Call>
     
     public void end()
     {
-        _result = IParameter.VOID;
+        _result = IValue.VOID;
     }
     
     public void endWithResult(Object result)
     {
-        _result = ParamsFactory.newValue(result);
+        _result = ValuesFactory.newValue(result);
     }
     
     public void endWithException(Throwable thr)
@@ -119,12 +120,12 @@ public class Call implements Comparable<Call>
         return _targetClass;
     }
     
-    public List<IParameter> args()
+    public List<IValue> args()
     {
         return Collections.unmodifiableList(_args);
     }
 
-    public IParameter getResult()
+    public IValue getResult()
     {
         return _result;
     }

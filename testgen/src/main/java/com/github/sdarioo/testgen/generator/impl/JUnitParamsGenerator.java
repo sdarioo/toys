@@ -15,7 +15,7 @@ import com.github.sdarioo.testgen.generator.MethodBuilder;
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
 import com.github.sdarioo.testgen.generator.source.TestMethod;
 import com.github.sdarioo.testgen.recorder.Call;
-import com.github.sdarioo.testgen.recorder.IParameter;
+import com.github.sdarioo.testgen.recorder.values.IValue;
 import com.github.sdarioo.testgen.util.GeneratorUtil;
 import com.github.sdarioo.testgen.util.StringUtil;
 import com.github.sdarioo.testgen.util.TypeUtil;
@@ -71,7 +71,7 @@ public class JUnitParamsGenerator
             Class<?>[] paramTypes = method.getParameterTypes();
             Type[] paramGenericTypes = method.getGenericParameterTypes();
             
-            List<IParameter> callArgs = call.args();
+            List<IValue> callArgs = call.args();
             List<String> callArgsCode = new ArrayList<String>();
             
             for (int i = 0; i < callArgs.size(); i++) {
@@ -121,7 +121,11 @@ public class JUnitParamsGenerator
        
         List<String> body = getCall(targetClass, method, paramNames, RESULT, builder);
         if (hasReturn(method)) {
-            body.add(fmt("Assert.assertEquals({0}, {1})", EXPECTED, RESULT)); //$NON-NLS-1$
+            if (method.getReturnType().isArray()) {
+                body.add(fmt("Assert.assertArrayEquals({0}, {1})", EXPECTED, RESULT)); //$NON-NLS-1$
+            } else {
+                body.add(fmt("Assert.assertEquals({0}, {1})", EXPECTED, RESULT)); //$NON-NLS-1$
+            }
         }
         methodBuilder.statements(body);
         
@@ -155,7 +159,7 @@ public class JUnitParamsGenerator
             Class<?>[] paramTypes = method.getParameterTypes();
             Type[] paramGenericTypes = method.getGenericParameterTypes();
             
-            List<IParameter> callArgs = call.args();
+            List<IValue> callArgs = call.args();
             List<String> callArgsCode = new ArrayList<String>();
             for (int i = 0; i < callArgs.size(); i++) {
                 Type type = getTypeWithoutVariables(paramTypes[i], paramGenericTypes[i]);

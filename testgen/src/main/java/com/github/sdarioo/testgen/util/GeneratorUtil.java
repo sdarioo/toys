@@ -8,7 +8,7 @@ import java.util.Comparator;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.github.sdarioo.testgen.generator.TestSuiteBuilder;
-import com.github.sdarioo.testgen.recorder.params.ParamsFactory;
+import com.github.sdarioo.testgen.recorder.values.ValuesFactory;
 import com.github.sdarioo.testgen.util.Defaults;
 
 public final class GeneratorUtil 
@@ -46,7 +46,7 @@ public final class GeneratorUtil
         String[] result = new String[paramTypes.length];
         for (int i = 0; i < result.length; i++) {
             Object defaultValue = Defaults.getDefaultValue(paramTypes[i]);
-            result[i] = ParamsFactory.newValue(defaultValue).toSouceCode(paramTypes[i], builder);
+            result[i] = ValuesFactory.newValue(defaultValue).toSouceCode(paramTypes[i], builder);
         }
         return result;
     }

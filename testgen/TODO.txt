@@ -1,9 +1,8 @@
-1. Interfejse proxy params
+1. Testing abstract classes
 
-   - parametryzacja
-   - generic params
-
-
-2. When recording mock params reuse same proxy instance for same object instance.
-
-3. Helper method 'res' musi być static.
+ - test should be generated for abstract class
+ 
+ 2. Mock used by other mock field initializer
+ 
+ 3. code formatters 
+ 

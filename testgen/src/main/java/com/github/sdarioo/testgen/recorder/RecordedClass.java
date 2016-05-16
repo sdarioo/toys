@@ -14,7 +14,10 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.github.sdarioo.testgen.Configuration;
 import com.github.sdarioo.testgen.logging.Logger;
-import com.github.sdarioo.testgen.recorder.params.mock.ProxiesCache;
+import com.github.sdarioo.testgen.recorder.values.IAggregateValue;
+import com.github.sdarioo.testgen.recorder.values.IValue;
+import com.github.sdarioo.testgen.recorder.values.mock.MockValue;
+import com.github.sdarioo.testgen.recorder.values.mock.ProxiesCache;
 
 /**
  * Stores recorded calls for single tested class. 
@@ -117,7 +120,11 @@ public final class RecordedClass
         }
         
         if (call.isSupported(new HashSet<String>())) {
-            return recordCall(_calls, call);
+            boolean bRecorded = recordCall(_calls, call);
+            if (bRecorded) {
+                incMockReferencesCount(call);
+            }
+            return bRecorded;
         } else {
             return recordCall(_unsupportedCalls, call);
         }
@@ -161,6 +168,37 @@ public final class RecordedClass
         synchronized (calls) {
             Set<Call> methodCalls = calls.get(method);
             return (methodCalls != null) ? methodCalls.size() : 0;
+        }
+    }
+    
+    /**
+     * Mark mocks references count because same mock used more than once will have
+     * different source code generated.
+     */
+    private static void incMockReferencesCount(Call call)
+    {
+        Set<Integer> visited = new HashSet<Integer>();
+        incMockReferencesCount(call.getResult(), visited);
+        for (IValue arg : call.args()) {
+            incMockReferencesCount(arg, visited);
+        }
+    }
+    
+    private static void incMockReferencesCount(IValue value, Set<Integer> visited)
+    {
+        if (value == null) {
+            return;
+        }
+        if (value instanceof MockValue) {
+            ((MockValue)value).getHandler().incReferencesCount();
+        }
+        
+        int hash = System.identityHashCode(value);
+        if ((value instanceof IAggregateValue) && !visited.contains(hash)) {
+            visited.add(hash);
+            for (IValue child : ((IAggregateValue)value).getComponents()) {
+                incMockReferencesCount(child, visited);
+            }
         }
     }
     
