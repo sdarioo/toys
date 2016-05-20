@@ -80,6 +80,16 @@ public class MockValue
         return ProxyFactory.getHandler(_proxy);
     }
     
+    public void incReferencesCount()
+    {
+        getHandler().incReferencesCount();
+    }
+    
+    public int getReferencesCount()
+    {
+        return getHandler().getReferencesCount();
+    }
+    
     @SuppressWarnings("nls")
     private String createErrorMessage(Set<String> subErrors)
     {

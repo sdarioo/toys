@@ -30,7 +30,7 @@ public class ServletContainerInitializer
     {
         return new Class[]
         {
-            SpringMVCApplicationContext.class
+            SpringMVCServletContext.class
         };
     }
 

@@ -38,12 +38,12 @@ public class RecordingInvocationHandler
         return _proxyType;
     }
     
-    public void incReferencesCount()
+    void incReferencesCount()
     {
         _referencesCount++;
     }
     
-    public int getReferencesCount()
+    int getReferencesCount()
     {
         return _referencesCount;
     }

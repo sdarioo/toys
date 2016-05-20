@@ -7,7 +7,10 @@
   http://www.springframework.org/schema/context 
   http://www.springframework.org/schema/context/spring-context.xsd">
  
-  <context:component-scan base-package="com.sdarioo.web_spring_xml.not-existing" />
-  <context:annotation-config />
+  <!-- Enable below elements if annotation based configurations should be enabled -->
+  
+  <!-- context:annotation-config />
+  <context:component-scan base-package="config" /-->
+  
    
 </beans>

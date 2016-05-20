@@ -172,8 +172,8 @@ public final class RecordedClass
     }
     
     /**
-     * Mark mocks references count because same mock used more than once will have
-     * different source code generated.
+     * Mark mocks usages count because the same mock instance used more than once will have
+     * different source code generated than mock used only once (static field instead of local value)
      */
     private static void incMockReferencesCount(Call call)
     {
@@ -190,7 +190,7 @@ public final class RecordedClass
             return;
         }
         if (value instanceof MockValue) {
-            ((MockValue)value).getHandler().incReferencesCount();
+            ((MockValue)value).incReferencesCount();
         }
         
         int hash = System.identityHashCode(value);
