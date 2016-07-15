@@ -106,6 +106,10 @@
 					<scanIntervalSeconds>3</scanIntervalSeconds>
 					<!-- By Default, jetty start on port 8080 <httpConnector> <port>9090</port> 
 						</httpConnector> -->
+						<httpConnector>
+							<host>localhost</host>
+							<port>8080</port>
+						</httpConnector>
 				</configuration>
 			</plugin>
 

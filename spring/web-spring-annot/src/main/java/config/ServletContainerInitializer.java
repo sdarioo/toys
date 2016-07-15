@@ -10,7 +10,7 @@ public class ServletContainerInitializer
     @Override
     protected String getServletName()
     {
-        return "spring-mvc";
+        return "demo";
     }
 	
     @Override
@@ -18,7 +18,7 @@ public class ServletContainerInitializer
     {
         return new Class[]
         {
-            ApplicationContext.class
+            AppConfig.class
         };
     }
 
@@ -30,7 +30,7 @@ public class ServletContainerInitializer
     {
         return new Class[]
         {
-            SpringMVCServletContext.class
+            MvcConfig.class
         };
     }
 
