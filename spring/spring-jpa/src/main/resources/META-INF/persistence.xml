@@ -5,10 +5,12 @@
 
    <persistence-unit name="demoPersistenceUnit" transaction-type="RESOURCE_LOCAL">
       
-      <!-- Without this eclipse complains that there is no primaryKey in child entities -->
+      
       <class>com.examples.demo.model.JPackage</class>
       <class>com.examples.demo.model.JProject</class>
-      <class>org.springframework.data.jpa.domain.AbstractPersistable</class>
+      
+      <!-- class>org.springframework.data.jpa.domain.AbstractPersistable</class-->
+      
       <exclude-unlisted-classes/>
 
 	</persistence-unit>

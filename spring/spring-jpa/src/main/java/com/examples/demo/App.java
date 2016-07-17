@@ -1,11 +1,14 @@
 package com.examples.demo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.AbstractEnvironment;
 
 import com.examples.demo.config.AppConfig;
-import com.examples.demo.model.JPackage;
 import com.examples.demo.model.JProject;
+import com.examples.demo.repository.ProjectRepository;
 import com.examples.demo.service.CodeService;
 
 /**
@@ -22,11 +25,13 @@ public class App
     	AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
     	
     	CodeService service = context.getBean(CodeService.class);
-    	JProject project = service.addProject("xtest");
-    	JPackage xtest = service.addPackage("com.parasoft.xtest", project, null);
-    	JPackage util = service.addPackage("com.parasoft.xtest.util", project, xtest);
+    	ProjectRepository repo = context.getBean(ProjectRepository.class);
     	
-    	service.getChildPackages(xtest);
+    	List<JProject> projs = new ArrayList<JProject>();
+    	for (int i = 0; i < 10; i++) {
+    		projs.add(new JProject("com.parasoft.xtest." + i));
+        }
+    	repo.save(projs);
     	
     	context.close();
         System.out.println("OK");

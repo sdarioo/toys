@@ -2,8 +2,11 @@ package com.examples.demo.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 /**
@@ -15,15 +18,20 @@ import javax.persistence.Table;
 public class JPackage extends JObject {
 	private static final long serialVersionUID = 1L;
 	
+	@Id
+	@GeneratedValue(generator="packages_id_seq")
+	@SequenceGenerator(name = "packages_id_seq", sequenceName = "packages_id_seq")
+	private Integer id;
+
 	@Column(unique=true)
 	private String name;
 	
 	@ManyToOne
-	@JoinColumn(name="parent_proj_id", nullable=false)
+	@JoinColumn(name="project_id", nullable=false)
 	private JProject project;
 
 	@ManyToOne
-	@JoinColumn(name="parent_pkg_id", nullable=true)
+	@JoinColumn(name="parent_id", nullable=true)
 	private JPackage parent;
 	
 	
@@ -35,6 +43,14 @@ public class JPackage extends JObject {
 		this.project = project;
 		this.parent = parent;
 	}
+	
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}	
 	   
 	public String getName() {
 		return this.name;
