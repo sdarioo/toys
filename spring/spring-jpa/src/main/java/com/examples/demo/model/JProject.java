@@ -3,7 +3,6 @@ package com.examples.demo.model;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -18,10 +17,8 @@ public class JProject extends JObject {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
-	@GeneratedValue(strategy=GenerationType.AUTO)
-//	@GeneratedValue(strategy=GenerationType.IDENTITY)
-//	@GeneratedValue(generator="projects_id_seq")
-//	@SequenceGenerator(name = "projects_id_seq", sequenceName = "projects_id_seq")
+	@GeneratedValue(generator="projects_id_seq")
+	@SequenceGenerator(name = "projects_id_seq", sequenceName = "projects_id_seq", allocationSize=1)
 	private Integer id;
 	
 	@Column(unique=true)

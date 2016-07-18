@@ -20,7 +20,7 @@ public class JPackage extends JObject {
 	
 	@Id
 	@GeneratedValue(generator="packages_id_seq")
-	@SequenceGenerator(name = "packages_id_seq", sequenceName = "packages_id_seq")
+	@SequenceGenerator(name = "packages_id_seq", sequenceName = "packages_id_seq", allocationSize=1)
 	private Integer id;
 
 	@Column(unique=true)
