@@ -3,13 +3,17 @@ DROP TABLE packages IF EXISTS;
 
 /* In HSQLDB you can use IDENTITY keyword to define an auto-increment column */
 
+/* GenerationStrategy.SEQUENCE */
+CREATE SEQUENCE packages_id_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE projects_id_seq START WITH 1 INCREMENT BY 1;
+
 CREATE TABLE projects (
-  id   INTEGER IDENTITY PRIMARY KEY,
+  id   INTEGER PRIMARY KEY,
   name VARCHAR(255)
 );
 
 CREATE TABLE packages (
-  id         INTEGER IDENTITY PRIMARY KEY,
+  id         INTEGER PRIMARY KEY,
   name       VARCHAR(255),
   project_id INTEGER NOT NULL,
   parent_id  INTEGER
