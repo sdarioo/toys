@@ -7,7 +7,6 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.core.env.AbstractEnvironment;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -23,12 +22,9 @@ import com.examples.demo.repository.ProjectRepository;
  */
 public class App 
 {
-	public static final String DEV_PROFILE = "dev";
-	public static final String TEST_PROFILE = "test";
 	
     public static void main( String[] args )
     {
-    	System.setProperty(AbstractEnvironment.ACTIVE_PROFILES_PROPERTY_NAME, DEV_PROFILE);
     	AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class);
     	
     	ProjectRepository repo = context.getBean(ProjectRepository.class);
