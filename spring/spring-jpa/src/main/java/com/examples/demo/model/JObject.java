@@ -13,11 +13,9 @@ public abstract class JObject implements Persistable<Integer> {
 	private static final long serialVersionUID = 1L;
 
 	protected JObject() {}
-	
 
 	public abstract Integer getId();
 
-	protected abstract void setId(Integer id);
 
 	/**
 	 * Must be {@link Transient} in order to ensure that no JPA provider complains because of a missing setter.

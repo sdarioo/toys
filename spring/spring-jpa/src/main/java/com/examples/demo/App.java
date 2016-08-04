@@ -39,12 +39,12 @@ public class App
     	for (int j = 0; j < 100; j++) {
 	    	for (int i = 0; i < 1000; i++) {
 	    		JProject p = new JProject("com.parasoft.xtest." + j + ':' + i);
-	    		p.setId((j*1000)+i);
+	    		//p.setId((j*1000)+i);
 				projs.add(p);
 	        }
-	    	addWithJdbcTemplate(projs, ds, tx);
+	    	//addWithJdbcTemplate(projs, ds, tx);
 	    	//add(projs, em, tx);
-	    	//repo.saveAndFlush(projs);
+	    	repo.saveAndFlush(projs);
 	    	projs.clear();
 		}
 

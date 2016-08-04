@@ -30,10 +30,6 @@ public class JProject extends JObject {
 	public Integer getId() {
 		return id;
 	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}	
 	
 	public JProject(String name) {
 		this.name = name;
