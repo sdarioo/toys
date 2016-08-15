@@ -6,6 +6,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 /**
  * Entity implementation class for Entity: JProject
@@ -21,18 +22,19 @@ public class JProject extends JObject {
 	@SequenceGenerator(name = "projects_id_seq", sequenceName = "projects_id_seq", allocationSize=1)
 	private Integer id;
 	
+	@NotNull
 	@Column(unique=true)
 	private String name;
 
-	public JProject() {
-	}
-	
-	public Integer getId() {
-		return id;
+	protected JProject() {
 	}
 	
 	public JProject(String name) {
 		this.name = name;
+	}
+	
+	public Integer getId() {
+		return id;
 	}
 	
 	public String getName() {

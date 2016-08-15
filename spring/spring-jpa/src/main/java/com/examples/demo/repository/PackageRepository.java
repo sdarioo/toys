@@ -11,6 +11,11 @@ import com.examples.demo.model.JProject;
 
 public interface PackageRepository extends JpaRepository<JPackage, Integer> {
 	
+	
+	@Query("SELECT p FROM JPackage p join fetch p.project")
+	List<JPackage> findAll();
+	
+	
 	@Query("SELECT p FROM JPackage p join fetch p.project WHERE p.project = :project and p.parent IS NULL")
 	List<JPackage> findRootPackages(@Param("project") JProject project);
 	

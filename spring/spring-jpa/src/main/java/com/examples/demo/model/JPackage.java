@@ -2,12 +2,14 @@ package com.examples.demo.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 /**
  * Entity implementation class for Entity: JPackage
@@ -23,19 +25,25 @@ public class JPackage extends JObject {
 	@SequenceGenerator(name = "packages_id_seq", sequenceName = "packages_id_seq", allocationSize=1)
 	private Integer id;
 
+	@NotNull
 	@Column(unique=true)
 	private String name;
 	
-	@ManyToOne
-	@JoinColumn(name="project_id", nullable=false)
+	@NotNull
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="project_id")
 	private JProject project;
 
-	@ManyToOne
-	@JoinColumn(name="parent_id", nullable=true)
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="parent_id")
 	private JPackage parent;
 	
 	
-	public JPackage() {
+	protected JPackage() {
+	}
+	
+	public JPackage(String name, JProject project) {
+		this(name, project, null);
 	}
 	
 	public JPackage(String name, JProject project, JPackage parent) {

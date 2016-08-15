@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
 import com.examples.demo.config.DataSourceBuilder;
+import com.examples.demo.util.SQLExecutionListener;
 
 import net.ttddyy.dsproxy.listener.SLF4JLogLevel;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
@@ -31,6 +32,7 @@ public class TestConfig {
 		        .create(ds)
 		        .logQueryBySlf4j(SLF4JLogLevel.INFO)
 		        .countQuery()
+		        .listener(SQLExecutionListener.getDefault())
 		        .build();
 	}
 }
