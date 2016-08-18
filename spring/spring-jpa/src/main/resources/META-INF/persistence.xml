@@ -6,8 +6,9 @@
    <persistence-unit name="demoPersistenceUnit" transaction-type="RESOURCE_LOCAL">
       
       
-      <class>com.examples.demo.model.JPackage</class>
       <class>com.examples.demo.model.JProject</class>
+      <class>com.examples.demo.model.JPackage</class>
+      <class>com.examples.demo.model.JClass</class>
       
       <!-- class>org.springframework.data.jpa.domain.AbstractPersistable</class-->
       

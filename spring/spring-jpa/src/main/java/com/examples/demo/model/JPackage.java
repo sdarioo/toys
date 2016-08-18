@@ -1,5 +1,8 @@
 package com.examples.demo.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -7,6 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
@@ -26,7 +30,7 @@ public class JPackage extends JObject {
 	private Integer id;
 
 	@NotNull
-	@Column(unique=true)
+	@Column
 	private String name;
 	
 	@NotNull
@@ -38,6 +42,9 @@ public class JPackage extends JObject {
 	@JoinColumn(name="parent_id")
 	private JPackage parent;
 	
+	
+	@OneToMany(mappedBy="parent", fetch=FetchType.LAZY, orphanRemoval=true)
+	private Set<JClass> classes = new HashSet<>();
 	
 	protected JPackage() {
 	}
@@ -59,25 +66,20 @@ public class JPackage extends JObject {
 	public String getName() {
 		return this.name;
 	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 	public JProject getProject() {
 		return project;
-	}
-
-	public void setProject(JProject project) {
-		this.project = project;
 	}
 
 	public JPackage getParent() {
 		return parent;
 	}
 
-	public void setParent(JPackage parent) {
-		this.parent = parent;
+	public Set<JClass> getClasses() {
+		return classes;
 	}
-   
+
+	void addClass(JClass clazz) {
+		classes.add(clazz);
+	}
 }
