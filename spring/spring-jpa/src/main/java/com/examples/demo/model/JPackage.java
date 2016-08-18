@@ -3,6 +3,7 @@ package com.examples.demo.model;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -43,7 +44,9 @@ public class JPackage extends JObject {
 	private JPackage parent;
 	
 	
-	@OneToMany(mappedBy="parent", fetch=FetchType.LAZY, orphanRemoval=true)
+	@OneToMany(mappedBy="parent", 
+			   fetch=FetchType.LAZY,
+			   orphanRemoval=true)
 	private Set<JClass> classes = new HashSet<>();
 	
 	protected JPackage() {

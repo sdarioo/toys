@@ -29,6 +29,7 @@ public class TestLazyFetch extends IntegrationTestBase {
 		assertTrue(Persistence.getPersistenceUtil().isLoaded(pkg));
 		assertTrue(Persistence.getPersistenceUtil().isLoaded(cls));
 		
+		
 		assertFalse(em.contains(proj));
 		assertFalse(em.contains(pkg));
 		assertFalse(em.contains(cls));
@@ -76,10 +77,11 @@ public class TestLazyFetch extends IntegrationTestBase {
 			SQLCountValidator.reset();
 			Set<JClass> classes = pkg.getClasses();
 			assertNotNull(classes);
-			assertFalse(Persistence.getPersistenceUtil().isLoaded(classes));
+			assertFalse(Persistence.getPersistenceUtil().isLoaded(pkg, "classes"));
 			SQLCountValidator.assertSelectCount(0);
 			
 			assertEquals(1, classes.size());
+			assertTrue(Persistence.getPersistenceUtil().isLoaded(pkg, "classes"));
 			SQLCountValidator.assertSelectCount(1);
 		});
 		
