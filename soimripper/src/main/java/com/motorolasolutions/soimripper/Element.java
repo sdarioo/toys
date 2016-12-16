@@ -1,16 +1,26 @@
 package com.motorolasolutions.soimripper;
 
-import java.util.List;
-
 public interface Element {
 
     String LS = "\n";
 
-    List<Element> flatElement();
-
+    /**
+     * @return text representation of this element
+     */
     String getText();
 
+    /**
+     * @return html representation of this element
+     */
     String toHtml();
 
+    /**
+     * @return whether element has no visual representation
+     */
     boolean isEmpty();
+
+    /**
+     * @return whether this elements or one of its children represents table
+     */
+    boolean containsTables();
 }

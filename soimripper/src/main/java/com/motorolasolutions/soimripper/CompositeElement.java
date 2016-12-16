@@ -6,10 +6,21 @@ import java.util.stream.Collectors;
 
 public class CompositeElement implements Element {
 
-    private final List<Element> elements;
+    private final List<Element> elements = new ArrayList<>();
+
+    public CompositeElement() {
+    }
 
     public CompositeElement(List<Element> elements) {
-        this.elements = elements;
+        this.elements.addAll(elements);
+    }
+
+    public void add(Element element) {
+        elements.add(element);
+    }
+
+    public List<Element> getElements() {
+        return elements;
     }
 
     @Override
@@ -18,28 +29,21 @@ public class CompositeElement implements Element {
     }
 
     @Override
-    public List<Element> flatElement() {
-        List<Element> result = new ArrayList<>();
-        elements.forEach(e -> result.addAll(e.flatElement()));
-        return result;
-    }
-
-    public Element joinParagraphs() {
-        List<Element> flatElements = flatElement();
-        if (flatElements.stream().allMatch(e -> (e instanceof Paragraph))) {
-            String text = flatElements.stream().map(Element::getText).collect(Collectors.joining(LS));
-            return new Paragraph(text);
-        }
-        return this;
+    public boolean containsTables() {
+        return elements.stream().allMatch(Element::containsTables);
     }
 
     @Override
     public String getText() {
-        return elements.stream().map(Element::getText).collect(Collectors.joining(LS));
+        return elements.stream()
+                .map(Element::getText)
+                .collect(Collectors.joining(LS));
     }
 
     @Override
     public String toHtml() {
-        return elements.stream().map(Element::toHtml).collect(Collectors.joining(LS));
+        return elements.stream()
+                .map(Element::toHtml)
+                .collect(Collectors.joining(LS));
     }
 }

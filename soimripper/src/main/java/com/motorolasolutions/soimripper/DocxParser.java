@@ -3,6 +3,7 @@ package com.motorolasolutions.soimripper;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.apache.poi.xwpf.usermodel.XWPFTableCell;
 import org.apache.poi.xwpf.usermodel.XWPFTableRow;
@@ -12,70 +13,82 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class DocxParser {
+public final class DocxParser {
+
+    private DocxParser() {}
 
     public static List<Element> parse(Path path) throws IOException {
-        List<Element> result = new ArrayList<>();
+        List<Element> elements = new ArrayList<>();
         try (InputStream inputStream = Files.newInputStream(path)) {
             XWPFDocument doc = new XWPFDocument(inputStream);
-            List<XWPFTable> tables = doc.getTables();
-            for (XWPFTable table : tables) {
-                Element element = toElement(table);
+            for (XWPFTable xTable : doc.getTables()) {
+                Element element = parseTable(xTable);
+                elements.add(element);
+            }
+        }
+        return elements;
+    }
+
+    private static Element parseTable(XWPFTable xTable) {
+        List<List<Element>> data = new ArrayList<>();
+
+        XWPFTableCell[][] cells = getTableCells(xTable);
+        for (XWPFTableCell[] row : cells) {
+            List<Element> rowData = new ArrayList<>();
+            for (XWPFTableCell cell : row) {
+                rowData.add(parseCell(cell));
+            }
+            data.add(rowData);
+        }
+        Table table = new Table(data);
+        if (table.getColumnCount() == 1) {
+            return (table.getRowsCount() == 1) ? table.getCell(0, 0) : new CompositeElement(table.getColumn(0));
+        }
+        if (table.isBulletList()) {
+            return new CompositeElement(table.toList(" "));
+        }
+
+        return table;
+    }
+
+    private static Element parseCell(XWPFTableCell cell) {
+        CompositeElement result = new CompositeElement();
+        for (IBodyElement xElement : cell.getBodyElements()) {
+            Element element = parseBody(xElement);
+            if (!element.isEmpty()) {
                 result.add(element);
             }
+        }
+        if (result.isEmpty()) {
+            return new Paragraph("");
+        }
+        if (result.getElements().size() == 1) {
+            return result.getElements().get(0);
         }
         return result;
     }
 
-    private static Element toElement(XWPFTable xTable) {
-        XWPFTableCell[][] cells = getTableCells(xTable);
-        if ((cells.length == 1) && (cells[0].length == 1)) {
-            return toElement(cells[0][0]);
-        }
-        List<List<Element>> tableData = new ArrayList<>();
-        for (XWPFTableCell[] row : cells) {
-            tableData.add(
-                    Arrays.stream(row)
-                            .map(DocxParser::toElement)
-                            .collect(Collectors.toList()));
-        }
-        return new Table(tableData).getFormatted();
-    }
-
-    private static Element toElement(XWPFTableCell cell) {
-        List<Element> elements = cell.getBodyElements().stream()
-                .map(DocxParser::toElement)
-                .filter(e -> !e.isEmpty())
-                .collect(Collectors.toList());
-        List<Element> flatElements = new CompositeElement(elements).flatElement();
-        return new CompositeElement(flatElements).joinParagraphs();
-    }
-
-    private static Element toElement(IBodyElement element) {
+    private static Element parseBody(IBodyElement element) {
         if (element instanceof XWPFParagraph) {
-            return toElement(((XWPFParagraph)element));
+            return parseParagraph(((XWPFParagraph)element));
         }
         if (element instanceof XWPFTable) {
-            return toElement((XWPFTable)element);
+            return parseTable((XWPFTable)element);
         }
         throw new IllegalArgumentException();
     }
 
-    private static Element toElement(XWPFParagraph paragraph) {
-        if (paragraph.getRuns().size() != paragraph.getIRuns().size()) {
-            throw new UnsupportedOperationException();
+    private static Element parseParagraph(XWPFParagraph paragraph) {
+        StringBuilder text = new StringBuilder();
+        for (XWPFRun run : paragraph.getRuns()) {
+            if (run.getCTR().isSetRsidDel()) {
+                continue;
+            }
+            text.append(run.toString().trim());
         }
-        String text = paragraph.getRuns().stream()
-                .filter(p -> !p.getCTR().isSetRsidDel())
-                .map(Object::toString)
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.joining());
-        return new Paragraph(text);
+        return new Paragraph(text.toString());
     }
 
     private static XWPFTableCell[][] getTableCells(XWPFTable table) {

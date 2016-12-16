@@ -4,8 +4,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -17,10 +15,9 @@ public class Main {
         List<Element> elements = DocxParser.parse(path);
 
         String text = toString(elements);
-        String html = toHtml(elements);
+        String html = HtmlGenerator.toHtml(elements);
 
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("C:\\temp\\soim.html")))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("C:\\temp\\main.html")))) {
             writer.write(html);
         }
 
@@ -38,34 +35,6 @@ public class Main {
         return sb.toString();
     }
 
-    private static String toHtml(List<Element> elements) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>");
-        sb.append(Element.LS);
-        sb.append("<body>");
-        sb.append(Element.LS);
 
-        for (Element element : elements) {
-            if (!element.isEmpty()) {
-                sb.append(element.toHtml());
-                sb.append(Element.LS);
-            }
-        }
-
-        sb.append("</body>");
-        sb.append(Element.LS);
-        sb.append("</html>");
-        return sb.toString();
-    }
-
-    private static boolean isHeading(String text) {
-        int idx = 0;
-        if (!text.contains("\n")) {
-            while ((idx < text.length()) && ((text.charAt(idx) == '.') || Character.isDigit(text.charAt(idx)))) {
-                idx++;
-            }
-        }
-        return idx > 0;
-    }
 }
 
