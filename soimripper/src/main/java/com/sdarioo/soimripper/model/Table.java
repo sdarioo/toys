@@ -1,4 +1,4 @@
-package com.motorolasolutions.soimripper;
+package com.sdarioo.soimripper.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,13 @@ public class Table implements Element {
 
     private static final String BULLET = "•";
 
-    private final List<List<Element>> data;
+    private final List<List<Element>> data = new ArrayList<>();
+
+    public Table() {
+    }
 
     public Table(List<List<Element>> data) {
-        this.data = data;
+        this.data.addAll(data);
     }
 
     @Override
@@ -38,6 +41,10 @@ public class Table implements Element {
 
     public List<Element> getRow(int n) {
         return data.get(n);
+    }
+
+    public void addRow(List<Element> row) {
+        data.add(row);
     }
 
     public List<List<Element>> data() {
@@ -85,7 +92,7 @@ public class Table implements Element {
             sb.append("<tr>");
             sb.append(LS);
             for (Element cell : row) {
-                sb.append(header ? "<th class=\"tg-h31u\">" : "<td>");
+                sb.append(header ? "<th>" : "<td>");
                 sb.append(cell.toHtml());
                 sb.append(header ? "</th>" : "</td>");
                 sb.append(LS);

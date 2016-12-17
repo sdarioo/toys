@@ -1,4 +1,4 @@
-package com.motorolasolutions.soimripper;
+package com.sdarioo.soimripper.model;
 
 public interface Element {
 

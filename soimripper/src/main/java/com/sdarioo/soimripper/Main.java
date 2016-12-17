@@ -1,7 +1,9 @@
-package com.motorolasolutions.soimripper;
+package com.sdarioo.soimripper;
+
+import com.sdarioo.soimripper.model.Document;
+import com.sdarioo.soimripper.model.Element;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -11,17 +13,18 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        Path path = Paths.get("c:\\Users\\PWH473\\Desktop\\soim\\R5.4-SOIM-D5.4.01.docx");
-        List<Element> elements = DocxParser.parse(path);
+        Path path = Paths.get("d:\\devel\\projects\\com.github.sdarioo\\toys\\soimripper\\src\\main\\resources\\main.docx");
+        Path htmlPath = Paths.get("d:\\temp\\main.html");
 
-        String text = toString(elements);
-        String html = HtmlGenerator.toHtml(elements);
+        Document document = DocumentParser.parse(path);
 
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("C:\\temp\\main.html")))) {
+        String html = HtmlGenerator.toHtml(document);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(htmlPath.toFile()))) {
             writer.write(html);
         }
 
-        System.out.println(text);
+        System.out.println("Done.");
     }
 
     private static String toString(List<Element> elements) {

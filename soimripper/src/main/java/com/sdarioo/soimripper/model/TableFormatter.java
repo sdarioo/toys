@@ -1,4 +1,4 @@
-package com.motorolasolutions.soimripper;
+package com.sdarioo.soimripper.model;
 
 import java.util.ArrayList;
 import java.util.List;

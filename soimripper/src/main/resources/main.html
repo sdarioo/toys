@@ -1,16 +1,19 @@
-<html>
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org">
+
 <body>
 <style type="text/css">
 
 body {
-    font-family:Arial, sans-serif;font-size:12px;
-}
-.tg  {
+    font-family:Arial, sans-serif;
+    font-size:11px;
+    }
+.tg {
     border-collapse:collapse;
     border-spacing:0;
     border-color:#ccc;
-    margin:0px auto;
-}
+    }
 .tg td {
     font-family:Arial, sans-serif;
     font-size:10px;
@@ -22,7 +25,7 @@ body {
     border-color:#ccc;
     color:#333;
     background-color:#fff;
-}
+    }
 .tg th {
     font-family:Arial, sans-serif;
     font-size:10px;
@@ -35,14 +38,12 @@ body {
     border-color:#ccc;
     color:#333;
     background-color:#f0f0f0;
-}
-.tg .tg-h31u {
-    font-family:Arial, Helvetica, sans-serif !important;;
-    vertical-align:top
-}
+    }
+.tg .tg-yw4l {  vertical-align:top }
+
 </style>
 
-${body}
+<div th:utext="${doc.body}"></div>
 
 </body>
 </html>

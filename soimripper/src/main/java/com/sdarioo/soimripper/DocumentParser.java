@@ -1,5 +1,6 @@
-package com.motorolasolutions.soimripper;
+package com.sdarioo.soimripper;
 
+import com.sdarioo.soimripper.model.*;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -15,11 +16,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DocxParser {
+public final class DocumentParser {
 
-    private DocxParser() {}
+    private DocumentParser() {}
 
-    public static List<Element> parse(Path path) throws IOException {
+    public static Document parse(Path path) throws IOException {
         List<Element> elements = new ArrayList<>();
         try (InputStream inputStream = Files.newInputStream(path)) {
             XWPFDocument doc = new XWPFDocument(inputStream);
@@ -28,7 +29,7 @@ public final class DocxParser {
                 elements.add(element);
             }
         }
-        return elements;
+        return new Document(elements);
     }
 
     private static Element parseTable(XWPFTable xTable) {

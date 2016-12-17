@@ -1,4 +1,4 @@
-package com.motorolasolutions.soimripper;
+package com.sdarioo.soimripper.model;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 
@@ -10,14 +10,14 @@ public class Paragraph implements Element {
 
     private final String text;
 
-    private boolean isHeader = false;
+    private int headerLevel;
 
     public Paragraph(String text) {
-        this.text = text;
+        this.text = text.replace('\u00A0', ' ');
     }
 
-    public void setHeader(boolean header) {
-        isHeader = header;
+    public void setHeader(int headerLevel) {
+        this.headerLevel = headerLevel;
     }
 
     @Override
@@ -27,13 +27,12 @@ public class Paragraph implements Element {
 
     @Override
     public String toHtml() {
-        String body = text.replace('\u00A0', ' ').trim();
+        String body = text.trim();
         body = StringEscapeUtils.escapeHtml4(body);
         List<String> lines = splitLines(body);
         body = lines.stream().collect(Collectors.joining("<br>"));
-        if (isHeader) {
-            int level = getHeaderLevel(body);
-            return "<h" + level + ">" + body + "</h" + level + ">";
+        if (headerLevel > 0) {
+            return "<h" + headerLevel + ">" + body + "</h" + headerLevel + ">";
         }
         return "<p>" + body + "</p>";
     }
@@ -56,17 +55,5 @@ public class Paragraph implements Element {
                 .collect(Collectors.toList());
     }
 
-    private static int getHeaderLevel(String text) {
-        int idx = 0;
-        text = text.trim();
-        while ((idx < text.length()) &&
-                (Character.isDigit(text.charAt(idx)) || (text.charAt(idx) == '.'))) {
-            idx ++;
-        }
-        if (idx > 0) {
-            String number = text.substring(0, idx);
-            return number.split("\\.").length;
-        }
-        return 0;
-    }
+
 }
