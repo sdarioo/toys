@@ -15,8 +15,7 @@ public class Parent extends EntityBase {
 
 	@OneToMany(mappedBy="parent", 
 			fetch=FetchType.LAZY,
-			orphanRemoval=true, 
-			cascade=CascadeType.ALL)
+			cascade={CascadeType.PERSIST, CascadeType.REMOVE})
 	private Set<Child> children = new HashSet<>();
 	
 	protected Parent() {}
@@ -37,8 +36,15 @@ public class Parent extends EntityBase {
 		return children;
 	}
 	
-	public void addChild(String name) {
-		children.add(new Child(name, this));
+	public Child addChild(String name) {
+		Child child = new Child(name, this);
+		children.add(child);
+		return child;
+	}
+	
+	public void removeChild(Child child) {
+		children.removeIf(c -> c.getId().equals(child.getId()));
+		child.setParent(null);
 	}
 	
 }

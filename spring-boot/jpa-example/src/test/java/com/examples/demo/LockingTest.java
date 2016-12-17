@@ -27,7 +27,7 @@ public class LockingTest extends AbstractTest {
 		});
 		
 		final CyclicBarrier barrier = new CyclicBarrier(2);
-		final AtomicBoolean lockException = new AtomicBoolean(false);
+		final AtomicBoolean exceptionThrown = new AtomicBoolean(false);
 		
 		Runnable modifyCustomer = () -> {
 			try {
@@ -38,7 +38,7 @@ public class LockingTest extends AbstractTest {
 				em.flush();
 
 			} catch (OptimisticLockException e) {
-				lockException.set(true); // Expected
+				exceptionThrown.set(true); // Expected
 			} catch (Throwable t) {
 				Assert.fail(t.toString());
 			}
@@ -51,7 +51,7 @@ public class LockingTest extends AbstractTest {
 		executor.shutdown();
 		executor.awaitTermination(2, TimeUnit.SECONDS);
 		
-		assertThat(lockException.get()).isTrue();
+		assertThat(exceptionThrown.get()).isTrue();
 	}
 	
 

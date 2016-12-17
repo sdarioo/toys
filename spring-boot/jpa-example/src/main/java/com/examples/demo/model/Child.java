@@ -17,6 +17,7 @@ public class Child extends EntityBase {
 	
 	public Child(String name, Parent parent) {
 		this.name = name;
+		this.parent = parent;
 	}
 	
 	public String getName() {
@@ -25,5 +26,9 @@ public class Child extends EntityBase {
 	
 	public Parent getParent() {
 		return parent;
+	}
+	
+	void setParent(Parent parent) {
+		this.parent = parent;
 	}
 }
