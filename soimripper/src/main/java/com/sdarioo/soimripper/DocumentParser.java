@@ -33,7 +33,8 @@ public final class DocumentParser {
     }
 
     private static Element parseTable(XWPFTable xTable) {
-        List<List<Element>> data = new ArrayList<>();
+
+        Table table = new Table();
 
         XWPFTableCell[][] cells = getTableCells(xTable);
         for (XWPFTableCell[] row : cells) {
@@ -41,16 +42,14 @@ public final class DocumentParser {
             for (XWPFTableCell cell : row) {
                 rowData.add(parseCell(cell));
             }
-            data.add(rowData);
+            table.addRow(rowData);
         }
-        Table table = new Table(data);
         if (table.getColumnCount() == 1) {
             return (table.getRowsCount() == 1) ? table.getCell(0, 0) : new CompositeElement(table.getColumn(0));
         }
         if (table.isBulletList()) {
             return new CompositeElement(table.toList(" "));
         }
-
         return table;
     }
 

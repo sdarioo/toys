@@ -3,47 +3,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <body>
-<style type="text/css">
 
-body {
-    font-family:Arial, sans-serif;
-    font-size:11px;
-    }
-.tg {
-    border-collapse:collapse;
-    border-spacing:0;
-    border-color:#ccc;
-    }
-.tg td {
-    font-family:Arial, sans-serif;
-    font-size:10px;
-    padding:5px 3px;
-    border-style:solid;
-    border-width:1px;
-    overflow:hidden;
-    word-break:normal;
-    border-color:#ccc;
-    color:#333;
-    background-color:#fff;
-    }
-.tg th {
-    font-family:Arial, sans-serif;
-    font-size:10px;
-    font-weight:normal;
-    padding:5px 3px;
-    border-style:solid;
-    border-width:1px;
-    overflow:hidden;
-    word-break:normal;
-    border-color:#ccc;
-    color:#333;
-    background-color:#f0f0f0;
-    }
-.tg .tg-yw4l {  vertical-align:top }
-
+<style>
+p { border-width: 5px; }
+.demo  {border-collapse:collapse;border-spacing:0;border-color:#ccc;}
+.demo td{font-family:Arial, sans-serif;font-size:10px;padding:0px 0px 0px 0px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#fff;}
+.demo th{font-family:Arial, sans-serif;font-size:10px;font-weight:normal;padding:0px 0px 0px 0px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:#ccc;color:#333;background-color:#f0f0f0;}
 </style>
 
-<div th:utext="${doc.body}"></div>
+</body>
+
+<div th:utext="${doc.createBody()}"></div>
 
 </body>
 </html>

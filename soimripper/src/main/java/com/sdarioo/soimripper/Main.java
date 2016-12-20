@@ -13,15 +13,14 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        Path path = Paths.get("d:\\devel\\projects\\com.github.sdarioo\\toys\\soimripper\\src\\main\\resources\\main.docx");
-        Path htmlPath = Paths.get("d:\\temp\\main.html");
+        Path path = Paths.get("c:\\Temp\\main.docx");
+        Path htmlPath = Paths.get("c:\\temp\\main.html");
 
         Document document = DocumentParser.parse(path);
-
-        String html = HtmlGenerator.toHtml(document);
+        SOIM soim = SOIMFormatter.createSOIM(document);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(htmlPath.toFile()))) {
-            writer.write(html);
+            writer.write(soim.toHtml());
         }
 
         System.out.println("Done.");

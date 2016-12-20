@@ -85,7 +85,7 @@ public class Table implements Element {
     @Override
     public String toHtml() {
         StringBuilder sb = new StringBuilder();
-        sb.append("<table class=\"tg\">");
+        sb.append("<table class=\"demo\">");
         sb.append(LS);
         boolean header = true;
         for (List<Element> row : data) {
