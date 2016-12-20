@@ -3,7 +3,6 @@ package com.sdarioo.soimripper;
 import com.sdarioo.soimripper.model.Document;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.context.IContext;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import java.util.Locale;
@@ -24,8 +23,8 @@ public class HtmlGenerator {
         TemplateEngine engine = new TemplateEngine();
         engine.setTemplateResolver(templateResolver);
 
-        IContext context = new Context(Locale.getDefault());
-        context.getVariables().put("doc", doc);
+        Context context = new Context(Locale.getDefault());
+        context.setVariable("doc", doc);
 
         return engine.process(TEMPLATE, context);
     }
