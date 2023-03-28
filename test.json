@@ -1,0 +1,2133 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "OpenAPI definition",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "https://data-project-x-backend.azurewebsites.net",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/v1/standards/{standardId}": {
+      "get": {
+        "tags": [
+          "standard-controller"
+        ],
+        "operationId": "getStandard",
+        "parameters": [
+          {
+            "name": "standardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "standard-controller"
+        ],
+        "operationId": "updateStandard",
+        "parameters": [
+          {
+            "name": "standardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StandardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "standard-controller"
+        ],
+        "operationId": "deleteStandard",
+        "parameters": [
+          {
+            "name": "standardId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/services/{serviceId}": {
+      "get": {
+        "tags": [
+          "service-controller"
+        ],
+        "operationId": "getService",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "service-controller"
+        ],
+        "operationId": "updateService",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "service-controller"
+        ],
+        "operationId": "deleteService",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rules/{ruleId}": {
+      "put": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "updateRule",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "deleteRule",
+        "parameters": [
+          {
+            "name": "ruleId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/layouts": {
+      "get": {
+        "tags": [
+          "layout-controller"
+        ],
+        "operationId": "getLayout",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "layout-controller"
+        ],
+        "operationId": "updateLayout",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLayoutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LayoutDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comments/{commentId}": {
+      "put": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "updateComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "deleteComment",
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tags": {
+      "get": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "getTags",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TagDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tag-controller"
+        ],
+        "operationId": "createTag",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tag-assignments": {
+      "get": {
+        "tags": [
+          "tag-assignment-controller"
+        ],
+        "operationId": "getTagAssignments",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TagAssignmentDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "tag-assignment-controller"
+        ],
+        "operationId": "createTagAssignment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TagAssignmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TagAssignmentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/standards": {
+      "get": {
+        "tags": [
+          "standard-controller"
+        ],
+        "operationId": "getStandards",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/StandardDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "standard-controller"
+        ],
+        "operationId": "createStandard",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StandardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/services": {
+      "get": {
+        "tags": [
+          "service-controller"
+        ],
+        "operationId": "getServices",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ServiceDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "service-controller"
+        ],
+        "operationId": "addService",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateServiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rules": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "getRules",
+        "parameters": [
+          {
+            "name": "standardId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RuleDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "createRule",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuleDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/comments": {
+      "get": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "getCommentsByServiceName",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CommentDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "comment-controller"
+        ],
+        "operationId": "createComment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommentDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/violations": {
+      "get": {
+        "tags": [
+          "violation-controller"
+        ],
+        "operationId": "getViolations",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "env",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ViolationDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/supported-databases": {
+      "get": {
+        "tags": [
+          "supported-databases-controller"
+        ],
+        "operationId": "getSupportedDatabases",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/services/{serviceId}/refresh": {
+      "get": {
+        "tags": [
+          "service-controller"
+        ],
+        "operationId": "refreshService",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/services/refresh": {
+      "get": {
+        "tags": [
+          "service-controller"
+        ],
+        "operationId": "refreshAll",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/rules/definitions": {
+      "get": {
+        "tags": [
+          "rule-controller"
+        ],
+        "operationId": "getDefinitions",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DefinitionsDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/envs": {
+      "get": {
+        "tags": [
+          "envs-controller"
+        ],
+        "operationId": "getEnvs",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/db-schemas": {
+      "get": {
+        "tags": [
+          "db-schema-controller"
+        ],
+        "operationId": "getEnvironmentSchema",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "env",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DbSchemaDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/db-schema-diff": {
+      "get": {
+        "tags": [
+          "db-schema-diff-controller"
+        ],
+        "operationId": "compareEnv",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromEnv",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "toEnv",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemaDiffDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "tags": [
+          "dashboard-controller"
+        ],
+        "operationId": "getDashboard",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DashboardDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/api-schemas": {
+      "get": {
+        "tags": [
+          "api-schema-controller"
+        ],
+        "operationId": "getApiSchema",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "env",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApiSchemaDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/api-schema-diff": {
+      "get": {
+        "tags": [
+          "api-schema-diff-controller"
+        ],
+        "operationId": "compareEnv_1",
+        "parameters": [
+          {
+            "name": "serviceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromEnv",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "toEnv",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchemaDiffDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/tag-assignments/{tagAssignmentId}": {
+      "delete": {
+        "tags": [
+          "tag-assignment-controller"
+        ],
+        "operationId": "deleteTagAssignment",
+        "parameters": [
+          {
+            "name": "tagAssignmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "security-oauth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateTagRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 12,
+            "minLength": 1,
+            "type": "string"
+          },
+          "color": {
+            "pattern": "^#[0-9a-fA-F]{6}$",
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "TagDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "StandardRequest": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "dbTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appliesTo": {
+            "type": "string",
+            "enum": [
+              "API",
+              "DB",
+              "EVENT"
+            ]
+          }
+        }
+      },
+      "StandardDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "dbTypes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appliesTo": {
+            "type": "string",
+            "enum": [
+              "API",
+              "DB",
+              "EVENT"
+            ]
+          }
+        }
+      },
+      "EnvDetails": {
+        "type": "object",
+        "properties": {
+          "env": {
+            "type": "string"
+          },
+          "dbConnectionString": {
+            "type": "string"
+          },
+          "openApiUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateServiceRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "envs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvDetails"
+            }
+          }
+        }
+      },
+      "ServiceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "managedByAgent": {
+            "type": "boolean"
+          },
+          "envs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnvDetails"
+            }
+          }
+        }
+      },
+      "Condition": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "ALWAYS",
+              "DATA_TYPE",
+              "ENDS_WITH",
+              "STARTS_WITH",
+              "UPPER_CASE",
+              "LOWER_CASE",
+              "CAMEL_CASE",
+              "PLURAL",
+              "HAS_TAG"
+            ]
+          },
+          "value": {
+            "maxLength": 255,
+            "minLength": 0,
+            "type": "string"
+          }
+        }
+      },
+      "RuleRequest": {
+        "type": "object",
+        "properties": {
+          "standardId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "TABLE",
+              "FIELD",
+              "ENDPOINT",
+              "RESPONSE",
+              "REQUEST"
+            ]
+          },
+          "when": {
+            "$ref": "#/components/schemas/Condition"
+          },
+          "then": {
+            "$ref": "#/components/schemas/Condition"
+          },
+          "description": {
+            "maxLength": 255,
+            "minLength": 1,
+            "type": "string"
+          }
+        }
+      },
+      "RuleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "TABLE",
+              "FIELD",
+              "ENDPOINT",
+              "RESPONSE",
+              "REQUEST"
+            ]
+          },
+          "when": {
+            "$ref": "#/components/schemas/Condition"
+          },
+          "then": {
+            "$ref": "#/components/schemas/Condition"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "Position": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "UpdateLayoutRequest": {
+        "type": "object",
+        "properties": {
+          "tableNameToPositionMap": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Position"
+            }
+          },
+          "pan": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "zoom": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "LayoutDto": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tableNameToPositionMap": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/Position"
+            }
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pan": {
+            "$ref": "#/components/schemas/Position"
+          },
+          "zoom": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "UpdateCommentRequest": {
+        "type": "object",
+        "properties": {
+          "commentBody": {
+            "type": "string"
+          },
+          "serviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tableName": {
+            "type": "string"
+          },
+          "fieldName": {
+            "type": "string"
+          }
+        }
+      },
+      "CommentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "commentBody": {
+            "type": "string"
+          },
+          "tableName": {
+            "type": "string"
+          },
+          "fieldName": {
+            "type": "string"
+          }
+        }
+      },
+      "TagAssignmentRequest": {
+        "required": [
+          "fieldName",
+          "serviceId",
+          "tableName"
+        ],
+        "type": "object",
+        "properties": {
+          "tagId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "tableName": {
+            "type": "string"
+          },
+          "fieldName": {
+            "type": "string"
+          }
+        }
+      },
+      "TagAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "tagId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "serviceId": {
+            "type": "string"
+          },
+          "tableName": {
+            "type": "string"
+          },
+          "fieldName": {
+            "type": "string"
+          },
+          "tagName": {
+            "type": "string"
+          },
+          "tagColor": {
+            "type": "string"
+          },
+          "tagDescription": {
+            "type": "string"
+          }
+        }
+      },
+      "ViolationDto": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "string"
+          },
+          "env": {
+            "type": "string"
+          },
+          "tableName": {
+            "type": "string"
+          },
+          "fieldName": {
+            "type": "string"
+          },
+          "ruleDescription": {
+            "type": "string"
+          }
+        }
+      },
+      "ConditionDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "ALWAYS",
+              "DATA_TYPE",
+              "ENDS_WITH",
+              "STARTS_WITH",
+              "UPPER_CASE",
+              "LOWER_CASE",
+              "CAMEL_CASE",
+              "PLURAL",
+              "HAS_TAG"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TABLE",
+                "FIELD",
+                "ENDPOINT",
+                "RESPONSE",
+                "REQUEST"
+              ]
+            }
+          },
+          "valueType": {
+            "type": "string",
+            "enum": [
+              "NO_VALUE",
+              "STRING",
+              "TAG"
+            ]
+          }
+        }
+      },
+      "DefinitionsDto": {
+        "type": "object",
+        "properties": {
+          "targets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TargetDto"
+            }
+          },
+          "whens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterDto"
+            }
+          },
+          "thens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ConditionDto"
+            }
+          }
+        }
+      },
+      "FilterDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "enum": [
+              "ALWAYS",
+              "DATA_TYPE",
+              "ENDS_WITH",
+              "STARTS_WITH",
+              "UPPER_CASE",
+              "LOWER_CASE",
+              "CAMEL_CASE",
+              "PLURAL",
+              "HAS_TAG"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "targets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "TABLE",
+                "FIELD",
+                "ENDPOINT",
+                "RESPONSE",
+                "REQUEST"
+              ]
+            }
+          },
+          "valueType": {
+            "type": "string",
+            "enum": [
+              "NO_VALUE",
+              "STRING",
+              "TAG"
+            ]
+          }
+        }
+      },
+      "TargetDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "schemaType": {
+            "type": "string",
+            "enum": [
+              "API",
+              "DB",
+              "EVENT"
+            ]
+          },
+          "label": {
+            "type": "string"
+          }
+        }
+      },
+      "DbField": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "nullable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "DbRelation": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/Field"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Field"
+          }
+        }
+      },
+      "DbSchema": {
+        "type": "object",
+        "properties": {
+          "dbType": {
+            "type": "string"
+          },
+          "dbName": {
+            "type": "string"
+          },
+          "tables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DbTable"
+            }
+          },
+          "relations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DbRelation"
+            }
+          }
+        }
+      },
+      "DbSchemaDto": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "string"
+          },
+          "env": {
+            "type": "string"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/DbSchema"
+          }
+        }
+      },
+      "DbTable": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DbField"
+            }
+          },
+          "indexes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Index"
+            }
+          }
+        }
+      },
+      "Field": {
+        "type": "object",
+        "properties": {
+          "tableName": {
+            "type": "string"
+          },
+          "fieldName": {
+            "type": "string"
+          }
+        }
+      },
+      "Index": {
+        "type": "object",
+        "properties": {
+          "tableName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SchemaChange": {
+        "type": "object",
+        "properties": {
+          "changeType": {
+            "type": "string",
+            "enum": [
+              "ADDED",
+              "REMOVED",
+              "CHANGED"
+            ]
+          },
+          "objectType": {
+            "type": "string",
+            "enum": [
+              "FIELD",
+              "TABLE",
+              "INDEX"
+            ]
+          },
+          "before": {
+            "type": "object"
+          },
+          "after": {
+            "type": "object"
+          },
+          "parent": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "SchemaDiffDto": {
+        "type": "object",
+        "properties": {
+          "consistency": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SchemaChange"
+            }
+          }
+        }
+      },
+      "DashboardDto": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "dbType": {
+            "type": "string"
+          },
+          "envs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardEnv"
+            }
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TagSummary"
+            }
+          },
+          "metrics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DashboardMetric"
+            }
+          },
+          "standardsAdherencePercentage": {
+            "type": "number",
+            "format": "double"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "schemaUpdateInProgress": {
+            "type": "boolean"
+          },
+          "managedByAgent": {
+            "type": "boolean"
+          },
+          "lastSchemaUpdate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "DashboardEnv": {
+        "type": "object",
+        "properties": {
+          "env": {
+            "type": "string"
+          },
+          "api": {
+            "type": "string",
+            "enum": [
+              "CONSISTENT",
+              "INCONSISTENT",
+              "UNDEFINED"
+            ]
+          },
+          "db": {
+            "type": "string",
+            "enum": [
+              "CONSISTENT",
+              "INCONSISTENT",
+              "UNDEFINED"
+            ]
+          },
+          "events": {
+            "type": "string",
+            "enum": [
+              "CONSISTENT",
+              "INCONSISTENT",
+              "UNDEFINED"
+            ]
+          }
+        }
+      },
+      "DashboardMetric": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "TagSummary": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "color": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ApiSchema": {
+        "type": "object",
+        "properties": {
+          "tables": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TableField"
+            }
+          }
+        }
+      },
+      "ApiSchemaDto": {
+        "type": "object",
+        "properties": {
+          "serviceId": {
+            "type": "string"
+          },
+          "env": {
+            "type": "string"
+          },
+          "schema": {
+            "$ref": "#/components/schemas/ApiSchema"
+          }
+        }
+      },
+      "TableField": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "boolean"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Field"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "security-oauth": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://login.microsoftonline.com/038ab541-e4d5-49b5-a5ec-5972742bb4f4/oauth2/v2.0/authorize",
+            "tokenUrl": "https://login.microsoftonline.com/038ab541-e4d5-49b5-a5ec-5972742bb4f4/oauth2/v2.0/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}
